@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { apiClient } from "@/lib/api/client";
 import { ok, err, Result } from "@/lib/result";
 import { redirect } from "next/navigation";
+import { setSessionCookies } from "./session-cookies";
 
 export interface AppUser {
   id: string;
@@ -24,15 +25,42 @@ export interface AppUser {
  */
 export async function requireUser(options?: { redirectToLogin?: boolean }): Promise<Result<AppUser>> {
   const cookieStore = await cookies();
-  const token = cookieStore.get("access_token")?.value;
+  let token = cookieStore.get("access_token")?.value;
+  const refreshToken = cookieStore.get("refresh_token")?.value;
 
-  if (!token) {
+  if (!token && !refreshToken) {
     if (options?.redirectToLogin) redirect("/login");
     return err("No autorizado. Inicia sesión para continuar.");
   }
 
-  // Obtenemos el usuario real desde el backend
-  const result = await apiClient.get<any>("/users/me");
+  // Intentamos obtener el perfil del usuario desde el backend
+  let result = token ? await apiClient.get<any>("/users/me") : { success: false, data: null };
+
+  // Si falló (ej. access_token expirado) y contamos con refresh_token, renovamos silenciosamente
+  if (!result.success && refreshToken) {
+    const refreshResult = await apiClient.post<any>("/auth/refresh", {
+      refreshToken,
+    });
+
+    if (refreshResult.success && refreshResult.data?.access_token) {
+      token = refreshResult.data.access_token as string;
+      try {
+        await setSessionCookies({
+          accessToken: token,
+          refreshToken: refreshResult.data.refresh_token as string | undefined,
+        });
+      } catch {
+        // Ignore cookie mutation errors when requireUser runs inside a Server Component render
+      }
+
+      // Reintentamos /users/me con el token recién emitido
+      result = await apiClient.get<any>("/users/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }
+  }
 
   if (!result.success || !result.data) {
     if (options?.redirectToLogin) redirect("/login");
