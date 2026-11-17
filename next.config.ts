@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
-import path from "node:path";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: path.resolve(__dirname),
-  },
   async headers() {
     return [
       {
@@ -37,10 +32,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default process.env.NODE_ENV === "production" && process.env.SENTRY_DSN
-  ? withSentryConfig(nextConfig, {
-      silent: true,
-      org: "habitapp",
-      project: "frontend",
-    })
-  : nextConfig;
+export default nextConfig;
