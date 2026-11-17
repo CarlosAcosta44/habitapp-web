@@ -1,7 +1,12 @@
 import * as Sentry from "@sentry/nextjs";
 
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN || "https://placeholder@o0.ingest.sentry.io/0",
-  tracesSampleRate: 1.0,
-  debug: false,
-});
+const dsn = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
+const isProd = process.env.NODE_ENV === "production";
+
+if (isProd && dsn && !dsn.includes("placeholder")) {
+  Sentry.init({
+    dsn,
+    tracesSampleRate: 0.1,
+    debug: false,
+  });
+}

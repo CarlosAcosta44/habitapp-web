@@ -37,8 +37,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  silent: true,
-  org: "habitapp",
-  project: "frontend",
-});
+export default process.env.NODE_ENV === "production" && process.env.SENTRY_DSN
+  ? withSentryConfig(nextConfig, {
+      silent: true,
+      org: "habitapp",
+      project: "frontend",
+    })
+  : nextConfig;
