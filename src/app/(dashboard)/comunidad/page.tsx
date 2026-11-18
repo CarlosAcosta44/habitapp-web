@@ -8,7 +8,6 @@
 import { requireUserStrict as requireUser } from "@/lib/auth/require-user";
 import { ComunidadService } from "@/services/comunidad.service";
 import { HabitoService } from "@/services/habito.service";
-import { UsuarioService } from "@/services/usuario.service";
 import { ComunidadInteractiveView } from "@/components/comunidad/ComunidadInteractiveView";
 
 export const metadata = {
@@ -18,7 +17,6 @@ export const metadata = {
 
 const comunidadService = new ComunidadService();
 const habitoService = new HabitoService();
-const usuarioService = new UsuarioService();
 
 export default async function ComunidadPage() {
   const user = await requireUser();
@@ -31,7 +29,6 @@ export default async function ComunidadPage() {
     especialistasRes,
     retosRes,
     userHabitosRes,
-    profileRes,
     statsRes,
   ] = await Promise.all([
     comunidadService.getForos(),
@@ -40,7 +37,6 @@ export default async function ComunidadPage() {
     comunidadService.getEspecialistas(),
     comunidadService.getRetos(),
     habitoService.getAll("Activo"),
-    usuarioService.getPerfilMe(),
     comunidadService.getStats(),
   ]);
 
@@ -51,8 +47,8 @@ export default async function ComunidadPage() {
   const retos = retosRes.success && Array.isArray(retosRes.data) ? retosRes.data : [];
   const userHabitos = userHabitosRes.success && Array.isArray(userHabitosRes.data) ? userHabitosRes.data : [];
 
-  const profile = profileRes.success ? profileRes.data : null;
-  const isAdmin = profile?.nombrerol?.toUpperCase() === "ADMINISTRADOR";
+  const roleUpper = (user.nombrerol || '').toUpperCase();
+  const isAdmin = roleUpper === "ADMINISTRADOR" || roleUpper === "ADMIN";
   const totalMiembros = statsRes.success && statsRes.data?.totalMiembros ? statsRes.data.totalMiembros : 30;
 
   return (

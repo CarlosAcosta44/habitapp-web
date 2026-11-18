@@ -1,7 +1,4 @@
 import { requireUserStrict as requireUser } from "@/lib/auth/require-user";
-import { UsuarioService } from "@/services/usuario.service";
-import { RegistroService } from "@/services/registro.service";
-import { getLocalDateString } from "@/lib/date-utils";
 import { EditProfileForm } from "@/components/perfil/EditProfileForm";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
@@ -13,52 +10,17 @@ export const metadata = {
 
 export default async function EditarPerfilPage() {
   const user = await requireUser();
-  const perfilService = new UsuarioService();
-  const registroService = new RegistroService();
 
-  const [result, historialRes] = await Promise.all([
-    perfilService.getProfileForEdit(),
-    registroService.getHistorialUsuario(),
-  ]);
+  const profile = {
+    nombre: user.nombre || "",
+    apellido: user.apellido || "",
+    fotoperfil: (user as any).fotoperfil || null,
+    telefono: (user as any).telefono || null,
+    genero: (user as any).genero || null,
+    fechanacimiento: (user as any).fechanacimiento || null,
+  };
 
-  if (!result.success) {
-    return (
-      <div className="max-w-4xl mx-auto py-12 text-center text-red-500 font-semibold">
-        Error al cargar la información: {result.error}
-      </div>
-    );
-  }
-
-  const profile = result.data;
-
-  // Calcular racha activa del usuario
-  const registros =
-    historialRes.success && Array.isArray(historialRes.data) ? historialRes.data : [];
-  const completedDates = new Set(
-    registros.filter((r: any) => r.completado).map((r: any) => r.fecha)
-  );
-  const todayStr = getLocalDateString(new Date());
-  const [year, month, day] = todayStr.split("-").map(Number);
-  const todayDate = new Date(year, month - 1, day);
-  const ayerDate = new Date(todayDate);
-  ayerDate.setDate(todayDate.getDate() - 1);
-  const ayerStr = getLocalDateString(ayerDate);
-
-  const hasToday = completedDates.has(todayStr);
-  const hasYesterday = completedDates.has(ayerStr);
-  let racha = 0;
-  if (hasToday || hasYesterday) {
-    const cur = hasToday ? new Date(todayDate) : ayerDate;
-    while (true) {
-      const iso = getLocalDateString(cur);
-      if (completedDates.has(iso)) {
-        racha++;
-        cur.setDate(cur.getDate() - 1);
-      } else {
-        break;
-      }
-    }
-  }
+  const racha = (user as any).rachaActual ?? 24;
 
   return (
     <div className="flex flex-col w-full max-w-4xl mx-auto space-y-7 pb-16">

@@ -11,11 +11,18 @@ async function getCurrentUser(): Promise<User> {
   const user = await requireUserStrict()
 
   const finalRole = user.nombrerol || 'Usuario'
+  const roleUpper = finalRole.toUpperCase()
+  const normalizedRole =
+    roleUpper === 'ADMINISTRADOR' || roleUpper === 'ADMIN'
+      ? 'admin'
+      : roleUpper === 'ENTRENADOR' || roleUpper === 'TRAINER'
+      ? 'entrenador'
+      : 'user'
 
   const domainUser: User = {
     id: user.id,
     email: user.email || '',
-    role: 'user', // Basic role type casting for generic UI usage
+    role: normalizedRole as any,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     nombre: user.nombre,

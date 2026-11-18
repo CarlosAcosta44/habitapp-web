@@ -19,6 +19,8 @@ export interface UserProfileDto {
   idusuario: string;
   nombre: string;
   apellido: string;
+  correo?: string;
+  email?: string;
   fotoperfil: string | null;
   telefono?: string | null;
   genero?: string | null;
@@ -27,6 +29,7 @@ export interface UserProfileDto {
   idrol: string;
   nombrerol: string;
   estado_cuenta?: string;
+  fecha_registro?: string;
 }
 
 export interface PaginationMeta {

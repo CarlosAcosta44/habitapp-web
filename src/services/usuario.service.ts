@@ -44,16 +44,16 @@ export class UsuarioService {
         sugerenciasRes,
         logrosRes,
       ] = await Promise.all([
-        usuarioRepository.get<any>("users/me/profile"),
-        usuarioRepository.get<any[]>("records/historial"),
+        usuarioRepository.get<any>("users/me"),
+        usuarioRepository.get<any[]>("users/records/historial"),
         usuarioRepository.get<any[]>("users/me/points-history?limit=5"),
-        usuarioRepository.get<any[]>("friends"),
-        usuarioRepository.get<any[]>("friends/suggestions?limit=12"),
+        usuarioRepository.get<any[]>("users/friends"),
+        usuarioRepository.get<any[]>("users/friends/suggestions?limit=12"),
         usuarioRepository.get<any[]>("users/me/achievements"),
       ]);
 
       const perfil = perfilRes.success ? perfilRes.data : null;
-      const puntos = perfil?.puntos ?? 0;
+      const puntos = perfil?.puntostotales ?? perfil?.puntos ?? 0;
       const registrosReales = historialRes.success ? historialRes.data : [];
       const historialPuntos = puntosRes.success ? puntosRes.data : [];
       const amigos = amigosRes.success ? amigosRes.data : [];

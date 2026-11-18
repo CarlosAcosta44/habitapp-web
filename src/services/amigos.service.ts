@@ -9,14 +9,14 @@ import type { Result } from "@/lib/result";
 
 export class AmigosService {
   async addFriend(targetUserId: string): Promise<Result<any>> {
-    return amigosRepository.post<any>("friends", { targetUserId });
+    return amigosRepository.post<any>("users/friends", { targetUserId });
   }
 
   async getFriends(): Promise<Result<any[]>> {
-    return amigosRepository.get<any[]>("friends");
+    return amigosRepository.get<any[]>("users/friends");
   }
 
   async getFriendSuggestions(limit = 12): Promise<Result<any[]>> {
-    return amigosRepository.get<any[]>(`friends/suggestions?limit=${limit}`);
+    return amigosRepository.get<any[]>(`users/friends/suggestions?limit=${limit}`);
   }
 }

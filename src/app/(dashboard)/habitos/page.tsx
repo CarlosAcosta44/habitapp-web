@@ -106,17 +106,12 @@ export default async function HabitosDashboardPage() {
 
   // ── 3. Calcular rachas reales para cada hábito individual ────────────────────
   const rachasMap: Record<string, number> = {};
-  await Promise.all(
-    habitos.map(async (h) => {
-      const id = h.idHabito || h.idhabito;
-      if (id) {
-        const rachaRes = await registroService.getRacha(id);
-        rachasMap[id] = rachaRes.success && typeof rachaRes.data?.rachaActual === 'number'
-          ? rachaRes.data.rachaActual
-          : (h.rachaActual ?? 0);
-      }
-    })
-  );
+  for (const h of habitos) {
+    const id = h.idHabito || h.idhabito;
+    if (id) {
+      rachasMap[id] = typeof h.rachaActual === 'number' ? h.rachaActual : 0;
+    }
+  }
 
   // ── 4. Calcular racha global real del usuario ───────────────────────────────
   const hoyStr = getLocalDateString(new Date());

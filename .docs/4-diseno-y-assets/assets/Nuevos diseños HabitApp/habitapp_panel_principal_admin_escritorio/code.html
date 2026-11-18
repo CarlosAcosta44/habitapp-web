@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-primary":"#ffffff","inverse-surface":"#312f3a","secondary-fixed-dim":"#c9beff","on-secondary-fixed-variant":"#483b88","on-tertiary-fixed-variant":"#832600","on-background":"#1c1a25","secondary-fixed":"#e6deff","primary-container":"#704efd","inverse-primary":"#c9beff","on-tertiary-container":"#fff1ed","tertiary":"#9b340a","primary":"#572de4","on-primary-container":"#f7f2ff","surface-container-highest":"#e6e0ef","on-secondary-fixed":"#1b065c","surface":"#fdf8ff","on-tertiary":"#ffffff","on-error-container":"#93000a","primary-fixed":"#e6deff","on-error":"#ffffff","tertiary-container":"#bc4c22","tertiary-fixed":"#ffdbd0","surface-tint":"#5e38eb","surface-container-low":"#f7f1ff","surface-bright":"#fdf8ff","surface-variant":"#e6e0ef","secondary-container":"#b6a8fe","surface-container-high":"#ece6f5","outline-variant":"#c9c4d8","inverse-on-surface":"#f4eefd","error-container":"#ffdad6","surface-container-lowest":"#ffffff","on-primary-fixed":"#1b0063","on-surface-variant":"#484556","outline":"#797587","primary-fixed-dim":"#c9beff","error":"#ba1a1a","tertiary-fixed-dim":"#ffb59d","on-secondary":"#ffffff","on-primary-fixed-variant":"#4608d4","on-surface":"#1c1a25","surface-dim":"#ddd7e6","surface-container":"#f1ebfa","on-secondary-container":"#463987","background":"#fdf8ff","secondary":"#6053a2","on-tertiary-fixed":"#390c00"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xl":"1.5rem","gutter-default":"0.75rem","space-md":"1rem","space-lg":"1.25rem","space-xs":"0.5rem","space-sm":"0.75rem","space-2xs":"0.25rem","card-padding":"1.25rem","space-3xl":"2.5rem","space-2xl":"2rem","screen-edge":"1.25rem"},"fontFamily":{"body-md":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"numeric-stat":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"]},"fontSize":{"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-md":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"numeric-stat":["24px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"display":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["13px",{"lineHeight":"18px","fontWeight":"600"}],"headline-sm":["18px",{"lineHeight":"24px","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-lg":["15px",{"lineHeight":"20px","fontWeight":"600"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between"><div class="flex flex-col h-full"><div class="px-space-lg pt-space-lg pb-space-md flex items-center gap-space-sm"><img alt="icon.png" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrC0X-LkkM7LoluscMpIwzsDA2DtzKtn4171Zvl3W2b0aHd_5PA5kLdaYh-aUtfHWExU1iChkJp4_hn_HWwmK5KoovtG2Kcx23b-PrWPygDUzhkdJK-kY_ccO_0XhqUTt_tdNjvUPy_2LLsatK-FL5HKI40dHdQOEUDKlrpvScfHpjck3eGQR8IuVy5cvO5QegWzWjMkCm_LqUCLnYlaCxn7m6nj7PlfAO8MdOLZGuTYR2NmLbvF7sy56h_FQj1eBev42V-6uypX7w"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">HabitApp</span><span class="font-label-sm text-label-sm text-on-surface-variant">Salud Mental &amp; Hábitos</span></div></div><div class="flex-1 overflow-y-auto px-space-md py-space-xs space-y-space-md"><nav class="space-y-1" data-active-classes="bg-primary-container text-on-primary-container font-label-md rounded-xl shadow-[0_4px_12px_rgba(112,78,253,0.18)]"><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="habitos" href="#"><span class="material-symbols-outlined text-[20px]">check_circle</span>Hábitos</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="retos" href="#"><span class="material-symbols-outlined text-[20px]">emoji_events</span>Retos y Desafíos</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="comunidad" href="#"><span class="material-symbols-outlined text-[20px]">forum</span>Comunidad</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="progreso" href="#"><span class="material-symbols-outlined text-[20px]">insights</span>Progreso y Métricas</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="ajustes" href="#"><span class="material-symbols-outlined text-[20px]">settings</span>Ajustes</a></nav><div class="pt-space-xs"><div class="flex items-center justify-between px-space-md py-space-2xs mb-space-2xs"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Administración</span><span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed">Gobernanza</span></div><nav class="space-y-1" data-active-classes="bg-primary-container text-on-primary-container font-label-md rounded-xl shadow-[0_4px_12px_rgba(112,78,253,0.18)]"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-xs transition-all bg-primary-container text-on-primary-container font-label-md rounded-xl shadow-[0_4px_12px_rgba(112,78,253,0.18)]" data-path="admin-panel" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span>Panel Admin</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="gestion-de-usuarios" href="#"><span class="material-symbols-outlined text-[20px]">manage_accounts</span>Gestión de Usuarios</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="moderacion" href="#"><span class="material-symbols-outlined text-[20px]">gavel</span>Moderación</a></nav></div></div><div class="p-space-md m-space-md rounded-xl bg-surface-container-low shadow-[0_1px_4px_rgba(0,0,0,0.03)] flex items-center justify-between"><div class="flex items-center gap-space-xs min-w-0"><div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">shield_person</span></div><div class="min-w-0"><div class="flex items-center gap-space-2xs"><span class="font-label-md text-label-md text-on-surface truncate block">Admin Master</span><span class="font-label-sm text-label-sm px-1.5 py-0.2 rounded-full bg-primary text-on-primary shrink-0">Admin</span></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate block">admin@habitapp.com</span></div></div><button aria-label="Cerrar sesión" class="text-on-surface-variant hover:text-error transition-colors p-space-2xs rounded-lg hover:bg-surface-container" type="button"><span class="material-symbols-outlined text-[20px]">logout</span></button></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.03)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-sm"><img alt="icon.png" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrC0X-LkkM7LoluscMpIwzsDA2DtzKtn4171Zvl3W2b0aHd_5PA5kLdaYh-aUtfHWExU1iChkJp4_hn_HWwmK5KoovtG2Kcx23b-PrWPygDUzhkdJK-kY_ccO_0XhqUTt_tdNjvUPy_2LLsatK-FL5HKI40dHdQOEUDKlrpvScfHpjck3eGQR8IuVy5cvO5QegWzWjMkCm_LqUCLnYlaCxn7m6nj7PlfAO8MdOLZGuTYR2NmLbvF7sy56h_FQj1eBev42V-6uypX7w"/><span class="font-headline-sm text-headline-sm text-on-surface hidden sm:inline">HabitApp</span></div><div class="flex-1 max-w-lg mx-space-lg"><div class="relative flex items-center w-full"><span class="material-symbols-outlined absolute left-space-md text-on-surface-variant text-[20px]">search</span><input class="w-full h-10 pl-11 pr-space-md rounded-full bg-surface-container text-on-surface placeholder:text-outline font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all" placeholder="Buscar en el sistema, usuarios, hilos..." type="text"/></div></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span><span>Sincronizado</span></div><button aria-label="Notificaciones" class="relative p-space-xs rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-tertiary-container"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Dynamic Top Ambient Aura -->
+<div class="relative w-full px-space-xl pt-space-xl pb-space-3xl overflow-hidden">
+<div class="absolute -top-32 -left-20 w-96 h-96 rounded-full bg-primary-container/10 blur-3xl pointer-events-none"></div>
+<div class="absolute top-0 right-10 w-80 h-80 rounded-full bg-secondary-fixed/30 blur-2xl pointer-events-none"></div>
+<!-- Header & Governance Identification -->
+<div class="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg mb-space-2xl">
+<div class="space-y-space-xs max-w-3xl">
+<div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-high text-on-surface-variant shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Rol: ADMINISTRADOR (Supervisión Total)</span>
+<span class="text-outline text-label-sm font-light">|</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">v3.4.2-prod</span>
+</div>
+<h1 class="font-display text-display text-on-surface tracking-tight">Panel de Control Operativo</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+          Gobernanza global, monitoreo del sistema en tiempo real y auditoría institucional de HabitApp.
+        </p>
+</div>
+<!-- Header Actions -->
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<button class="group inline-flex items-center gap-space-xs px-space-lg py-2.5 rounded-full bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all shadow-[0_1px_3px_rgba(121,117,130,0.06)] active:scale-95" id="btn-export-log" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary group-hover:rotate-12 transition-transform">download</span>
+<span class="font-label-md text-label-md">Descargar Log de Auditoría</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-lg py-2.5 rounded-full bg-primary-container text-on-primary font-label-md text-label-md shadow-[0_8px_20px_rgba(112,78,253,0.24)] hover:bg-primary transition-all active:scale-95" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span>Configuración del Sistema</span>
+</button>
+</div>
+</div>
+<!-- 4 High Impact Metric Cards (Bento Flow) -->
+<div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-2xl">
+<!-- KPI 1: Usuarios -->
+<div class="relative p-space-card rounded-[22px] bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_16px_rgba(121,117,130,0.04)] hover:shadow-[0_8px_24px_rgba(121,117,130,0.08)] transition-all">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Usuarios Registrados</span>
+<div class="w-10 h-10 rounded-xl bg-primary-fixed/50 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">group</span>
+</div>
+</div>
+<div class="flex items-baseline gap-space-xs mb-1">
+<span class="font-display text-display text-on-surface font-bold">14,820</span>
+<span class="inline-flex items-center gap-0.5 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-low text-primary-container font-semibold">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>+12.4%
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5 pt-space-2xs">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+          +185 nuevos registrados esta semana
+        </p>
+</div>
+<!-- KPI 2: Coaches -->
+<div class="relative p-space-card rounded-[22px] bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_16px_rgba(121,117,130,0.04)] hover:shadow-[0_8px_24px_rgba(121,117,130,0.08)] transition-all">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Entrenadores Verificados</span>
+<div class="w-10 h-10 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">verified</span>
+</div>
+</div>
+<div class="flex items-baseline gap-space-xs mb-1">
+<span class="font-display text-display text-on-surface font-bold">48</span>
+<span class="font-label-md text-label-md text-secondary font-semibold">Activos</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5 pt-space-2xs">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          12 solicitudes pendientes de validación
+        </p>
+</div>
+<!-- KPI 3: Hábitos & Cumplimiento -->
+<div class="relative p-space-card rounded-[22px] bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_16px_rgba(121,117,130,0.04)] hover:shadow-[0_8px_24px_rgba(121,117,130,0.08)] transition-all">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Hábitos en Curso</span>
+<div class="w-10 h-10 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+</div>
+<div class="flex items-baseline gap-space-xs mb-1">
+<span class="font-display text-display text-on-surface font-bold">68,450</span>
+<span class="inline-flex items-center gap-0.5 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-tertiary-fixed-dim/40 text-tertiary font-semibold">
+            86.8%
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5 pt-space-2xs">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+          Tasa de cumplimiento general hoy
+        </p>
+</div>
+<!-- KPI 4: Moderación -->
+<div class="relative p-space-card rounded-[22px] bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_16px_rgba(121,117,130,0.04)] hover:shadow-[0_8px_24px_rgba(121,117,130,0.08)] transition-all">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Alertas de Moderación</span>
+<div class="w-10 h-10 rounded-xl bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[22px]">gavel</span>
+</div>
+</div>
+<div class="flex items-baseline gap-space-xs mb-1">
+<span class="font-display text-display text-error font-bold">5</span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-semibold animate-pulse">
+            Requiere revisión
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5 pt-space-2xs truncate">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+          2 hilos marcados, 3 comentarios
+        </p>
+</div>
+</div>
+<!-- Main Content Layout (2/3 Main Stream, 1/3 Side Dock) -->
+<div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
+<!-- 2/3 COLUMN: Main Analytical Area -->
+<div class="lg:col-span-8 flex flex-col gap-space-xl">
+<!-- Interactive Growth & Activity Analytics Card -->
+<div class="p-space-xl rounded-[24px] bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_16px_rgba(121,117,130,0.03)] flex flex-col gap-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs mb-1">
+<span class="font-headline-sm text-headline-sm text-on-surface">Crecimiento y Actividad de la Plataforma</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">30 Días</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Registros de usuarios activos frente a hábitos completados en micro-ciclos.
+              </p>
+</div>
+<!-- Range Filter Controls -->
+<div class="inline-flex items-center p-1 rounded-full bg-surface-container-high self-start sm:self-auto">
+<button class="range-btn px-space-md py-1 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all" data-range="7d" type="button">7 días</button>
+<button class="range-btn px-space-md py-1 rounded-full font-label-sm text-label-sm bg-surface-container-lowest text-primary-container shadow-sm transition-all font-semibold" data-range="30d" type="button">30 días</button>
+<button class="range-btn px-space-md py-1 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all" data-range="year" type="button">Este año</button>
+</div>
+</div>
+<!-- Inline Rich SVG Visual Graph (Chart + Metrics) -->
+<div class="w-full h-64 relative flex flex-col justify-end pt-space-md">
+<svg class="w-full h-48 overflow-visible" preserveaspectratio="none" viewbox="0 0 700 180">
+<defs>
+<lineargradient id="primaryCurveGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#704efd" stop-opacity="0.32"></stop>
+<stop offset="100%" stop-color="#704efd" stop-opacity="0.0"></stop>
+</lineargradient>
+<lineargradient id="secondaryCurveGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#6053a2" stop-opacity="0.22"></stop>
+<stop offset="100%" stop-color="#6053a2" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Subtle Horizontal Guide Lines -->
+<line stroke="#f1ebfa" stroke-dasharray="4 4" stroke-width="1.5" x1="0" x2="700" y1="30" y2="30"></line>
+<line stroke="#f1ebfa" stroke-dasharray="4 4" stroke-width="1.5" x1="0" x2="700" y1="80" y2="80"></line>
+<line stroke="#f1ebfa" stroke-dasharray="4 4" stroke-width="1.5" x1="0" x2="700" y1="130" y2="130"></line>
+<!-- Secondary Line Area (Hábitos completados) -->
+<path d="M 0,140 Q 90,110 170,125 T 350,90 T 520,60 T 700,45 L 700,180 L 0,180 Z" fill="url(#secondaryCurveGrad)"></path>
+<path d="M 0,140 Q 90,110 170,125 T 350,90 T 520,60 T 700,45" fill="none" stroke="#6053a2" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Primary Curve Area (Registros & Conversiones) -->
+<path d="M 0,165 Q 110,140 210,130 T 420,70 T 580,45 T 700,20 L 700,180 L 0,180 Z" fill="url(#primaryCurveGrad)"></path>
+<path d="M 0,165 Q 110,140 210,130 T 420,70 T 580,45 T 700,20" fill="none" stroke="#704efd" stroke-linecap="round" stroke-width="3"></path>
+<!-- Active Focal Nodes -->
+<circle class="filter drop-shadow" cx="420" cy="70" fill="#ffffff" r="5" stroke="#704efd" stroke-width="3"></circle>
+<circle class="filter drop-shadow" cx="580" cy="45" fill="#ffffff" r="5" stroke="#704efd" stroke-width="3"></circle>
+<circle class="filter drop-shadow" cx="700" cy="20" fill="#704efd" r="6" stroke="#ffffff" stroke-width="2"></circle>
+</svg>
+<!-- Chart Time Labels -->
+<div class="flex items-center justify-between text-outline font-label-sm text-label-sm pt-space-xs px-1">
+<span>01 Feb</span>
+<span>08 Feb</span>
+<span>15 Feb</span>
+<span>22 Feb</span>
+<span class="text-primary font-bold">Hoy (28 Feb)</span>
+</div>
+</div>
+<!-- Bottom Micro Status Bar -->
+<div class="pt-space-md mt-space-xs flex flex-wrap items-center justify-between gap-space-sm bg-surface-container-low p-space-md rounded-2xl">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary-container"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Nuevos Registros (+18.4%)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Cumplimiento Hábitos (86.8%)</span>
+</div>
+</div>
+<!-- Server SLA Chip -->
+<div class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-surface-container-lowest shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">Todos los servicios operativos (99.98% uptime)</span>
+</div>
+</div>
+</div>
+<!-- System Audit Log & Recent Events Feed -->
+<div class="p-space-xl rounded-[24px] bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_16px_rgba(121,117,130,0.03)] flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs pb-space-xs">
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface">Feed de Actividad del Sistema</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-mono text-[11px] text-primary">GET /admin/users?limit=5</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Auditoría en tiempo real conectada a la infraestructura NestJS.</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-surface-container text-on-surface-variant transition-colors" id="refresh-feed-btn" title="Actualizar Feed" type="button">
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+</button>
+<a class="font-label-sm text-label-sm text-primary hover:text-primary-container transition-colors flex items-center gap-1 font-semibold" href="#">
+                Ver todos los logs <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Activity Stream Rows -->
+<div class="space-y-space-xs">
+<!-- Event 1: Lucía Morales -->
+<div class="group p-space-md rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface truncate">Registro de nuevo usuario</span>
+<span class="font-label-sm text-label-sm px-2 py-0.2 rounded-full bg-surface-container-lowest text-primary font-semibold">Activo</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+                    Lucía Morales <span class="font-mono text-outline">(lucia.m@ejemplo.com)</span>
+</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-space-md shrink-0">
+<span class="font-label-sm text-label-sm text-outline">Hace 4 min</span>
+<button class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-highest transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Event 2: Carlos Vega -->
+<div class="group p-space-md rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface truncate">Ascenso de rol gubernamental</span>
+<span class="font-label-sm text-label-sm px-2 py-0.2 rounded-full bg-secondary text-on-secondary font-semibold">Rol: Entrenador</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+                    Carlos Vega ascendido a Entrenador por <strong class="text-on-surface">Admin Master</strong>
+</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-space-md shrink-0">
+<span class="font-label-sm text-label-sm text-outline">Hace 28 min</span>
+<button class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-highest transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Event 3: Reporte de contenido -->
+<div class="group p-space-md rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">report</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface truncate">Reporte de contenido comunitario</span>
+<span class="font-label-sm text-label-sm px-2 py-0.2 rounded-full bg-error-container text-on-error-container font-semibold">Pendiente revisión</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+                    Hilo reportado por presunto spam en <span class="italic text-on-surface">Foro Nutrición</span>
+</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-space-md shrink-0">
+<span class="font-label-sm text-label-sm text-outline">Hace 1 hora</span>
+<a class="px-space-sm py-1 rounded-full bg-surface-container-lowest font-label-sm text-label-sm text-error font-medium hover:bg-error hover:text-on-error transition-all shadow-sm" href="#">
+                  Resolver
+                </a>
+</div>
+</div>
+<!-- Event 4: Suspensión preventiva -->
+<div class="group p-space-md rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">block</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface truncate">Suspensión preventiva activada</span>
+<span class="font-label-sm text-label-sm px-2 py-0.2 rounded-full bg-surface-variant text-on-surface-variant font-semibold">Suspendido</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+                    Cuenta temporalmente suspendida: <span class="font-mono text-outline">user_9841</span> (múltiples denuncias)
+                  </p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-space-md shrink-0">
+<span class="font-label-sm text-label-sm text-outline">Hace 3 horas</span>
+<button class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-highest transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Event 5: Nueva rutina pública -->
+<div class="group p-space-md rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed text-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">auto_stories</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface truncate">Nueva rutina institucional creada</span>
+<span class="font-label-sm text-label-sm px-2 py-0.2 rounded-full bg-tertiary-fixed-dim/50 text-tertiary font-semibold">Rutina pública</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+                    Dra. Elena Vidal publicó <span class="text-on-surface font-medium">'Higiene del Sueño y Ritmo Circadiano'</span>
+</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-space-md shrink-0">
+<span class="font-label-sm text-label-sm text-outline">Hace 5 horas</span>
+<button class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-highest transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 1/3 COLUMN: Governance Navigation & Realtime Infrastructure Dock -->
+<div class="lg:col-span-4 flex flex-col gap-space-xl">
+<!-- Quick Governance Shortcuts -->
+<div class="p-space-xl rounded-[24px] bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_16px_rgba(121,117,130,0.03)] flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface">Accesos Rápidos</span>
+<span class="material-symbols-outlined text-outline text-[20px]">bolt</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant -mt-2">
+            Módulos centrales de gestión administrativa y permisos.
+          </p>
+<div class="space-y-space-xs mt-space-2xs">
+<!-- Shortcut 1: User Mgmt -->
+<a class="group flex items-center justify-between p-space-md rounded-2xl bg-surface-container-low hover:bg-primary hover:text-on-primary transition-all duration-200 shadow-sm" href="#">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-lowest text-primary group-hover:bg-primary-container group-hover:text-on-primary flex items-center justify-center shrink-0 transition-colors">
+<span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+</div>
+<div class="min-w-0">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-on-primary block truncate">Gestión de Usuarios y Roles</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant group-hover:text-primary-fixed block truncate">14,820 cuentas registradas</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+<!-- Shortcut 2: Moderation Center -->
+<a class="group flex items-center justify-between p-space-md rounded-2xl bg-surface-container-low hover:bg-error hover:text-on-error transition-all duration-200 shadow-sm" href="#">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-xl bg-error-container text-error group-hover:bg-on-error group-hover:text-error flex items-center justify-center shrink-0 transition-colors">
+<span class="material-symbols-outlined text-[20px]">forum</span>
+</div>
+<div class="min-w-0">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-on-error block truncate">Centro de Moderación</span>
+<span class="font-body-sm text-body-sm text-error group-hover:text-on-error block truncate font-semibold">5 reportes pendientes</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-error group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+<!-- Shortcut 3: Coaches -->
+<a class="group flex items-center justify-between p-space-md rounded-2xl bg-surface-container-low hover:bg-secondary hover:text-on-secondary transition-all duration-200 shadow-sm" href="#">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-xl bg-secondary-fixed text-secondary group-hover:bg-secondary-container group-hover:text-on-secondary flex items-center justify-center shrink-0 transition-colors">
+<span class="material-symbols-outlined text-[20px]">sports</span>
+</div>
+<div class="min-w-0">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-on-secondary block truncate">Gestión de Entrenadores</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant group-hover:text-secondary-fixed block truncate">48 certificados activos</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-secondary group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+<!-- Shortcut 4: API Swagger -->
+<a class="group flex items-center justify-between p-space-md rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-all duration-200 shadow-sm" href="#">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-lowest text-outline group-hover:text-primary flex items-center justify-center shrink-0 transition-colors">
+<span class="material-symbols-outlined text-[20px]">api</span>
+</div>
+<div class="min-w-0">
+<span class="font-label-md text-label-md text-on-surface block truncate">Documentación OpenAPI</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block truncate">Swagger / NestJS RolesGuard</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:translate-x-1 transition-all">open_in_new</span>
+</a>
+</div>
+</div>
+<!-- Infrastructure Status & Security Card -->
+<div class="p-space-xl rounded-[24px] bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_16px_rgba(121,117,130,0.03)] flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface">Salud de Infraestructura</span>
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+</div>
+<div class="space-y-space-sm">
+<!-- Node 1: API Gateway -->
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">hub</span>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface block font-semibold">API Gateway (NestJS)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Latencia media: 24ms</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-lowest text-primary font-semibold">Operativo</span>
+</div>
+<!-- Node 2: PostgreSQL -->
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">database</span>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface block font-semibold">PostgreSQL Cluster</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Réplica de lectura en sync</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-lowest text-secondary font-semibold">Sincronizada</span>
+</div>
+<!-- Node 3: JWT & Auth -->
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary-container text-[20px]">key</span>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface block font-semibold">Servicio JWT / Auth</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Rotación de llaves segura</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-lowest text-primary-container font-semibold">Activo</span>
+</div>
+</div>
+<!-- Micro Banner / Security Policy Note -->
+<div class="mt-space-2xs p-space-sm rounded-xl bg-surface-container flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-outline mt-0.5">verified_user</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-tight">
+              Cumplimiento SOC-2 y cifrado en reposo activo. Respaldos automáticos configurados cada 6 horas.
+            </p>
+</div>
+</div>
+<!-- System Admin Master Identity Pill -->
+<div class="p-space-md rounded-[20px] bg-gradient-to-r from-primary/10 via-secondary-fixed/30 to-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface block font-semibold">Sesión con Privilegios Root</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono">IP: 192.168.1.104 (Auditable)</span>
+</div>
+</div>
+<span class="font-mono text-outline text-[11px]">UTC-5</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Range button toggle behavior
+  const rangeBtns = document.querySelectorAll('.range-btn');
+  rangeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      rangeBtns.forEach(b => {
+        b.classList.remove('bg-surface-container-lowest', 'text-primary-container', 'shadow-sm', 'font-semibold');
+        b.classList.add('text-on-surface-variant');
+      });
+      btn.classList.add('bg-surface-container-lowest', 'text-primary-container', 'shadow-sm', 'font-semibold');
+      btn.classList.remove('text-on-surface-variant');
+    });
+  });
+
+  // Simulated Audit Log Download
+  const exportBtn = document.getElementById('btn-export-log');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const originalText = exportBtn.innerHTML;
+      exportBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> <span class="font-label-md text-label-md">Generando JSON...</span>';
+      setTimeout(() => {
+        exportBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] text-primary">done</span> <span class="font-label-md text-label-md">¡Descarga lista!</span>';
+        setTimeout(() => {
+          exportBtn.innerHTML = originalText;
+        }, 2500);
+      }, 900);
+    });
+  }
+
+  // Refresh Feed Micro-Interaction
+  const refreshBtn = document.getElementById('refresh-feed-btn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      refreshBtn.classList.add('animate-spin');
+      setTimeout(() => {
+        refreshBtn.classList.remove('animate-spin');
+      }, 750);
+    });
+  }
+</script></main></div></body></html>

@@ -5,10 +5,17 @@ export interface CoachClient {
   assigned_at: string;
   client: {
     id: string;
+    idusuario?: string;
+    nombre?: string;
+    apellido?: string;
     full_name: string;
     email: string;
+    correo?: string;
     avatar_url?: string;
+    fotoperfil?: string;
     total_points: number;
+    puntostotales?: number;
+    nombrerol?: string;
   };
 }
 
@@ -67,10 +74,34 @@ export interface UpdateRoutineDto {
 }
 
 export interface ClientProgress {
-  currentStreak: number;
-  longestStreak: number;
-  totalPoints: number;
-  habits: any[]; // Resumen de los hábitos del cliente
+  userId?: string;
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  fotoperfil?: string;
+  puntos_totales?: number;
+  cumplimiento_global?: number;
+  total_esperado?: number;
+  total_cumplido?: number;
+  racha_actual?: number;
+  racha_maxima?: number;
+  volumen_semanal?: number[];
+  consistencia_mes?: any[];
+  recordsByDate?: Record<string, string[]>;
+  activeHabits?: Array<{
+    id: string;
+    nombre: string;
+    descripcion?: string;
+    tipo?: string;
+    meta?: string;
+    completadoHoy?: boolean;
+    progreso?: number;
+  }>;
+  insight?: string;
+  currentStreak?: number;
+  longestStreak?: number;
+  totalPoints?: number;
+  habits?: any[];
 }
 
 export const coachService = {
@@ -104,5 +135,9 @@ export const coachService = {
 
   async getClientProgress(clientId: string): Promise<Result<ClientProgress>> {
     return coachRepository.get<ClientProgress>(`/coach/clients/${clientId}/progress`);
+  },
+
+  async sendRecommendation(clientId: string, message: string, type: string = 'Recomendación'): Promise<Result<{ message: string }>> {
+    return coachRepository.post<{ message: string }>(`/coach/clients/${clientId}/recommendation`, { message, type });
   },
 };

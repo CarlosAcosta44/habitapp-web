@@ -12,3 +12,11 @@ export async function updateUserRoleAction(userId: string, newRole: string) {
 export async function updateUserStatusAction(userId: string, newStatus: string) {
   return await adminService.updateUserStatus(userId, newStatus);
 }
+
+export async function deleteForumAction(forumId: string) {
+  return await adminService.deleteForum(forumId);
+}
+
+export async function deleteForumCommentAction(commentId: string) {
+  return await adminService.deleteForumComment(commentId);
+}

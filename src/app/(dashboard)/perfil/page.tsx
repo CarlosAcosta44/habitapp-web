@@ -7,6 +7,7 @@
 import { requireUserStrict as requireUser } from "@/lib/auth/require-user";
 import { UsuarioService } from "@/services/usuario.service";
 import { HabitoService } from "@/services/habito.service";
+import { ReportesService } from "@/services/reportes.service";
 import { PerfilInteractiveView } from "@/components/perfil/PerfilInteractiveView";
 
 export const metadata = {
@@ -15,30 +16,44 @@ export const metadata = {
 };
 
 export default async function PerfilPage() {
-  await requireUser();
+  const user = await requireUser();
   const perfilService = new UsuarioService();
   const habitoService = new HabitoService();
+  const reportesService = new ReportesService();
 
-  const [result, habitosRes] = await Promise.all([
+  const [result, habitosRes, reportesRes] = await Promise.all([
     perfilService.getPerfilDashboardData(),
     habitoService.getAll("Activo"),
+    reportesService.getEstadisticas(user.id, "month"),
   ]);
 
-  if (!result.success) {
-    return (
-      <div className="max-w-5xl mx-auto py-12 text-center text-red-500 font-semibold">
-        Error al cargar la información del perfil: {result.error}
-      </div>
-    );
-  }
-
+  const reportesData = reportesRes && reportesRes.success ? reportesRes.data : null;
   const activeHabitsCount =
-    habitosRes.success && Array.isArray(habitosRes.data) ? habitosRes.data.length : 6;
+    habitosRes.success && Array.isArray(habitosRes.data) ? habitosRes.data.length : 0;
+
+  const dashboardData = result.success ? result.data : null;
 
   const data = {
-    ...result.data,
+    ...dashboardData,
+    perfil: {
+      ...dashboardData?.perfil,
+      id: user.id,
+      idusuario: user.id,
+      nombre: user.nombre || dashboardData?.perfil?.nombre || "Usuario",
+      apellido: user.apellido || dashboardData?.perfil?.apellido || "",
+      email: user.email || (dashboardData?.perfil as any)?.email || "",
+      correo: user.email || (dashboardData?.perfil as any)?.correo || "",
+      fotoperfil: user.fotoperfil || dashboardData?.perfil?.fotoperfil || null,
+      puntostotales: user.puntostotales ?? dashboardData?.perfil?.puntos ?? 0,
+      puntos: user.puntostotales ?? dashboardData?.perfil?.puntos ?? 0,
+    },
+    rachaGlobal: reportesData?.racha_actual ?? dashboardData?.rachaGlobal ?? 0,
+    diasActivosMensuales: reportesData?.total_cumplido ?? dashboardData?.diasActivosMensuales ?? 0,
+    eficienciaMensual: reportesData?.cumplimiento_global ?? dashboardData?.eficienciaMensual ?? 0,
     totalHabitosActivos: activeHabitsCount,
+    amigos: dashboardData?.amigos ?? [],
+    logros: dashboardData?.logros ?? [],
   };
 
-  return <PerfilInteractiveView data={data} />;
+  return <PerfilInteractiveView data={data as any} />;
 }

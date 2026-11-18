@@ -43,6 +43,14 @@ export async function assignRoutineToClientAction(clientId: string, routineId: s
   return { success: true, data: response.data };
 }
 
+export async function sendCoachRecommendationAction(clientId: string, message: string, type: string = "Recomendación") {
+  const response = await coachService.sendRecommendation(clientId, message, type);
+  if (!response.success) return { success: false, error: response.error };
+  revalidatePath("/entrenador");
+  revalidatePath(`/entrenador/clientes/${clientId}`);
+  return { success: true, data: response.data };
+}
+
 export async function getCoachRoutinesAction() {
   const response = await coachService.getRoutines();
   if (!response.success) return { success: false, error: response.error };
