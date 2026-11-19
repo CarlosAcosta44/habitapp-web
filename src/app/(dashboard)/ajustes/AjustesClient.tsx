@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { logoutAction } from "@/actions/auth.actions";
+import { unlinkMyTrainerAction } from "@/actions/coach.actions";
+import type { MyTrainerInfo, MyAssignedRoutine } from "@/services/coach.service";
 import {
   Sparkles,
   CheckCircle2,
@@ -23,10 +25,12 @@ import {
   Heart,
   EyeOff,
   Calendar,
-  Video,
   LogOut,
   Flame,
   Check,
+  Users,
+  Layers,
+  UserMinus,
 } from "lucide-react";
 
 interface AjustesUser {
@@ -41,16 +45,38 @@ interface AjustesUser {
 
 interface AjustesClientProps {
   user?: AjustesUser;
+  initialTrainers?: MyTrainerInfo[];
+  initialRoutines?: MyAssignedRoutine[];
 }
 
-export function AjustesClient({ user }: Readonly<AjustesClientProps>) {
+export function AjustesClient({
+  user,
+  initialTrainers = [],
+  initialRoutines = [],
+}: Readonly<AjustesClientProps>) {
   const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">("light");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [selectedSound, setSelectedSound] = useState<"campanas" | "naturaleza" | "silencio">("campanas");
   const [healthSync, setHealthSync] = useState(true);
   const [privateCommunity, setPrivateCommunity] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [trainers, setTrainers] = useState<MyTrainerInfo[]>(initialTrainers);
+  const [unlinkingId, setUnlinkingId] = useState<string | null>(null);
+
+  const handleUnlinkTrainer = async (identrenador: string, name: string) => {
+    if (!confirm(`¿Deseas desvincularte del entrenador ${name}?`)) return;
+    setUnlinkingId(identrenador);
+    try {
+      const res = await unlinkMyTrainerAction(identrenador);
+      if (res.success) {
+        setTrainers((prev) => prev.filter((t) => t.identrenador !== identrenador));
+      } else {
+        alert(res.error || "No se pudo desvincular del entrenador.");
+      }
+    } finally {
+      setUnlinkingId(null);
+    }
+  };
 
   // Cargar estado inicial del tema
   useEffect(() => {
@@ -143,7 +169,7 @@ export function AjustesClient({ user }: Readonly<AjustesClientProps>) {
   const initials = user
     ? `${user.nombre?.charAt(0) || ""}${user.apellido?.charAt(0) || ""}`.toUpperCase() || "HA"
     : "HA";
-  const rachaActiva = user?.racha ?? 24;
+  const rachaActiva = user?.racha ?? 0;
 
   return (
     <div className="flex flex-col w-full max-w-7xl mx-auto space-y-7 pb-16">
@@ -569,62 +595,139 @@ export function AjustesClient({ user }: Readonly<AjustesClientProps>) {
             </article>
           </div>
 
-          {/* 2. Acompañamiento Profesional */}
+          {/* 2. Acompañamiento Profesional (Datos 100% Reales) */}
           <div className="flex flex-col gap-3.5">
             <div className="flex items-center justify-between px-1">
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Acompañamiento Profesional
               </h3>
-              <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/40 px-2.5 py-0.5 rounded-full">
-                1 Sesión Activa
+              <span className="text-[11px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/40 px-2.5 py-0.5 rounded-full">
+                {trainers.length > 0 ? `${trainers.length} Entrenador(es) Vinculado(s)` : "Sin Entrenador"}
               </span>
             </div>
 
-            <article className="bg-white dark:bg-[#111827] rounded-3xl p-5 sm:p-6 shadow-xs border border-slate-200/80 dark:border-slate-800 relative overflow-hidden flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/40 px-3 py-1 rounded-full text-xs font-bold text-blue-600 dark:text-blue-400">
-                  <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
-                  <span>Próxima sesión • En 2 días</span>
-                </span>
-                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 px-2.5 py-0.5 rounded-full">
-                  Confirmada
-                </span>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="relative shrink-0">
-                  <div className="w-14 h-14 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-lg ring-2 ring-blue-100 dark:ring-blue-900/40 shadow-xs">
-                    EV
-                  </div>
-                  <span
-                    className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-[#111827]"
-                    title="Acompañante asignada"
-                  />
+            {trainers.length === 0 ? (
+              <article className="bg-white dark:bg-[#111827] rounded-3xl p-6 shadow-xs border border-slate-200/80 dark:border-slate-800 flex flex-col items-center text-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                  <Users className="w-6 h-6" aria-hidden="true" />
                 </div>
-                <div className="flex flex-col min-w-0">
-                  <h4 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
-                    Dra. Elena Vidal
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                    No tienes un entrenador vinculado actualmente
                   </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Especialista en hábitos y Mindfulness • Colegiada Nº 31.045
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
+                    Conéctate con un especialista certificado en la comunidad para recibir rutinas de hábitos personalizadas y seguimiento diario.
                   </p>
-                  <div className="flex flex-wrap items-center gap-3 mt-3">
-                    <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 text-xs font-semibold">
-                      <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" aria-hidden="true" />
-                      <span>Jueves, 18:00 hrs (45 min)</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setVideoModalOpen(true)}
-                      className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs font-bold hover:underline cursor-pointer"
-                    >
-                      <Video className="w-4 h-4" aria-hidden="true" />
-                      <span>Ver enlace de videollamada</span>
-                    </button>
-                  </div>
                 </div>
+                <Link
+                  href="/comunidad?tab=especialistas"
+                  className="mt-1 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition-all"
+                >
+                  Explorar Entrenadores en Comunidad
+                </Link>
+              </article>
+            ) : (
+              <div className="space-y-3">
+                {trainers.map((tr) => {
+                  const trInitials = `${tr.nombre?.[0] || "E"}${tr.apellido?.[0] || ""}`.toUpperCase();
+                  return (
+                    <article
+                      key={tr.identrenador}
+                      className="bg-white dark:bg-[#111827] rounded-3xl p-5 sm:p-6 shadow-xs border border-slate-200/80 dark:border-slate-800 relative overflow-hidden flex flex-col gap-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/40 px-3 py-1 rounded-full text-xs font-bold text-blue-600 dark:text-blue-400">
+                          <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
+                          <span>Desde {tr.fechainicio || "Reciente"}</span>
+                        </span>
+                        <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 px-2.5 py-0.5 rounded-full">
+                          Supervisión Activa
+                        </span>
+                      </div>
+
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-4 min-w-0">
+                          <div className="relative shrink-0">
+                            {tr.fotoperfil ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={tr.fotoperfil}
+                                alt={tr.full_name}
+                                className="w-14 h-14 rounded-full object-cover ring-2 ring-blue-100 dark:ring-blue-900/40"
+                              />
+                            ) : (
+                              <div className="w-14 h-14 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-lg ring-2 ring-blue-100 dark:ring-blue-900/40 shadow-xs">
+                                {trInitials}
+                              </div>
+                            )}
+                            <span
+                              className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-[#111827]"
+                              title="Entrenador asignado"
+                            />
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <h4 className="text-base font-bold text-slate-900 dark:text-white leading-tight truncate">
+                              {tr.full_name}
+                            </h4>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                              Especialista en {tr.especialidad} • {tr.experiencia} años exp.
+                            </p>
+                            {tr.email && (
+                              <span className="text-[11px] text-slate-400 mt-1 truncate">
+                                {tr.email}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={unlinkingId === tr.identrenador}
+                          onClick={() => {
+                            void handleUnlinkTrainer(tr.identrenador, tr.full_name);
+                          }}
+                          className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors shrink-0"
+                          title="Desvincular entrenador"
+                        >
+                          <UserMinus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+
+                {initialRoutines.length > 0 && (
+                  <div className="bg-white dark:bg-[#111827] rounded-3xl p-5 shadow-xs border border-slate-200/80 dark:border-slate-800 space-y-3">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
+                      <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span>Rutinas Asignadas por tu Entrenador ({initialRoutines.length})</span>
+                    </div>
+                    <div className="space-y-2">
+                      {initialRoutines.map((rut) => (
+                        <div
+                          key={rut.idrutina}
+                          className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex flex-col gap-1"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-slate-900 dark:text-white">
+                              {rut.nombre}
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300">
+                              {rut.tipo} • {rut.nivel}
+                            </span>
+                          </div>
+                          {rut.descripcion && (
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                              {rut.descripcion}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            </article>
+            )}
           </div>
 
           {/* 3. Botón de Cerrar Sesión */}
@@ -641,47 +744,6 @@ export function AjustesClient({ user }: Readonly<AjustesClientProps>) {
           </div>
         </section>
       </div>
-
-      {/* Modal simulado de videollamada */}
-      {videoModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="bg-white dark:bg-[#111827] rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Video className="w-5 h-5 text-blue-600" aria-hidden="true" />
-                <span>Sala de Videollamada</span>
-              </h3>
-              <button
-                type="button"
-                onClick={() => setVideoModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              La sesión con la Dra. Elena Vidal estará disponible 10 minutos antes de la hora acordada (Jueves 18:00 hrs).
-            </p>
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-300 break-all border border-slate-200/80 dark:border-slate-700">
-              https://meet.habitapp.io/sesion-mindfulness-ev724
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  void navigator.clipboard
-                    .writeText("https://meet.habitapp.io/sesion-mindfulness-ev724")
-                    .catch(() => {});
-                  setVideoModalOpen(false);
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 hover:bg-blue-700 transition cursor-pointer"
-              >
-                Copiar enlace
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Harmonious Footer Note ── */}
       <footer className="text-center mt-8 py-2 text-slate-400 dark:text-slate-500 text-xs">

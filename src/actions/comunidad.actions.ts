@@ -7,9 +7,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies }        from "next/headers";
 import { z }              from "zod";
 import { requireUser }    from "@/lib/auth/require-user";
+import { getValidAccessToken } from "@/lib/api/client";
 import { ComunidadService } from "@/services/comunidad.service";
 import type { ActionState } from "@/actions/habito.actions";
 
@@ -370,8 +370,7 @@ export async function uploadComunidadImageAction(
   }
 
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
+    const token = await getValidAccessToken(false);
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
     const forwardFd = new FormData();
@@ -382,11 +381,24 @@ export async function uploadComunidadImageAction(
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${backendUrl}/users/community/upload-image`, {
+    let res = await fetch(`${backendUrl}/users/community/upload-image`, {
       method: "POST",
       headers,
       body: forwardFd,
     });
+
+    if (res.status === 401) {
+      const refreshedToken = await getValidAccessToken(true);
+      if (refreshedToken) {
+        const retryFd = new FormData();
+        retryFd.append("file", file);
+        res = await fetch(`${backendUrl}/users/community/upload-image`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${refreshedToken}` },
+          body: retryFd,
+        });
+      }
+    }
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));

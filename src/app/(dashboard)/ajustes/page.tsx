@@ -5,6 +5,8 @@
  */
 
 import { requireUserStrict } from "@/lib/auth/require-user";
+import { ReportesService } from "@/services/reportes.service";
+import { coachService } from "@/services/coach.service";
 import { AjustesClient } from "./AjustesClient";
 
 export const metadata = {
@@ -14,6 +16,16 @@ export const metadata = {
 
 export default async function AjustesPage() {
   const user = await requireUserStrict();
+  const reportesService = new ReportesService();
+
+  const [reportesRes, trainerRes] = await Promise.all([
+    reportesService.getEstadisticas(user.id, "week"),
+    coachService.getMyTrainerAndRoutines(),
+  ]);
+
+  const realStreak = reportesRes.success && reportesRes.data ? (reportesRes.data.racha_actual ?? 0) : 0;
+  const trainers = trainerRes.success && trainerRes.data?.trainers ? trainerRes.data.trainers : [];
+  const routines = trainerRes.success && trainerRes.data?.routines ? trainerRes.data.routines : [];
 
   const currentUserData = {
     nombre: user.nombre || "Usuario",
@@ -22,8 +34,14 @@ export default async function AjustesPage() {
     fotoperfil: (user as any).fotoperfil || null,
     nombrerol: user.nombrerol || "Usuario",
     puntostotales: user.puntostotales ?? 0,
-    racha: (user as any).rachaActual ?? 24,
+    racha: realStreak,
   };
 
-  return <AjustesClient user={currentUserData} />;
+  return (
+    <AjustesClient
+      user={currentUserData}
+      initialTrainers={trainers}
+      initialRoutines={routines}
+    />
+  );
 }

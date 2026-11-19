@@ -8,25 +8,106 @@
 import { ok, err }       from "@/lib/result";
 import type { Result }   from "@/lib/result";
 import { cookies } from "next/headers";
+import { setSessionCookies } from "@/lib/auth/session-cookies";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
 /**
+ * Caché en memoria de tokens renovados durante renders de Server Components
+ * (donde Next.js no permite mutar cookies directement) para que todas las peticiones
+ * paralelas o subsecuentes usen el access_token fresco sin fallar con 401.
+ */
+const refreshedAccessTokens = new Map<string, string>();
+const inFlightRefreshes = new Map<string, Promise<string | null>>();
+
+/**
+ * Renueva silenciosamente el access_token usando el refresh_token disponible.
+ */
+export async function refreshAccessTokenSilently(refreshToken: string): Promise<string | null> {
+  const existingPromise = inFlightRefreshes.get(refreshToken);
+  if (existingPromise) {
+    return existingPromise;
+  }
+
+  const refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${API_URL}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!res.ok) return null;
+
+      const data = await res.json();
+      const newAccessToken = data?.access_token as string | undefined;
+      const newRefreshToken = data?.refresh_token as string | undefined;
+
+      if (!newAccessToken) return null;
+
+      refreshedAccessTokens.set(refreshToken, newAccessToken);
+      if (newRefreshToken) {
+        refreshedAccessTokens.set(newRefreshToken, newAccessToken);
+      }
+
+      try {
+        await setSessionCookies({
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        });
+      } catch {
+        // Ignorar si se ejecuta dentro de un Server Component render donde cookies.set no está permitido
+      }
+
+      return newAccessToken;
+    } catch {
+      return null;
+    } finally {
+      inFlightRefreshes.delete(refreshToken);
+    }
+  })();
+
+  inFlightRefreshes.set(refreshToken, refreshPromise);
+  return refreshPromise;
+}
+
+/**
+ * Obtiene un access_token válido (desde cookies o desde la caché de renovación silenciosa).
+ */
+export async function getValidAccessToken(forceRefresh = false): Promise<string | null> {
+  try {
+    const cookieStore = await cookies();
+    const cookieToken = cookieStore.get("access_token")?.value || null;
+    const refreshToken = cookieStore.get("refresh_token")?.value || null;
+
+    if (forceRefresh && refreshToken) {
+      return await refreshAccessTokenSilently(refreshToken);
+    }
+
+    if (refreshToken && refreshedAccessTokens.has(refreshToken)) {
+      return refreshedAccessTokens.get(refreshToken) || cookieToken;
+    }
+
+    if (!cookieToken && refreshToken) {
+      return await refreshAccessTokenSilently(refreshToken);
+    }
+
+    return cookieToken;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Obtiene las cabeceras de autorización con el Bearer JWT del usuario autenticado.
  */
-async function getAuthHeader(): Promise<Record<string, string>> {
+async function getAuthHeader(forceRefresh = false): Promise<Record<string, string>> {
   const headers: Record<string, string> = {
     "x-timezone-offset": new Date().getTimezoneOffset().toString(),
   };
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value || null;
-
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-  } catch (error) {
-    // cookies() may throw if called outside request context (e.g. during build)
+  const token = await getValidAccessToken(forceRefresh);
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
   return headers;
 }
@@ -36,7 +117,7 @@ interface FetchOptions extends RequestInit {
 }
 
 /**
- * Wrapper genérico de fetch que gestiona la comunicación de red y los errores.
+ * Wrapper genérico de fetch que gestiona la comunicación de red, renovación automática en 401 y errores.
  */
 async function request<T>(
   endpoint: string,
@@ -44,25 +125,44 @@ async function request<T>(
 ): Promise<Result<T>> {
   const { params, headers: customHeaders, ...rest } = options;
 
-  let url = `${API_URL}/${endpoint.replace(/^\//, "")}`;
+  const cleanEndpoint = endpoint.replace(/^\//, "");
+  let url = `${API_URL}/${cleanEndpoint}`;
   if (params) {
     const searchParams = new URLSearchParams(params);
     url += `?${searchParams.toString()}`;
   }
 
-  const authHeader = await getAuthHeader();
+  const authHeader = await getAuthHeader(false);
 
-  const headers = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...authHeader,
-    ...customHeaders,
+    ...(customHeaders as Record<string, string>),
   };
 
   try {
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       ...rest,
       headers,
     });
+
+    // Si recibimos 401 y no es un endpoint de login/refresh, intentamos renovar con refresh_token y reintentar
+    if (
+      response.status === 401 &&
+      !cleanEndpoint.startsWith("auth/login") &&
+      !cleanEndpoint.startsWith("auth/refresh")
+    ) {
+      const refreshedAuthHeader = await getAuthHeader(true);
+      if (refreshedAuthHeader["Authorization"]) {
+        response = await fetch(url, {
+          ...rest,
+          headers: {
+            ...headers,
+            ...refreshedAuthHeader,
+          },
+        });
+      }
+    }
 
     if (!response.ok) {
       let errorMessage = `Error en la petición: ${response.status} ${response.statusText}`;

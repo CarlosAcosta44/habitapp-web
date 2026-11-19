@@ -44,24 +44,27 @@ interface CoachClientDetailInteractiveProps {
   readonly clientId: string;
   readonly clientData: ClientProgress;
   readonly availableRoutines: CoachRoutine[];
+  readonly initialRecommendations?: Array<{ id: string; text: string; date: string; status: string }>;
+}
+
+function getHeatmapDayStatus(level: number): string {
+  if (level === 3) return "100% completado";
+  if (level > 0) return "Parcial";
+  return "Sin registro";
 }
 
 export function CoachClientDetailInteractive({
   clientId,
   clientData,
   availableRoutines,
+  initialRecommendations = [],
 }: CoachClientDetailInteractiveProps) {
   const [habitFilter, setHabitFilter] = useState<"todos" | "asignados" | "personales">("todos");
   const [recommendationMessage, setRecommendationMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [sentRecommendations, setSentRecommendations] = useState<Array<{ id: string; text: string; date: string; status: string }>>([
-    {
-      id: "rec-1",
-      text: "Excelente constancia con la hidratación esta semana. Para los días de alta carga, intenta espaciar la meditación a 10 min al mediodía.",
-      date: "Enviado recientemente",
-      status: "Entregado en app",
-    },
-  ]);
+  const [sentRecommendations, setSentRecommendations] = useState<Array<{ id: string; text: string; date: string; status: string }>>(
+    initialRecommendations
+  );
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Assign modal
@@ -77,11 +80,11 @@ export function CoachClientDetailInteractive({
   const displayName = clientData.nombre 
     ? `${clientData.nombre} ${clientData.apellido || ''}`.trim() 
     : "Alumno HabitApp";
-  const displayEmail = clientData.email || "pupilo@habitapp.io";
-  const points = clientData.puntos_totales || 0;
+  const displayEmail = clientData.email || clientData.correo || "Sin correo registrado";
+  const points = clientData.puntos_totales || clientData.puntostotales || 0;
   const streak = clientData.racha_actual || 0;
   const maxStreak = clientData.racha_maxima || streak || 0;
-  const adherence = clientData.cumplimiento_global ?? (streak > 0 ? 85 : 0);
+  const adherence = clientData.cumplimiento_global ?? 0;
   const level = Math.max(1, Math.floor(points / 250) + 1);
 
   // Initials for avatar
@@ -92,39 +95,13 @@ export function CoachClientDetailInteractive({
     .join("")
     .toUpperCase();
 
-  // Habits list
+  // Habits list - 100% real records, zero mock fallback
   const allHabits: HabitSummaryItem[] = useMemo(() => {
     if (clientData.activeHabits && clientData.activeHabits.length > 0) {
       return clientData.activeHabits;
     }
-    // Default fallback habits if client just registered
-    return [
-      {
-        id: "h-1",
-        nombre: "Hidratación consciente (2L)",
-        descripcion: "Meta diaria de consumo de agua",
-        tipo: "Asignado",
-        meta: "8 vasos / día",
-        completadoHoy: streak > 0,
-      },
-      {
-        id: "h-2",
-        nombre: "Pausa activa o respiración 4-7-8",
-        descripcion: "Regulación del sistema nervioso",
-        tipo: "Asignado",
-        meta: "10 minutos",
-        completadoHoy: streak > 1,
-      },
-      {
-        id: "h-3",
-        nombre: "Desconexión de pantallas nocturna",
-        descripcion: "Higiene del sueño profundo",
-        tipo: "Personal",
-        meta: "22:30 PM",
-        completadoHoy: false,
-      },
-    ];
-  }, [clientData.activeHabits, streak]);
+    return [];
+  }, [clientData.activeHabits]);
 
   const filteredHabits = useMemo(() => {
     if (habitFilter === "asignados") {
@@ -136,7 +113,7 @@ export function CoachClientDetailInteractive({
     return allHabits;
   }, [allHabits, habitFilter]);
 
-  // Generate 70-day heatmap squares (10 weeks x 7 days)
+  // Generate 70-day heatmap squares (10 weeks x 7 days) strictly from real records
   const heatmapWeeks = useMemo(() => {
     const weeks: Array<Array<{ dateStr: string; level: number; dayName: string }>> = [];
     const today = new Date();
@@ -155,13 +132,15 @@ export function CoachClientDetailInteractive({
         const dayRecord = records[dateKey];
         
         let completionLevel = 0;
-        if (dayRecord && dayRecord.length > 0) {
-          completionLevel = dayRecord.length >= 2 ? 3 : 2;
-        } else if (w === 0 && d >= 4) {
-          // Future or today
-          completionLevel = d === 4 && streak > 0 ? 3 : 0;
-        } else if (streak >= (offset / 2)) {
-          completionLevel = (offset % 3 === 0) ? 2 : 3;
+        if (dayRecord && Array.isArray(dayRecord) && dayRecord.length > 0) {
+          const completedCount = dayRecord.filter((r: any) => r.completado).length;
+          if (completedCount >= 3) {
+            completionLevel = 3;
+          } else if (completedCount >= 2) {
+            completionLevel = 2;
+          } else if (completedCount >= 1) {
+            completionLevel = 1;
+          }
         }
 
         const dayNames = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -174,10 +153,10 @@ export function CoachClientDetailInteractive({
       weeks.push(daysInWeek);
     }
     return weeks;
-  }, [clientData.recordsByDate, streak]);
+  }, [clientData.recordsByDate]);
 
   const completedTodayCount = allHabits.filter((h) => h.completadoHoy).length;
-  const perfectDaysCount = Math.max(streak, Math.round(heatmapWeeks.flat().filter((d) => d.level === 3).length));
+  const perfectDaysCount = heatmapWeeks.flat().filter((d) => d.level === 3).length;
 
   const handleSendAdvice = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -452,7 +431,7 @@ export function CoachClientDetailInteractive({
                       <div
                         key={`${wIdx}-${dIdx}`}
                         className={`w-full aspect-square rounded-md ${colorClass} transition-all hover:scale-110 cursor-pointer`}
-                        title={`${day.dateStr} (${day.dayName}): ${day.level === 3 ? '100% completado' : day.level > 0 ? 'Parcial' : 'Sin registro'}`}
+                        title={`${day.dateStr} (${day.dayName}): ${getHeatmapDayStatus(day.level)}`}
                       />
                     );
                   })
@@ -537,9 +516,18 @@ export function CoachClientDetailInteractive({
             {/* Lista de Hábitos */}
             <div className="space-y-3">
               {filteredHabits.length === 0 ? (
-                <p className="text-xs text-slate-500 p-6 text-center">
-                  No hay hábitos en esta categoría.
-                </p>
+                <div className="p-8 text-center rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    {allHabits.length === 0
+                      ? "Este pupilo aún no tiene hábitos asignados o activos."
+                      : "No hay hábitos en esta categoría."}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {allHabits.length === 0
+                      ? "Utiliza el botón \"Asignar Nueva Rutina\" para iniciar su plan diario de bienestar."
+                      : "Prueba seleccionando otra pestaña de filtro arriba."}
+                  </p>
+                </div>
               ) : (
                 filteredHabits.map((habit) => {
                   const isAssigned = (habit.tipo || "").toLowerCase().includes("asignado");
@@ -622,7 +610,12 @@ export function CoachClientDetailInteractive({
               El consejo aparecerá destacado en el panel de {clientData.nombre || 'tu pupilo'} con tu sello de coach certificado.
             </p>
 
-            <form onSubmit={handleSendAdvice} className="flex flex-col gap-3">
+            <form
+              onSubmit={(e) => {
+                void handleSendAdvice(e);
+              }}
+              className="flex flex-col gap-3"
+            >
               <textarea
                 value={recommendationMessage}
                 onChange={(e) => setRecommendationMessage(e.target.value)}
@@ -657,27 +650,35 @@ export function CoachClientDetailInteractive({
             </div>
 
             <div className="space-y-3 mt-4">
-              {sentRecommendations.map((rec) => (
-                <div
-                  key={rec.id}
-                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 flex flex-col gap-1.5"
-                >
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#572de4]" />
-                      Coach (Tú)
-                    </span>
-                    <span className="text-[#572de4] font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      {rec.status}
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                    &quot;{rec.text}&quot;
+              {sentRecommendations.length === 0 ? (
+                <div className="p-6 text-center rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                  <p className="text-xs text-slate-500">
+                    No se han enviado recomendaciones a este alumno aún. Escribe un consejo arriba para comenzar.
                   </p>
-                  <span className="text-[11px] text-slate-400">{rec.date}</span>
                 </div>
-              ))}
+              ) : (
+                sentRecommendations.map((rec) => (
+                  <div
+                    key={rec.id}
+                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 flex flex-col gap-1.5"
+                  >
+                    <div className="flex items-center justify-between text-xs text-slate-400">
+                      <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#572de4]" />
+                        Coach (Tú)
+                      </span>
+                      <span className="text-[#572de4] font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        {rec.status}
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                      &quot;{rec.text}&quot;
+                    </p>
+                    <span className="text-[11px] text-slate-400">{rec.date}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -706,9 +707,9 @@ export function CoachClientDetailInteractive({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+              <span className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                 Seleccionar Rutina Plantilla
-              </label>
+              </span>
 
               {availableRoutines.length === 0 ? (
                 <p className="text-xs text-slate-500 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl text-center">
@@ -756,7 +757,9 @@ export function CoachClientDetailInteractive({
               <button
                 type="button"
                 disabled={isAssigning || !selectedRoutineId}
-                onClick={handleConfirmAssign}
+                onClick={() => {
+                  void handleConfirmAssign();
+                }}
                 className="px-6 py-2.5 rounded-full bg-[#572de4] hover:bg-[#4823c9] text-white text-xs font-bold shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-50"
               >
                 {isAssigning ? "Asignando..." : "Asignar Rutina"}

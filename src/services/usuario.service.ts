@@ -8,6 +8,7 @@
 import { ok, err } from "@/lib/result";
 import type { Result } from "@/lib/result";
 import { usuarioRepository } from "@/repositories/usuario.repository";
+import { getValidAccessToken } from "@/lib/api/client";
 import type { PerfilDashboardData, ProfileForEdit, UpdateProfileDTO } from "@/domain/perfil.types";
 import type { UserProfileDto, UpdateUserProfileDto } from "@/domain/usuario.types";
 
@@ -215,11 +216,30 @@ export class UsuarioService {
       formData.append("file", file);
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
-      const response = await fetch(`${API_URL}/users/me/avatar`, {
+      let token = await getValidAccessToken(false);
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      let response = await fetch(`${API_URL}/users/me/avatar`, {
         method: "POST",
-        credentials: "include", // envía las cookies HttpOnly del JWT
+        headers,
         body: formData,
       });
+
+      if (response.status === 401) {
+        token = await getValidAccessToken(true);
+        if (token) {
+          const retryFormData = new FormData();
+          retryFormData.append("file", file);
+          response = await fetch(`${API_URL}/users/me/avatar`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: retryFormData,
+          });
+        }
+      }
 
       if (!response.ok) {
         let errorMessage = "Error al subir imagen";

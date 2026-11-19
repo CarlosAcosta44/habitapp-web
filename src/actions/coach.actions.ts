@@ -40,6 +40,9 @@ export async function assignRoutineToClientAction(clientId: string, routineId: s
   const response = await coachService.assignRoutine(clientId, routineId);
   if (!response.success) return { success: false, error: response.error };
   revalidatePath("/entrenador");
+  revalidatePath(`/entrenador/clientes/${clientId}`);
+  revalidatePath("/habitos");
+  revalidatePath("/ajustes");
   return { success: true, data: response.data };
 }
 
@@ -60,6 +63,56 @@ export async function getCoachRoutinesAction() {
 export async function getCoachClientsAction() {
   const response = await coachService.getClients();
   if (!response.success) return { success: false, error: response.error };
+  return { success: true, data: response.data };
+}
+
+export async function linkClientAction(clientId: string) {
+  const response = await coachService.linkClient(clientId);
+  if (!response.success) return { success: false, error: response.error };
+  revalidatePath("/entrenador");
+  return { success: true, data: response.data };
+}
+
+export async function unlinkClientAction(clientId: string) {
+  const response = await coachService.unlinkClient(clientId);
+  if (!response.success) return { success: false, error: response.error };
+  revalidatePath("/entrenador");
+  return { success: true, data: response.data };
+}
+
+export async function getAvailableClientsAction() {
+  const response = await coachService.getAvailableClients();
+  if (!response.success) return { success: false, error: response.error };
+  return { success: true, data: response.data };
+}
+
+export async function getClientRecommendationsAction(clientId: string) {
+  const response = await coachService.getClientRecommendations(clientId);
+  if (!response.success) return { success: false, error: response.error };
+  return { success: true, data: response.data };
+}
+
+export async function getMyTrainerAndRoutinesAction() {
+  const response = await coachService.getMyTrainerAndRoutines();
+  if (!response.success) return { success: false, error: response.error };
+  return { success: true, data: response.data };
+}
+
+export async function linkMyTrainerAction(trainerId: string) {
+  const response = await coachService.linkMyTrainer(trainerId);
+  if (!response.success) return { success: false, error: response.error };
+  revalidatePath("/comunidad");
+  revalidatePath("/ajustes");
+  revalidatePath("/entrenador");
+  return { success: true, data: response.data };
+}
+
+export async function unlinkMyTrainerAction(trainerId: string) {
+  const response = await coachService.unlinkMyTrainer(trainerId);
+  if (!response.success) return { success: false, error: response.error };
+  revalidatePath("/comunidad");
+  revalidatePath("/ajustes");
+  revalidatePath("/entrenador");
   return { success: true, data: response.data };
 }
 

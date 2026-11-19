@@ -1,9 +1,8 @@
 import { cookies } from "next/headers";
-import { apiClient } from "@/lib/api/client";
+import { apiClient, getValidAccessToken } from "@/lib/api/client";
 import { ok, err, Result } from "@/lib/result";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { setSessionCookies } from "./session-cookies";
 
 export interface AppUser {
   id: string;
@@ -25,45 +24,21 @@ export interface AppUser {
  */
 const fetchCurrentUser = cache(async (): Promise<Result<AppUser>> => {
   const cookieStore = await cookies();
-  let token = cookieStore.get("access_token")?.value;
-  const refreshToken = cookieStore.get("refresh_token")?.value;
+  const hasAccessToken = Boolean(cookieStore.get("access_token")?.value);
+  const hasRefreshToken = Boolean(cookieStore.get("refresh_token")?.value);
 
-  if (!token && !refreshToken) {
+  if (!hasAccessToken && !hasRefreshToken) {
     return err("No autorizado. Inicia sesión para continuar.");
   }
 
-  // Intentamos obtener el perfil del usuario desde el backend
-  let result = token ? await apiClient.get<any>("/users/me") : { success: false, data: null };
-
-  // Si falló (ej. access_token expirado) y contamos con refresh_token, renovamos silenciosamente
-  if (!result.success && refreshToken) {
-    const refreshResult = await apiClient.post<any>("/auth/refresh", {
-      refreshToken,
-    });
-
-    if (refreshResult.success && refreshResult.data?.access_token) {
-      token = refreshResult.data.access_token as string;
-      try {
-        await setSessionCookies({
-          accessToken: token,
-          refreshToken: refreshResult.data.refresh_token as string | undefined,
-        });
-      } catch {
-        // Ignore cookie mutation errors when requireUser runs inside a Server Component render
-      }
-
-      // Reintentamos /users/me con el token recién emitido
-      result = await apiClient.get<any>("/users/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-    }
-  }
+  // apiClient ahora renueva silenciosamente el access_token en memoria y cookies si recibe 401
+  const result = await apiClient.get<any>("/users/me");
 
   if (!result.success || !result.data) {
     return err("Sesión expirada o inválida.");
   }
+
+  const token = await getValidAccessToken(false);
 
   let jwtEmail = "";
   if (token) {

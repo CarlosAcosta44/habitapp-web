@@ -24,14 +24,20 @@ import {
   ChevronRight,
   ShieldCheck,
   TrendingUp,
-  FileText
+  FileText,
+  UserPlus,
+  UserMinus,
+  RotateCw
 } from "lucide-react";
 import { 
   createRoutineAction, 
   updateRoutineAction, 
   deleteRoutineAction, 
   assignRoutineToClientAction,
-  sendCoachRecommendationAction 
+  sendCoachRecommendationAction,
+  linkClientAction,
+  unlinkClientAction,
+  getAvailableClientsAction
 } from "@/actions/coach.actions";
 import { CoachClient, CoachRoutine } from "@/services/coach.service";
 
@@ -66,7 +72,18 @@ export function CoachDashboardInteractive({
   const [editingRoutine, setEditingRoutine] = useState<CoachRoutine | null>(null);
   const [routineTitle, setRoutineTitle] = useState("");
   const [routineDescription, setRoutineDescription] = useState("");
+  const [routineTipo, setRoutineTipo] = useState("Salud Mental");
+  const [routineNivel, setRoutineNivel] = useState("Principiante");
+  const [routineDuracion, setRoutineDuracion] = useState<number>(21);
+  const [routineHabits, setRoutineHabits] = useState<string[]>([]);
+  const [newHabitInput, setNewHabitInput] = useState("");
   const [isSubmittingRoutine, setIsSubmittingRoutine] = useState(false);
+
+  // Link client modal
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
+  const [isLoadingAvailable, setIsLoadingAvailable] = useState(false);
+  const [isLinkingUser, setIsLinkingUser] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -86,11 +103,76 @@ export function CoachDashboardInteractive({
     });
   }, [clients, searchQuery]);
 
-  // Derived KPI metrics
+  // Derived KPI metrics (100% computed from real data)
   const activeClientsCount = clients.length;
   const createdRoutinesCount = routines.length;
+  const avgCompliance = useMemo(() => {
+    if (clients.length === 0) return 0;
+    const total = clients.reduce((acc, c) => acc + (c.client?.cumplimiento || 0), 0);
+    return Math.round(total / clients.length);
+  }, [clients]);
+
+  const inStreakCount = useMemo(() => {
+    return clients.filter((c) => (c.client?.racha_actual || 0) > 0).length;
+  }, [clients]);
+
+  const needsFocusCount = useMemo(() => {
+    return clients.filter((c) => (c.client?.racha_actual || 0) === 0).length;
+  }, [clients]);
 
   // Handlers
+  const handleOpenLinkModal = async () => {
+    setIsLinkModalOpen(true);
+    setIsLoadingAvailable(true);
+    const res = await getAvailableClientsAction();
+    if (res.success && res.data) {
+      setAvailableUsers(res.data);
+    }
+    setIsLoadingAvailable(false);
+  };
+
+  const handleLinkClient = async (userToLink: any) => {
+    setIsLinkingUser(userToLink.id);
+    const res = await linkClientAction(userToLink.id);
+    if (res.success) {
+      const newClientItem: CoachClient = {
+        assigned_at: new Date().toISOString(),
+        client: {
+          id: userToLink.id,
+          idusuario: userToLink.id,
+          nombre: userToLink.nombre,
+          apellido: userToLink.apellido,
+          full_name: userToLink.full_name,
+          email: userToLink.email,
+          fotoperfil: userToLink.fotoperfil,
+          total_points: userToLink.puntostotales || 0,
+          nombrerol: userToLink.nombrerol || "Usuario",
+          racha_actual: 0,
+          cumplimiento: 0,
+          completados_hoy: 0,
+          total_habitos: 0,
+        },
+      };
+      setClients([newClientItem, ...clients]);
+      setAvailableUsers(availableUsers.filter((u) => u.id !== userToLink.id));
+      showToast(`¡${userToLink.full_name || userToLink.nombre} vinculado como pupilo!`);
+    } else {
+      alert(res.error || "No se pudo vincular el alumno.");
+    }
+    setIsLinkingUser(null);
+  };
+
+  const handleUnlinkClient = async (clientId: string, clientName: string) => {
+    if (!confirm(`¿Estás seguro de desvincular a ${clientName} de tu supervisión?`)) return;
+    const res = await unlinkClientAction(clientId);
+    if (res.success) {
+      setClients(clients.filter((c) => (c.client?.id || c.client?.idusuario) !== clientId));
+      showToast(`Alumno ${clientName} desvinculado.`);
+    } else {
+      alert(res.error || "Error al desvincular alumno.");
+    }
+  };
+
   const handleOpenRecommend = (client: CoachClient) => {
     setSelectedClientForRecommend(client);
     setRecommendationText("");
@@ -150,24 +232,63 @@ export function CoachDashboardInteractive({
       setEditingRoutine(routine);
       setRoutineTitle(routine.name || "");
       setRoutineDescription(routine.description || "");
+      setRoutineTipo(routine.tipo || "Salud Mental");
+      setRoutineNivel(routine.nivel || "Principiante");
+      setRoutineDuracion(routine.duracion ?? 21);
+      setRoutineHabits(
+        (routine.routine_habits || []).map((h) => h.habit_name).filter(Boolean)
+      );
     } else {
       setEditingRoutine(null);
       setRoutineTitle("");
       setRoutineDescription("");
+      setRoutineTipo("Salud Mental");
+      setRoutineNivel("Principiante");
+      setRoutineDuracion(21);
+      setRoutineHabits([]);
     }
+    setNewHabitInput("");
     setIsRoutineModalOpen(true);
+  };
+
+  const handleAddHabitToRoutine = () => {
+    const trimmed = newHabitInput.trim();
+    if (!trimmed) return;
+    if (!routineHabits.includes(trimmed)) {
+      setRoutineHabits([...routineHabits, trimmed]);
+    }
+    setNewHabitInput("");
+  };
+
+  const handleRemoveHabitFromRoutine = (habitName: string) => {
+    setRoutineHabits(routineHabits.filter((h) => h !== habitName));
   };
 
   const handleSaveRoutine = async () => {
     if (!routineTitle.trim()) return;
     setIsSubmittingRoutine(true);
 
+    const pendingHabit = newHabitInput.trim();
+    const finalHabitsList =
+      pendingHabit && !routineHabits.includes(pendingHabit)
+        ? [...routineHabits, pendingHabit]
+        : routineHabits;
+
+    const payload = {
+      name: routineTitle.trim(),
+      description: routineDescription.trim(),
+      tipo: routineTipo,
+      nivel: routineNivel,
+      duracion: Number(routineDuracion) || 21,
+      habits:
+        finalHabitsList.length > 0
+          ? finalHabitsList.map((h) => ({ habit_name: h }))
+          : [{ habit_name: routineTitle.trim() }],
+    };
+
     try {
       if (editingRoutine) {
-        const res = await updateRoutineAction(editingRoutine.id, {
-          name: routineTitle.trim(),
-          description: routineDescription.trim(),
-        });
+        const res = await updateRoutineAction(editingRoutine.id, payload);
         if (res.success && res.data) {
           const updated = res.data;
           setRoutines(routines.map((r) => (r.id === editingRoutine.id ? updated : r)));
@@ -177,10 +298,7 @@ export function CoachDashboardInteractive({
           alert(res.error || "Error al actualizar la rutina.");
         }
       } else {
-        const res = await createRoutineAction({
-          name: routineTitle.trim(),
-          description: routineDescription.trim(),
-        });
+        const res = await createRoutineAction(payload);
         if (res.success && res.data) {
           setRoutines([res.data, ...routines]);
           showToast(`¡Plantilla "${routineTitle}" creada exitosamente!`);
@@ -209,6 +327,10 @@ export function CoachDashboardInteractive({
     const res = await createRoutineAction({
       name: `${routine.name} (Copia)`,
       description: routine.description,
+      tipo: routine.tipo || "Salud Mental",
+      nivel: routine.nivel || "Principiante",
+      duracion: routine.duracion ?? 21,
+      habits: (routine.routine_habits || []).map((h) => ({ habit_name: h.habit_name })),
     });
     if (res.success && res.data) {
       setRoutines([res.data, ...routines]);
@@ -253,10 +375,22 @@ export function CoachDashboardInteractive({
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
             <button
+              type="button"
+              onClick={() => {
+                void handleOpenLinkModal();
+              }}
+              className="h-11 px-4 rounded-full bg-white dark:bg-[#111827] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-xs transition-colors"
+            >
+              <UserPlus className="w-4 h-4 text-[#572de4]" />
+              <span>Vincular Alumno</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => handleOpenRoutineModal()}
-              className="h-11 px-5 rounded-full bg-[#572de4] hover:bg-[#4823c9] text-white font-semibold text-sm flex items-center gap-2 shadow-lg shadow-indigo-500/25 transition-transform active:scale-95"
+              className="h-11 px-5 rounded-full bg-[#572de4] hover:bg-[#4823c9] text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-indigo-500/25 transition-transform active:scale-95"
             >
               <Plus className="w-4 h-4" />
               <span>Nueva Rutina</span>
@@ -318,7 +452,7 @@ export function CoachDashboardInteractive({
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
             <span>Plantilla principal:</span>
             <span className="text-slate-900 dark:text-white font-semibold truncate max-w-[160px]">
-              {routines[0]?.name || "Sin rutinas"}
+              {routines[0]?.name || "Sin plantillas"}
             </span>
           </div>
           <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
@@ -329,20 +463,20 @@ export function CoachDashboardInteractive({
           </div>
         </div>
 
-        {/* KPI 3: Cumplimiento */}
+        {/* KPI 3: Cumplimiento Real */}
         <div className="p-6 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
               <Activity className="w-6 h-6" />
             </div>
             <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" /> Constancia
+              <Sparkles className="w-3.5 h-3.5" /> Adherencia Real
             </span>
           </div>
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                {activeClientsCount > 0 ? "88.4%" : "0%"}
+                {avgCompliance}%
               </span>
               <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Tasa Global</span>
             </div>
@@ -351,13 +485,15 @@ export function CoachDashboardInteractive({
             </span>
           </div>
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
-            <span>{activeClientsCount} en seguimiento activo</span>
-            <span className="text-slate-700 dark:text-slate-300 font-medium">100% verificado</span>
+            <span>{inStreakCount} en racha positiva</span>
+            <span className={needsFocusCount > 0 ? "text-amber-500 font-bold" : "text-slate-400"}>
+              {needsFocusCount} requieren foco
+            </span>
           </div>
           <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
             <div 
               className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
-              style={{ width: activeClientsCount > 0 ? "88.4%" : "0%" }}
+              style={{ width: `${avgCompliance}%` }}
             />
           </div>
         </div>
@@ -424,16 +560,30 @@ export function CoachDashboardInteractive({
         <div className="xl:col-span-8 flex flex-col gap-4">
           {activeTab === "clientes" ? (
             filteredClients.length === 0 ? (
-              <div className="p-12 text-center rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm">
-                <Users className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
+              <div className="p-12 text-center rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center">
+                <div className="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-950/40 text-[#572de4] flex items-center justify-center mb-4">
+                  <Users className="w-8 h-8" />
+                </div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  {searchQuery ? "No se encontraron clientes" : "No tienes clientes asignados"}
+                  {searchQuery ? "No se encontraron clientes" : "No tienes pupilos vinculados aún"}
                 </h3>
-                <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
+                <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto mb-5 leading-relaxed">
                   {searchQuery
                     ? `No hay coincidencias para "${searchQuery}". Intenta con otro término.`
-                    : "Los usuarios vinculados a tu cuenta de entrenador aparecerán aquí automáticamente."}
+                    : "Solo los usuarios explícitamente vinculados a tu supervisión aparecerán aquí. Vincula tu primer alumno para comenzar a monitorear sus hábitos."}
                 </p>
+                {!searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void handleOpenLinkModal();
+                    }}
+                    className="px-5 py-2.5 rounded-full bg-[#572de4] hover:bg-[#4823c9] text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-indigo-500/20"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    <span>Vincular Alumno Ahora</span>
+                  </button>
+                )}
               </div>
             ) : (
               filteredClients.map((clientItem, idx) => {
@@ -447,9 +597,12 @@ export function CoachDashboardInteractive({
                   .slice(0, 2)
                   .join("")
                   .toUpperCase();
-                const points = c?.total_points || c?.puntostotales || 0;
                 
-                // Color accent rotation for avatar
+                const clientStreak = c?.racha_actual ?? 0;
+                const completedToday = c?.completados_hoy ?? 0;
+                const totalHabits = c?.total_habitos ?? 0;
+                const compliance = c?.cumplimiento ?? 0;
+                
                 const avatarBg = idx % 2 === 0 ? "bg-indigo-100 text-[#572de4] dark:bg-indigo-950/60 dark:text-indigo-300" : "bg-purple-100 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300";
 
                 return (
@@ -471,7 +624,7 @@ export function CoachDashboardInteractive({
                             {initials}
                           </div>
                         )}
-                        <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-[#111827]" />
+                        <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ring-2 ring-white dark:ring-[#111827] ${clientStreak > 0 ? 'bg-emerald-500' : 'bg-amber-400'}`} />
                       </div>
 
                       <div className="flex flex-col min-w-0">
@@ -487,13 +640,18 @@ export function CoachDashboardInteractive({
                           {displayEmail}
                         </span>
 
-                        <div className="flex items-center gap-3 mt-2 text-xs font-semibold">
-                          <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 rounded-full">
-                            <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                            {points > 0 ? `${Math.round(points / 10)} pts activos` : "Racha activa"}
+                        <div className="flex items-center gap-3 mt-2 text-xs font-semibold flex-wrap">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full ${
+                            clientStreak > 0 
+                              ? "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400" 
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                          }`}>
+                            <Flame className={`w-3.5 h-3.5 ${clientStreak > 0 ? "fill-amber-500 text-amber-500" : "text-slate-400"}`} />
+                            {clientStreak} {clientStreak === 1 ? "día de racha" : "días de racha"}
                           </span>
+
                           <span className="text-slate-500 dark:text-slate-400">
-                            Vinculado: {new Date(clientItem.assigned_at || Date.now()).toLocaleDateString("es-ES", { month: "short", day: "numeric", year: "numeric" })}
+                            Hoy: <strong className="text-slate-900 dark:text-white">{completedToday}/{totalHabits}</strong> hábitos
                           </span>
                         </div>
                       </div>
@@ -501,10 +659,18 @@ export function CoachDashboardInteractive({
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
+                      {/* Mini Dial */}
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                        <div className="text-right">
+                          <span className="text-xs font-black text-slate-900 dark:text-white block">{compliance}%</span>
+                          <span className="text-[10px] text-slate-400 block font-medium">Adherencia</span>
+                        </div>
+                      </div>
+
                       {/* Enviar Recomendación */}
                       <button
                         onClick={() => handleOpenRecommend(clientItem)}
-                        className="h-10 px-3.5 rounded-2xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/50 text-[#572de4] dark:text-indigo-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                        className="h-10 px-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/50 text-[#572de4] dark:text-indigo-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
                         title="Enviar Recomendación"
                       >
                         <MessageSquare className="w-4 h-4" />
@@ -514,11 +680,23 @@ export function CoachDashboardInteractive({
                       {/* Asignar Rutina */}
                       <button
                         onClick={() => handleOpenAssign(clientItem)}
-                        className="h-10 px-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                        className="h-10 px-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors"
                         title="Asignar Rutina"
                       >
                         <PlusCircle className="w-4 h-4" />
                         <span className="hidden sm:inline">Asignar</span>
+                      </button>
+
+                      {/* Desvincular Pupilo */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void handleUnlinkClient(clientId, displayName);
+                        }}
+                        className="h-10 w-10 rounded-2xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center transition-colors"
+                        title="Desvincular pupilo"
+                      >
+                        <UserMinus className="w-4 h-4" />
                       </button>
 
                       {/* Link Detalle y Progreso */}
@@ -550,56 +728,95 @@ export function CoachDashboardInteractive({
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {routines.map((r) => (
-                  <div
-                    key={r.id}
-                    className="p-5 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:border-indigo-500/40 transition-colors"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-[#572de4] dark:text-indigo-300 text-xs font-bold">
-                          Plantilla Maestra
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleDuplicateRoutine(r)}
-                            className="p-1.5 text-slate-400 hover:text-[#572de4] rounded-lg transition-colors"
-                            title="Clonar plantilla"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleOpenRoutineModal(r)}
-                            className="p-1.5 text-slate-400 hover:text-blue-500 rounded-lg transition-colors"
-                            title="Editar plantilla"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteRoutine(r.id, r.name)}
-                            className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
-                            title="Eliminar plantilla"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <h4 className="font-bold text-base text-slate-900 dark:text-white mb-1.5">{r.name}</h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3 leading-relaxed">
-                        {r.description || "Sin descripción establecida."}
-                      </p>
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400">
-                      <span className="flex items-center gap-1 font-medium">
-                        <FileText className="w-3.5 h-3.5" /> Hábitos modulares
-                      </span>
-                      <span className="text-[#572de4] font-semibold">Listo para asignar</span>
-                    </div>
+              {routines.length === 0 ? (
+                <div className="p-10 text-center rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-[#572de4] flex items-center justify-center mb-3">
+                    <Layers className="w-7 h-7" />
                   </div>
-                ))}
-              </div>
+                  <h4 className="font-bold text-base text-slate-900 dark:text-white">
+                    Aún no has creado plantillas de rutina
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                    Crea tu primera plantilla con hábitos modulares para poder asignarla con un clic a cualquiera de tus pupilos vinculados.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {routines.map((r) => (
+                    <div
+                      key={r.id}
+                      className="p-5 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:border-indigo-500/40 transition-colors"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-[#572de4] dark:text-indigo-300 text-xs font-bold">
+                              {r.tipo || "Bienestar"}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-semibold">
+                              {r.nivel || "Principiante"} • {r.duracion ?? 21}d
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                void handleDuplicateRoutine(r);
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-[#572de4] rounded-lg transition-colors"
+                              title="Clonar plantilla"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenRoutineModal(r)}
+                              className="p-1.5 text-slate-400 hover:text-blue-500 rounded-lg transition-colors"
+                              title="Editar plantilla"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                void handleDeleteRoutine(r.id, r.name);
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
+                              title="Eliminar plantilla"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <h4 className="font-bold text-base text-slate-900 dark:text-white mb-1.5">{r.name}</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                          {r.description || "Sin descripción establecida."}
+                        </p>
+                        {r.routine_habits && r.routine_habits.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {r.routine_habits.map((h, i) => (
+                              <span
+                                key={`${r.id}-h-${i}`}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] font-medium text-slate-700 dark:text-slate-300"
+                              >
+                                <CheckCircle2 className="w-3 h-3 text-[#572de4]" />
+                                {h.habit_name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                        <span className="flex items-center gap-1 font-medium">
+                          <FileText className="w-3.5 h-3.5" /> {(r.routine_habits || []).length || 1} hábito(s) incluido(s)
+                        </span>
+                        <span className="text-[#572de4] font-semibold">Listo para asignar</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -633,13 +850,17 @@ export function CoachDashboardInteractive({
                     </h3>
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => handleDuplicateRoutine(r)}
+                        type="button"
+                        onClick={() => {
+                          void handleDuplicateRoutine(r);
+                        }}
                         className="p-1 text-slate-400 hover:text-[#572de4] rounded transition-colors"
                         title="Clonar"
                       >
                         <Copy className="w-3.5 h-3.5" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleOpenRoutineModal(r)}
                         className="p-1 text-slate-400 hover:text-blue-500 rounded transition-colors"
                         title="Editar"
@@ -677,6 +898,85 @@ export function CoachDashboardInteractive({
         </aside>
       </div>
 
+      {/* ── MODAL: Vincular Alumno ────────────────────────────────────── */}
+      {isLinkModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-[#111827] rounded-3xl max-w-lg w-full p-6 shadow-2xl flex flex-col gap-5 border border-slate-200 dark:border-slate-800 max-h-[85vh] overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 text-[#572de4] flex items-center justify-center">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white">Vincular Nuevo Pupilo</h3>
+                  <span className="text-xs text-slate-500 font-medium">Selecciona un usuario del sistema para iniciar supervisión</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsLinkModalOpen(false)}
+                className="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              {isLoadingAvailable ? (
+                <div className="py-12 text-center text-slate-400 flex flex-col items-center gap-2">
+                  <RotateCw className="w-6 h-6 animate-spin text-[#572de4]" />
+                  <span className="text-xs">Cargando usuarios disponibles...</span>
+                </div>
+              ) : availableUsers.length === 0 ? (
+                <p className="text-xs text-slate-500 p-8 text-center bg-slate-50 dark:bg-slate-900 rounded-2xl">
+                  No hay usuarios disponibles sin asignar en este momento.
+                </p>
+              ) : (
+                availableUsers.map((u) => (
+                  <div
+                    key={u.id}
+                    className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-[#572de4] flex items-center justify-center font-bold text-sm shrink-0">
+                        {u.nombre?.[0] || 'U'}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">
+                          {u.full_name || u.nombre}
+                        </span>
+                        <span className="text-[11px] text-slate-400 truncate block">
+                          {u.email}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={isLinkingUser === u.id}
+                      onClick={() => {
+                        void handleLinkClient(u);
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-[#572de4] hover:bg-[#4823c9] text-white text-xs font-bold transition-all disabled:opacity-50 shrink-0"
+                    >
+                      {isLinkingUser === u.id ? "Vinculando..." : "Vincular"}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <button
+                onClick={() => setIsLinkModalOpen(false)}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── MODAL: Enviar Recomendación Personalizada ─────────────────── */}
       {isRecommendModalOpen && selectedClientForRecommend && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
@@ -702,9 +1002,9 @@ export function CoachDashboardInteractive({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+              <span className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                 Tipo de Intervención
-              </label>
+              </span>
               <div className="grid grid-cols-3 gap-2">
                 {(["Motivación", "Ajuste de Meta", "Feedback"] as const).map((tipo) => (
                   <button
@@ -724,10 +1024,11 @@ export function CoachDashboardInteractive({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+              <label htmlFor="recommend-msg-input" className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                 Mensaje o Consejo de Bienestar
               </label>
               <textarea
+                id="recommend-msg-input"
                 value={recommendationText}
                 onChange={(e) => setRecommendationText(e.target.value)}
                 placeholder="Escribe aquí tu recomendación personalizada... Ej: 'He notado que te cuesta completar el hábito nocturno, probemos adelantarlo 30 minutos.'"
@@ -747,7 +1048,9 @@ export function CoachDashboardInteractive({
               <button
                 type="button"
                 disabled={isSubmittingRecommend || !recommendationText.trim()}
-                onClick={handleSendRecommendation}
+                onClick={() => {
+                  void handleSendRecommendation();
+                }}
                 className="px-6 py-2.5 rounded-full bg-[#572de4] hover:bg-[#4823c9] text-white text-xs font-bold shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-50 flex items-center gap-2"
               >
                 <Send className="w-3.5 h-3.5" />
@@ -783,9 +1086,9 @@ export function CoachDashboardInteractive({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+              <span className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                 Seleccionar Rutina Plantilla
-              </label>
+              </span>
 
               {routines.length === 0 ? (
                 <p className="text-xs text-slate-500 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl text-center">
@@ -837,7 +1140,9 @@ export function CoachDashboardInteractive({
               <button
                 type="button"
                 disabled={isSubmittingAssign || !selectedRoutineId}
-                onClick={handleConfirmAssign}
+                onClick={() => {
+                  void handleConfirmAssign();
+                }}
                 className="px-6 py-2.5 rounded-full bg-[#572de4] hover:bg-[#4823c9] text-white text-xs font-bold shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-50"
               >
                 {isSubmittingAssign ? "Asignando..." : "Asignar Rutina"}
@@ -850,15 +1155,18 @@ export function CoachDashboardInteractive({
       {/* ── MODAL: Crear / Editar Rutina Base ─────────────────────────── */}
       {isRoutineModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-[#111827] rounded-3xl max-w-lg w-full p-6 shadow-2xl flex flex-col gap-5 border border-slate-200 dark:border-slate-800">
+          <div className="bg-white dark:bg-[#111827] rounded-3xl max-w-lg w-full p-6 shadow-2xl flex flex-col gap-4 border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 text-[#572de4] flex items-center justify-center">
                   <Layers className="w-5 h-5" />
                 </div>
-                <h3 className="font-bold text-lg text-slate-900 dark:text-white">
-                  {editingRoutine ? "Editar Plantilla de Rutina" : "Crear Rutina Base"}
-                </h3>
+                <div>
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white">
+                    {editingRoutine ? "Editar Plantilla de Rutina" : "Crear Rutina Base"}
+                  </h3>
+                  <span className="text-xs text-slate-500">Define el objetivo y los hábitos que se activarán en el alumno</span>
+                </div>
               </div>
               <button
                 onClick={() => setIsRoutineModalOpen(false)}
@@ -869,29 +1177,139 @@ export function CoachDashboardInteractive({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                Título de la Rutina
+              <label htmlFor="routine-title-input" className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                Título / Objetivo de la Rutina
               </label>
               <input
+                id="routine-title-input"
                 type="text"
                 value={routineTitle}
                 onChange={(e) => setRoutineTitle(e.target.value)}
                 placeholder="Ej: Protocolo de Enfoque Matutino"
+                maxLength={200}
                 className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#572de4]"
               />
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <label htmlFor="routine-tipo-select" className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                  Categoría
+                </label>
+                <select
+                  id="routine-tipo-select"
+                  value={routineTipo}
+                  onChange={(e) => setRoutineTipo(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#572de4]"
+                >
+                  <option value="Salud Mental">Salud Mental</option>
+                  <option value="Ejercicio">Ejercicio</option>
+                  <option value="Nutrición">Nutrición</option>
+                  <option value="Sueño">Sueño</option>
+                  <option value="Hidratación">Hidratación</option>
+                  <option value="Productividad">Productividad</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label htmlFor="routine-nivel-select" className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                  Nivel
+                </label>
+                <select
+                  id="routine-nivel-select"
+                  value={routineNivel}
+                  onChange={(e) => setRoutineNivel(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#572de4]"
+                >
+                  <option value="Principiante">Principiante</option>
+                  <option value="Intermedio">Intermedio</option>
+                  <option value="Avanzado">Avanzado</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label htmlFor="routine-duracion-input" className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                  Duración (días)
+                </label>
+                <input
+                  id="routine-duracion-input"
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={routineDuracion}
+                  onChange={(e) => setRoutineDuracion(Number(e.target.value) || 21)}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#572de4]"
+                />
+              </div>
+            </div>
+
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                Descripción del Objetivo
+              <label htmlFor="routine-desc-input" className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                Descripción del Protocolo
               </label>
               <textarea
+                id="routine-desc-input"
                 value={routineDescription}
                 onChange={(e) => setRoutineDescription(e.target.value)}
                 placeholder="Describe brevemente el impacto en la salud mental o física del pupilo..."
-                rows={3}
+                rows={2}
+                maxLength={350}
                 className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#572de4] resize-none"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="routine-habit-input" className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                Hábitos Diarios Incluidos en la Rutina
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="routine-habit-input"
+                  type="text"
+                  value={newHabitInput}
+                  onChange={(e) => setNewHabitInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddHabitToRoutine();
+                    }
+                  }}
+                  placeholder="Ej: Meditación guiada 10 min (máx 45 car.)"
+                  maxLength={45}
+                  className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#572de4]"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddHabitToRoutine}
+                  className="px-3.5 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-[#572de4] dark:text-indigo-300 text-xs font-bold hover:bg-indigo-100 transition-colors shrink-0"
+                >
+                  + Añadir
+                </button>
+              </div>
+
+              {routineHabits.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {routineHabits.map((habitName) => (
+                    <span
+                      key={habitName}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-[#572de4] dark:text-indigo-300 text-xs font-semibold border border-indigo-200/60 dark:border-indigo-800/50"
+                    >
+                      <span>{habitName}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveHabitFromRoutine(habitName)}
+                        className="hover:text-rose-500"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] text-slate-400">
+                  Si no agregas hábitos específicos, se creará automáticamente un hábito principal con el título de la rutina al asignarla a un pupilo.
+                </p>
+              )}
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-2">
@@ -905,7 +1323,9 @@ export function CoachDashboardInteractive({
               <button
                 type="button"
                 disabled={isSubmittingRoutine || !routineTitle.trim()}
-                onClick={handleSaveRoutine}
+                onClick={() => {
+                  void handleSaveRoutine();
+                }}
                 className="px-6 py-2.5 rounded-full bg-[#572de4] hover:bg-[#4823c9] text-white text-xs font-bold shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-50"
               >
                 {isSubmittingRoutine ? "Guardando..." : "Guardar Plantilla"}
