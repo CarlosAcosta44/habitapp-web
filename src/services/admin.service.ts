@@ -36,7 +36,16 @@ export const adminService = {
    * Llama a PATCH /admin/users/:id/role
    */
   async updateUserRole(userId: string, newRole: UserRole | string): Promise<Result<any>> {
-    return adminRepository.patch(`admin/users/${userId}/role`, { role: newRole });
+    let formattedRole = 'Usuario';
+    const lower = (newRole || '').toLowerCase();
+    if (lower.includes('admin')) formattedRole = 'Administrador';
+    else if (lower.includes('entrenador') || lower.includes('trainer')) formattedRole = 'Entrenador';
+    else formattedRole = 'Usuario';
+
+    return adminRepository.patch(`admin/users/${userId}/role`, { 
+      nombrerol: formattedRole,
+      role: formattedRole 
+    });
   },
 
   /**

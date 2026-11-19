@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Bell, BellOff, MessageSquare, Shield, CheckCircle2 } from "lucide-react";
 
@@ -16,16 +16,7 @@ export default function NotificacionesPage() {
     }
     return defaultPrefs;
   });
-  const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
-
-  // Marcar como cargado en el cliente
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
 
   const toggle = (key: keyof typeof prefs) => {
     setPrefs(prev => ({ ...prev, [key]: !prev[key] }));
@@ -36,8 +27,6 @@ export default function NotificacionesPage() {
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
-
-  if (loading) return <div className="p-12 text-center text-slate-500 italic">Cargando preferencias...</div>;
 
   return (
     <div className="max-w-3xl mx-auto pb-12">

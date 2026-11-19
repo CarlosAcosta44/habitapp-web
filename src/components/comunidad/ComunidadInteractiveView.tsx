@@ -36,6 +36,10 @@ import {
   reaccionarAction,
   deleteForoAction,
 } from '@/actions/comunidad.actions';
+import {
+  linkMyTrainerAction,
+  unlinkMyTrainerAction,
+} from '@/actions/coach.actions';
 import { CreateForoModal } from '@/components/modals/CreateForoModal';
 import { ShareHabitModal } from '@/components/modals/ShareHabitModal';
 import { CreateRetoModal } from '@/components/modals/CreateRetoModal';
@@ -54,6 +58,7 @@ interface ComunidadInteractiveViewProps {
   readonly userId?: string;
   readonly isAdmin?: boolean;
   readonly totalMiembros?: number;
+  readonly initialLinkedTrainerIds?: string[];
 }
 
 type TabType = 'todo' | 'foros' | 'habitos' | 'articulos' | 'especialistas' | 'retos';
@@ -73,7 +78,8 @@ export function ComunidadInteractiveView({
   userHabitos = [],
   userId,
   isAdmin = false,
-  totalMiembros = 30,
+  totalMiembros = 0,
+  initialLinkedTrainerIds = [],
 }: ComunidadInteractiveViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -128,6 +134,59 @@ export function ComunidadInteractiveView({
 
   // Modal de especialista para agendar o ver perfil
   const [selectedSpecialist, setSelectedSpecialist] = useState<Record<string, any> | null>(null);
+  const [linkedTrainerIds, setLinkedTrainerIds] = useState<string[]>(initialLinkedTrainerIds);
+  const [linkingTrainerId, setLinkingTrainerId] = useState<string | null>(null);
+
+  const isTrainerLinked = (esp: Record<string, any>) => {
+    const tId = esp.identrenador || esp.idusuario || esp.id;
+    const uId = esp.idusuario || esp.id;
+    return Boolean((tId && linkedTrainerIds.includes(tId)) || (uId && linkedTrainerIds.includes(uId)));
+  };
+
+  const getTrainerActionLabel = (esp: Record<string, any>): string => {
+    const targetId = esp.identrenador || esp.idusuario || esp.id;
+    if (linkingTrainerId === targetId) return 'Procesando...';
+    if (isTrainerLinked(esp)) return 'Tu Coach ✓';
+    return 'Vincular Coach';
+  };
+
+  const handleToggleTrainerLink = async (esp: Record<string, any>) => {
+    const targetId = esp.identrenador || esp.idusuario || esp.id;
+    if (!targetId) return;
+    if (esp.idusuario && esp.idusuario === userId) {
+      showToast('No puedes vincularte a tu propia cuenta de entrenador.', 'error');
+      return;
+    }
+
+    const nombreCompleto = `${esp.nombre || 'Entrenador'} ${esp.apellido || ''}`.trim();
+    const currentlyLinked = isTrainerLinked(esp);
+
+    setLinkingTrainerId(targetId);
+    try {
+      if (currentlyLinked) {
+        const res = await unlinkMyTrainerAction(targetId);
+        if (res.success) {
+          setLinkedTrainerIds((prev) =>
+            prev.filter((id) => id !== esp.identrenador && id !== esp.idusuario && id !== targetId)
+          );
+          showToast(`Te has desvinculado de ${nombreCompleto}.`);
+        } else {
+          showToast(res.error || 'No se pudo desvincular del entrenador.', 'error');
+        }
+      } else {
+        const res = await linkMyTrainerAction(targetId);
+        if (res.success) {
+          const idsToAdd = [targetId, esp.identrenador, esp.idusuario].filter(Boolean);
+          setLinkedTrainerIds((prev) => Array.from(new Set([...prev, ...idsToAdd])));
+          showToast(`¡Te has vinculado con ${nombreCompleto} como tu entrenador! Ahora podrá asignarte rutinas y seguimiento.`);
+        } else {
+          showToast(res.error || 'No se pudo vincular al entrenador.', 'error');
+        }
+      }
+    } finally {
+      setLinkingTrainerId(null);
+    }
+  };
 
   // Modal interactivo de detalle de Reto
   const [selectedRetoModal, setSelectedRetoModal] = useState<Reto | null>(null);
@@ -1236,9 +1295,11 @@ export function ComunidadInteractiveView({
 
                         <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-slate-500 dark:text-slate-400">Sesión 1 a 1 (50 min)</span>
-                            <span className="text-base font-bold text-slate-900 dark:text-white">
-                              45€ <span className="text-xs text-slate-400 font-normal">/ sesión</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                              Experiencia certificada
+                            </span>
+                            <span className="text-xs font-bold text-slate-900 dark:text-white">
+                              {esp.experiencia ?? 3} años • {isTrainerLinked(esp) ? 'Vinculado ✓' : 'Disponible'}
                             </span>
                           </div>
 
@@ -1252,12 +1313,17 @@ export function ComunidadInteractiveView({
                             </button>
                             <button
                               type="button"
+                              disabled={linkingTrainerId === (esp.identrenador || esp.idusuario || esp.id)}
                               onClick={() => {
-                                showToast(`Has solicitado agendar sesión con ${nombreCompleto}. Pronto te contactará 📅`);
+                                void handleToggleTrainerLink(esp);
                               }}
-                              className="px-3 py-2 rounded-xl bg-[#572de4] hover:bg-[#461ebd] text-white font-semibold text-xs transition-all shadow-sm text-center"
+                              className={`px-3 py-2 rounded-xl font-semibold text-xs transition-all shadow-sm text-center disabled:opacity-50 ${
+                                isTrainerLinked(esp)
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-rose-50 hover:text-rose-600'
+                                  : 'bg-[#572de4] hover:bg-[#461ebd] text-white'
+                              }`}
                             >
-                              Agendar cita
+                              {getTrainerActionLabel(esp)}
                             </button>
                           </div>
                         </div>
@@ -1499,10 +1565,10 @@ export function ComunidadInteractiveView({
 
                     <div className="flex items-center justify-between text-xs pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
                       <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> En línea
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {isTrainerLinked(esp) ? 'Tu Entrenador' : 'Disponible'}
                       </span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">
-                        45€ <span className="text-xs text-slate-400 font-normal">/ sesión</span>
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {esp.experiencia ?? 3} años exp.
                       </span>
                     </div>
 
@@ -1516,12 +1582,17 @@ export function ComunidadInteractiveView({
                       </button>
                       <button
                         type="button"
+                        disabled={linkingTrainerId === (esp.identrenador || esp.idusuario || esp.id)}
                         onClick={() => {
-                          showToast(`Has solicitado agendar sesión con ${nombreCompleto}. Pronto te contactará.`);
+                          void handleToggleTrainerLink(esp);
                         }}
-                        className="py-2 rounded-xl bg-[#572de4] text-white text-xs font-bold hover:bg-[#461ebd] shadow-sm transition-all text-center"
+                        className={`py-2 rounded-xl text-xs font-bold shadow-sm transition-all text-center disabled:opacity-50 ${
+                          isTrainerLinked(esp)
+                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                            : 'bg-[#572de4] text-white hover:bg-[#461ebd]'
+                        }`}
                       >
-                        Agendar sesión
+                        {isTrainerLinked(esp) ? 'Vinculado ✓' : 'Vincular'}
                       </button>
                     </div>
                   </div>
@@ -1732,18 +1803,26 @@ export function ComunidadInteractiveView({
             </div>
 
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Profesional colegiado dedicado al acompañamiento en salud emocional, establecimiento de límites, reducción del sobrepensamiento y consolidación de hábitos de autocuidado sostenibles.
+              Entrenador certificado ({selectedSpecialist.experiencia ?? 3} años de experiencia) dedicado al acompañamiento en {selectedSpecialist.especialidad || 'hábitos saludables'}, asignación de rutinas personalizadas y seguimiento continuo de tus metas diarias.
             </p>
 
             <button
               type="button"
+              disabled={linkingTrainerId === (selectedSpecialist.identrenador || selectedSpecialist.idusuario || selectedSpecialist.id)}
               onClick={() => {
-                showToast(`Sesión solicitada con ${selectedSpecialist.nombre}. Te notificaremos pronto.`);
-                setSelectedSpecialist(null);
+                void handleToggleTrainerLink(selectedSpecialist).then(() => {
+                  setSelectedSpecialist(null);
+                });
               }}
-              className="w-full py-3 rounded-2xl bg-[#572de4] text-white font-bold text-xs shadow-md hover:bg-[#461ebd] transition-all"
+              className={`w-full py-3 rounded-2xl font-bold text-xs shadow-md transition-all disabled:opacity-50 ${
+                isTrainerLinked(selectedSpecialist)
+                  ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                  : 'bg-[#572de4] hover:bg-[#461ebd] text-white'
+              }`}
             >
-              Confirmar solicitud de sesión
+              {isTrainerLinked(selectedSpecialist)
+                ? 'Desvincular de mi supervisión'
+                : 'Vincular como mi Entrenador'}
             </button>
           </div>
         </div>

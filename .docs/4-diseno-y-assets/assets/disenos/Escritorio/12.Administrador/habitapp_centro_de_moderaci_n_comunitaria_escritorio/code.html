@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-primary":"#ffffff","inverse-surface":"#312f3a","secondary-fixed-dim":"#c9beff","on-secondary-fixed-variant":"#483b88","on-tertiary-fixed-variant":"#832600","on-background":"#1c1a25","secondary-fixed":"#e6deff","primary-container":"#704efd","inverse-primary":"#c9beff","on-tertiary-container":"#fff1ed","tertiary":"#9b340a","primary":"#572de4","on-primary-container":"#f7f2ff","surface-container-highest":"#e6e0ef","on-secondary-fixed":"#1b065c","surface":"#fdf8ff","on-tertiary":"#ffffff","on-error-container":"#93000a","primary-fixed":"#e6deff","on-error":"#ffffff","tertiary-container":"#bc4c22","tertiary-fixed":"#ffdbd0","surface-tint":"#5e38eb","surface-container-low":"#f7f1ff","surface-bright":"#fdf8ff","surface-variant":"#e6e0ef","secondary-container":"#b6a8fe","surface-container-high":"#ece6f5","outline-variant":"#c9c4d8","inverse-on-surface":"#f4eefd","error-container":"#ffdad6","surface-container-lowest":"#ffffff","on-primary-fixed":"#1b0063","on-surface-variant":"#484556","outline":"#797587","primary-fixed-dim":"#c9beff","error":"#ba1a1a","tertiary-fixed-dim":"#ffb59d","on-secondary":"#ffffff","on-primary-fixed-variant":"#4608d4","on-surface":"#1c1a25","surface-dim":"#ddd7e6","surface-container":"#f1ebfa","on-secondary-container":"#463987","background":"#fdf8ff","secondary":"#6053a2","on-tertiary-fixed":"#390c00"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xl":"1.5rem","gutter-default":"0.75rem","space-md":"1rem","space-lg":"1.25rem","space-xs":"0.5rem","space-sm":"0.75rem","space-2xs":"0.25rem","card-padding":"1.25rem","space-3xl":"2.5rem","space-2xl":"2rem","screen-edge":"1.25rem"},"fontFamily":{"body-md":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"numeric-stat":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"]},"fontSize":{"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-md":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"numeric-stat":["24px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"display":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["13px",{"lineHeight":"18px","fontWeight":"600"}],"headline-sm":["18px",{"lineHeight":"24px","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-lg":["15px",{"lineHeight":"20px","fontWeight":"600"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between"><div class="flex flex-col h-full"><div class="px-space-lg pt-space-lg pb-space-md flex items-center gap-space-sm"><img alt="icon.png" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrC0X-LkkM7LoluscMpIwzsDA2DtzKtn4171Zvl3W2b0aHd_5PA5kLdaYh-aUtfHWExU1iChkJp4_hn_HWwmK5KoovtG2Kcx23b-PrWPygDUzhkdJK-kY_ccO_0XhqUTt_tdNjvUPy_2LLsatK-FL5HKI40dHdQOEUDKlrpvScfHpjck3eGQR8IuVy5cvO5QegWzWjMkCm_LqUCLnYlaCxn7m6nj7PlfAO8MdOLZGuTYR2NmLbvF7sy56h_FQj1eBev42V-6uypX7w"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">HabitApp</span><span class="font-label-sm text-label-sm text-on-surface-variant">Salud Mental &amp; Hábitos</span></div></div><div class="flex-1 overflow-y-auto px-space-md py-space-xs space-y-space-md"><nav class="space-y-1" data-active-classes="bg-primary-container text-on-primary-container font-label-md rounded-xl shadow-[0_4px_12px_rgba(112,78,253,0.18)]"><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="habitos" href="#"><span class="material-symbols-outlined text-[20px]">check_circle</span>Hábitos</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="retos" href="#"><span class="material-symbols-outlined text-[20px]">emoji_events</span>Retos y Desafíos</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="comunidad" href="#"><span class="material-symbols-outlined text-[20px]">forum</span>Comunidad</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="progreso" href="#"><span class="material-symbols-outlined text-[20px]">insights</span>Progreso y Métricas</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="ajustes" href="#"><span class="material-symbols-outlined text-[20px]">settings</span>Ajustes</a></nav><div class="pt-space-xs"><div class="flex items-center justify-between px-space-md py-space-2xs mb-space-2xs"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Administración</span><span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed">Gobernanza</span></div><nav class="space-y-1" data-active-classes="bg-primary-container text-on-primary-container font-label-md rounded-xl shadow-[0_4px_12px_rgba(112,78,253,0.18)]"><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="admin-panel" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span>Panel Admin</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="gestion-de-usuarios" href="#"><span class="material-symbols-outlined text-[20px]">manage_accounts</span>Gestión de Usuarios</a><a class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all font-label-md text-label-md" data-path="moderacion" href="#"><span class="material-symbols-outlined text-[20px]">gavel</span>Moderación</a></nav></div></div><div class="p-space-md m-space-md rounded-xl bg-surface-container-low shadow-[0_1px_4px_rgba(0,0,0,0.03)] flex items-center justify-between"><div class="flex items-center gap-space-xs min-w-0"><div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">shield_person</span></div><div class="min-w-0"><div class="flex items-center gap-space-2xs"><span class="font-label-md text-label-md text-on-surface truncate block">Admin Master</span><span class="font-label-sm text-label-sm px-1.5 py-0.2 rounded-full bg-primary text-on-primary shrink-0">Admin</span></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate block">admin@habitapp.com</span></div></div><button aria-label="Cerrar sesión" class="text-on-surface-variant hover:text-error transition-colors p-space-2xs rounded-lg hover:bg-surface-container" type="button"><span class="material-symbols-outlined text-[20px]">logout</span></button></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.03)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-sm"><img alt="icon.png" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrC0X-LkkM7LoluscMpIwzsDA2DtzKtn4171Zvl3W2b0aHd_5PA5kLdaYh-aUtfHWExU1iChkJp4_hn_HWwmK5KoovtG2Kcx23b-PrWPygDUzhkdJK-kY_ccO_0XhqUTt_tdNjvUPy_2LLsatK-FL5HKI40dHdQOEUDKlrpvScfHpjck3eGQR8IuVy5cvO5QegWzWjMkCm_LqUCLnYlaCxn7m6nj7PlfAO8MdOLZGuTYR2NmLbvF7sy56h_FQj1eBev42V-6uypX7w"/><span class="font-headline-sm text-headline-sm text-on-surface hidden sm:inline">HabitApp</span></div><div class="flex-1 max-w-lg mx-space-lg"><div class="relative flex items-center w-full"><span class="material-symbols-outlined absolute left-space-md text-on-surface-variant text-[20px]">search</span><input class="w-full h-10 pl-11 pr-space-md rounded-full bg-surface-container text-on-surface placeholder:text-outline font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all" placeholder="Buscar en el sistema, usuarios, hilos..." type="text"/></div></div><div class="flex items-center gap-space-md"><div class="hidden md:flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span><span>Sincronizado</span></div><button aria-label="Notificaciones" class="relative p-space-xs rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-tertiary-container"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Top Command Surface & Metrics Strip -->
+<div class="px-space-xl pt-space-xl pb-space-lg flex flex-col gap-space-lg">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider">CU35 · CU37 • Control y Saneamiento</span>
+<span class="inline-flex items-center gap-1 px-space-xs py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
+            Cola Prioritaria
+          </span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Centro de Moderación Comunitaria</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+          Supervisión del contenido generado por usuarios, saneamiento de hilos y atención de reportes de convivencia.
+        </p>
+</div>
+<div class="flex items-center gap-space-sm self-start lg:self-center shrink-0">
+<button class="h-[46px] px-space-md rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md flex items-center gap-space-xs transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span>Registro de Auditoría</span>
+</button>
+<button class="h-[46px] px-space-lg rounded-full bg-primary text-on-primary font-label-lg text-label-lg shadow-[0_8px_20px_rgba(87,45,228,0.24)] hover:bg-primary-container transition-all flex items-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span>Configurar Reglas de Convivencia</span>
+</button>
+</div>
+</div>
+<!-- Live KPI Ribbon -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<div class="p-space-md rounded-2xl bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_12px_rgba(121,117,130,0.03)] flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-xl bg-error-container text-on-error-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">flag</span>
+</div>
+<div>
+<div class="font-numeric-stat text-numeric-stat text-on-surface">5</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Reportes activos pendientes</div>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">+2 urgentes</span>
+</div>
+<div class="p-space-md rounded-2xl bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_12px_rgba(121,117,130,0.03)] flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">cleaning_services</span>
+</div>
+<div>
+<div class="font-numeric-stat text-numeric-stat text-on-surface">18</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Hilos moderados este mes</div>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">99.4% resueltos</span>
+</div>
+<div class="p-space-md rounded-2xl bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_12px_rgba(121,117,130,0.03)] flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">avg_pace</span>
+</div>
+<div>
+<div class="font-numeric-stat text-numeric-stat text-on-surface">18 min</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Tiempo de respuesta promedio</div>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-primary-fixed-dim text-on-primary-fixed-variant font-label-sm text-label-sm">↓ 4 min vs semana ant.</span>
+</div>
+</div>
+</div>
+<!-- Primary Tab Bar Navigation -->
+<div class="px-space-xl border-b border-surface-container-highest flex items-center gap-space-md overflow-x-auto">
+<button class="relative pb-space-sm flex items-center gap-space-xs text-primary font-label-lg text-label-lg whitespace-nowrap" type="button">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+<span>Reportes de Usuarios</span>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-label-sm font-semibold">5 pendientes</span>
+<span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"></span>
+</button>
+<button class="pb-space-sm flex items-center gap-space-xs text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-colors whitespace-nowrap" type="button">
+<span class="material-symbols-outlined text-[20px]">forum</span>
+<span>Hilos del Foro</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-label-sm">142 activos</span>
+</button>
+<button class="pb-space-sm flex items-center gap-space-xs text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-colors whitespace-nowrap" type="button">
+<span class="material-symbols-outlined text-[20px]">chat_bubble_outline</span>
+<span>Comentarios Recientes</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-label-sm">1,280</span>
+</button>
+</div>
+<!-- Main Workboard: 2-Column Responsive Split -->
+<div class="px-space-xl py-space-xl grid grid-cols-1 xl:grid-cols-12 gap-space-xl">
+<!-- Left / Center River: Incident Stream & Editorial Pinned Posts (Cols 8) -->
+<div class="xl:col-span-8 flex flex-col gap-space-xl">
+<!-- Filter Chips & Search Context -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-xs overflow-x-auto pb-1 sm:pb-0">
+<button class="px-space-md py-1.5 rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md shadow-sm whitespace-nowrap" type="button">
+            Todos los reportes (5)
+          </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md transition-colors whitespace-nowrap flex items-center gap-1" type="button">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+            Urgentes (2)
+          </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md transition-colors whitespace-nowrap" type="button">
+            Posible Spam (1)
+          </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md transition-colors whitespace-nowrap" type="button">
+            Contenido Ofensivo (1)
+          </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md transition-colors whitespace-nowrap" type="button">
+            Desinformación (1)
+          </button>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm self-end sm:self-center">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+<span>Orden: Prioridad Crítica</span>
+</div>
+</div>
+<!-- Moderation Incident Stream -->
+<div class="flex flex-col gap-space-md">
+<!-- Case 1: Critical Mental Health Forum Harassment -->
+<article class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_6px_20px_rgba(121,117,130,0.06)] flex flex-col gap-space-md transition-all hover:shadow-[0_8px_24px_rgba(121,117,130,0.09)]">
+<!-- Incident Header Badges -->
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-0.5 rounded-full bg-error text-on-error font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                Prioridad Alta • CU37
+              </span>
+<span class="px-space-xs py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-medium">
+                Contenido Ofensivo / Vulnerabilidad
+              </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">group</span>
+                Reportado por <strong>3 usuarios</strong>
+</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Hace 14 min</span>
+</div>
+<!-- Reason & Incident Summary -->
+<div class="flex items-start gap-space-sm p-space-sm rounded-xl bg-surface-container-low">
+<span class="material-symbols-outlined text-tertiary text-[20px] mt-0.5">report_problem</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Motivo de la denuncia:</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                "Lenguaje agresivo y descalificación en hilo de salud mental. Invalida abiertamente síntomas de ansiedad aguda."
+              </p>
+</div>
+</div>
+<!-- Quoted Content Context Box -->
+<div class="p-space-md rounded-xl bg-surface-container flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-2xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">subdirectory_arrow_right</span>
+<span>Hilo afectado: <strong class="text-on-surface">“¿Qué hacéis cuando la sensación en el pecho aparece de la nada?”</strong></span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-md bg-surface-container-highest text-on-surface-variant">Comentario #8942</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-lowest shadow-sm flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0 font-label-md">
+                CP
+              </div>
+<div class="flex flex-col min-w-0 flex-1">
+<div class="flex items-center gap-space-2xs">
+<span class="font-label-md text-label-md text-on-surface">Carlos Pérez</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">@carlos_p92</span>
+<span class="px-1.5 py-0.2 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-semibold">1 advertencia previa</span>
+</div>
+<blockquote class="mt-1 font-body-md text-body-md text-error italic">
+                  “Eso no es nada, solo inventos para no trabajar. Poneos a correr y dejad el drama infantil.”
+                </blockquote>
+</div>
+</div>
+</div>
+<!-- Moderation Actions Toolbar -->
+<div class="pt-space-xs flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="text-on-surface-variant font-body-sm text-body-sm">
+              Endpoint: <code class="px-1 py-0.5 rounded bg-surface-container-high font-mono text-[11px] text-on-surface">DELETE /admin/forum/comments/:id</code>
+</div>
+<div class="flex flex-wrap items-center gap-space-xs">
+<!-- Neutral Dismiss -->
+<button class="h-10 px-space-md rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors" type="button">
+                Desestimar Reporte
+              </button>
+<!-- Suspend User (24h) -->
+<button class="h-10 px-space-md rounded-xl bg-tertiary-container hover:bg-tertiary text-on-tertiary-container hover:text-on-tertiary font-label-md text-label-md flex items-center gap-1 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>Suspender Usuario (24h)</span>
+</button>
+<!-- Delete Offending Comment -->
+<button class="h-10 px-space-md rounded-xl bg-error text-on-error hover:opacity-90 font-label-md text-label-md flex items-center gap-1 shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+<span>Eliminar Comentario</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Case 2: Commercial Spam / Cascade Delete Thread -->
+<article class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_6px_20px_rgba(121,117,130,0.06)] flex flex-col gap-space-md transition-all hover:shadow-[0_8px_24px_rgba(121,117,130,0.09)]">
+<!-- Incident Header Badges -->
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">block</span>
+                Detección Spam • CU35
+              </span>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-medium">
+                Fraude Farmacéutico
+              </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">group</span>
+                Reportado por <strong>5 usuarios</strong>
+</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Hace 32 min</span>
+</div>
+<!-- Reason & Summary -->
+<div class="flex items-start gap-space-sm p-space-sm rounded-xl bg-surface-container-low">
+<span class="material-symbols-outlined text-tertiary-container text-[20px] mt-0.5">crisis_alert</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Motivo de la denuncia:</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                "Spam comercial no autorizado de suplementos milagro y enlaces con redirecciones sospechosas."
+              </p>
+</div>
+</div>
+<!-- Thread Card Context -->
+<div class="p-space-md rounded-xl bg-surface-container flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-2xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">topic</span>
+<span>Hilo completo denunciado</span>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-md bg-error-container text-on-error-container font-semibold">4 respuestas de otros usuarios</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-space-2xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-2xs">
+<div class="w-7 h-7 rounded-full bg-error-container text-on-error-container flex items-center justify-center font-label-sm font-bold">
+                    BN
+                  </div>
+<span class="font-label-md text-label-md text-on-surface">Bot_NutriX</span>
+<span class="font-body-sm text-body-sm text-outline">@nutrix_bot_es (IP 194.38.21.11)</span>
+</div>
+<span class="font-label-sm text-label-sm text-error font-medium">Cuenta creada hoy</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                Compra pastillas para dormir garantizadas 100% efectivas en este link...
+              </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+                Recupera tus horas de descanso al instante con el compuesto natural patentado. Sin receta médica. Haz clic aquí: https://bit.ly/milagro-sueno-oferta...
+              </p>
+</div>
+</div>
+<!-- Moderation Actions Toolbar -->
+<div class="pt-space-xs flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="text-on-surface-variant font-body-sm text-body-sm">
+              Endpoint: <code class="px-1 py-0.5 rounded bg-surface-container-high font-mono text-[11px] text-on-surface">DELETE /admin/forum/:id</code>
+</div>
+<div class="flex flex-wrap items-center gap-space-xs">
+<!-- Neutral Dismiss -->
+<button class="h-10 px-space-md rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors" type="button">
+                Desestimar
+              </button>
+<!-- IP & Account Blacklist -->
+<button class="h-10 px-space-md rounded-xl bg-surface-container-highest hover:bg-inverse-surface hover:text-inverse-on-surface text-on-surface font-label-md text-label-md flex items-center gap-1 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_person</span>
+<span>Bloquear IP y Cuenta</span>
+</button>
+<!-- Delete Thread in Cascade -->
+<button class="h-10 px-space-md rounded-xl bg-error text-on-error hover:opacity-90 font-label-md text-label-md flex items-center gap-1 shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">folder_delete</span>
+<span>Eliminar Hilo en Cascada</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+<!-- Editorial Section: Publicaciones Destacadas y Contenido Fijado -->
+<section class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_12px_rgba(121,117,130,0.03)] flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">push_pin</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Publicaciones Destacadas y Contenido Fijado</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Herramienta editorial para elevar contenido de valor clínico y normas clave.</p>
+</div>
+</div>
+<button class="h-9 px-space-md rounded-full bg-secondary text-on-secondary font-label-md text-label-md flex items-center gap-1 hover:bg-secondary/90 transition-colors self-start sm:self-auto" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Fijar Nueva Publicación</span>
+</button>
+</div>
+<!-- Pinned Items Deck -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md pt-space-xs">
+<!-- Card 1 -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between gap-space-sm hover:bg-surface-container transition-colors">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center justify-between">
+<span class="px-space-xs py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm">Guía Especialista</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Fijado hace 3 días</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface text-[16px] leading-snug">
+                Guía oficial: Cómo gestionar el sobrepensamiento nocturno
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+                Estrategias de anclaje somático validadas por el equipo de psicología clínica de HabitApp para conciliar el sueño.
+              </p>
+</div>
+<div class="flex items-center justify-between pt-space-xs border-t border-surface-container-high">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Por: Admin Master</span>
+<button class="text-tertiary hover:text-error font-label-sm text-label-sm flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">keep_off</span>
+<span>Desfijar</span>
+</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between gap-space-sm hover:bg-surface-container transition-colors">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center justify-between">
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">Institucional</span>
+<span class="font-body-sm text-body-sm text-primary font-semibold">Permanente</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface text-[16px] leading-snug">
+                Normas de convivencia y respeto mutuo en HabitApp
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+                Marco ético fundamental: confidencialidad, no juicio y protección de espacios vulnerables dentro de la aplicación.
+              </p>
+</div>
+<div class="flex items-center justify-between pt-space-xs border-t border-surface-container-high">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Fijación de Sistema</span>
+<button class="text-tertiary hover:text-error font-label-sm text-label-sm flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">keep_off</span>
+<span>Desfijar</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Sidebar Support & Live Audit Log (Cols 4) -->
+<aside class="xl:col-span-4 flex flex-col gap-space-xl">
+<!-- Community Rules Quick Checklist -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_12px_rgba(121,117,130,0.03)] flex flex-col gap-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[22px]">policy</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Normas de Convivencia</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Criterios rápidos para valorar la resolución de incidencias comunitarias:
+        </p>
+<div class="flex flex-col gap-space-sm">
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">favorite</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Empatía y Salud Mental</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Tolerancia cero con burlas a síntomas clínicos o hábitos de recuperación.</span>
+</div>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-tertiary text-[18px] mt-0.5">block</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Cero Spam Comercial</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Prohibida la venta de fármacos, suplementos milagro o autopromoción lucrativa.</span>
+</div>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5">lock</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Confidencialidad Absoluta</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Queda vetado revelar información personal o vulnerabilidades privadas de terceros.</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md text-center transition-colors" type="button">
+          Ver Reglamento Integral Completo
+        </button>
+</div>
+<!-- Live Audit Log (Últimas Acciones de Moderación) -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_12px_rgba(121,117,130,0.03)] flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-on-surface text-[20px]">assignment</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Registro de Auditoría</h2>
+</div>
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+</div>
+<div class="flex flex-col divide-y divide-surface-container-highest">
+<!-- Log 1 -->
+<div class="py-space-sm flex items-start gap-space-sm first:pt-0">
+<div class="w-8 h-8 rounded-lg bg-error-container text-on-error-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">delete_forever</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-md text-label-md text-on-surface">Hilo spam eliminado en cascada</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ejecutado por <strong>Admin Master</strong></span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">Hace 2 horas • Ref #TK-902</span>
+</div>
+</div>
+<!-- Log 2 -->
+<div class="py-space-sm flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-md text-label-md text-on-surface">Reporte #108 resuelto y archivado</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Desestimado por falta de infracción</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">Hace 4 horas • Ref #TK-899</span>
+</div>
+</div>
+<!-- Log 3 -->
+<div class="py-space-sm flex items-start gap-space-sm last:pb-0">
+<div class="w-8 h-8 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">person_off</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-md text-label-md text-on-surface">Usuario suspendido temporalmente</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">@toxic_mind sancionado 48h</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">Ayer a las 18:40 • Ref #TK-894</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 rounded-xl text-primary hover:bg-primary-fixed/20 font-label-md text-label-md transition-colors text-center" type="button">
+          Descargar Informe CSV
+        </button>
+</div>
+<!-- Quick Moderator Wellness Card -->
+<div class="p-space-md rounded-2xl bg-gradient-to-br from-primary/10 via-secondary-container/20 to-transparent flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">self_improvement</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Fatiga de Moderación</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Llevas 45 minutos activos. Recuerda tomar una pausa y aplicar respiración diafragmática.</span>
+</div>
+</div>
+</aside>
+</div>
+<script>
+    // Inline interaction handler for prompt actions
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const text = btn.innerText.trim();
+        if (text.includes('Eliminar Comentario')) {
+          if (confirm('¿Confirmas retirar este comentario del hilo comunitario? (DELETE /admin/forum/comments/:id)')) {
+            const card = btn.closest('article');
+            card.style.opacity = '0.4';
+            card.style.pointerEvents = 'none';
+            btn.innerText = 'Comentario Eliminado';
+          }
+        } else if (text.includes('Eliminar Hilo en Cascada')) {
+          if (confirm('PELIGRO: Esto eliminará el tema y todas sus réplicas asociadas de forma permanente. (DELETE /admin/forum/:id)')) {
+            const card = btn.closest('article');
+            card.style.opacity = '0.4';
+            card.style.pointerEvents = 'none';
+            btn.innerText = 'Hilo Purificado';
+          }
+        } else if (text.includes('Desestimar')) {
+          const card = btn.closest('article');
+          card.classList.add('transition-all', 'duration-300', 'scale-95', 'opacity-0');
+          setTimeout(() => card.remove(), 300);
+        }
+      });
+    });
+  </script>
+</div></main></div></body></html>

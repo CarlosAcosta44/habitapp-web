@@ -53,12 +53,12 @@ export function PerfilInteractiveView({ data }: Readonly<PerfilInteractiveViewPr
   const perfil = data.perfil;
   const displayName = `${perfil?.nombre || "Usuario"} ${perfil?.apellido || ""}`.trim();
   const initials = `${perfil?.nombre?.charAt(0) || ""}${perfil?.apellido?.charAt(0) || ""}`.toUpperCase() || "HA";
-  const email = perfil?.email || "usuario@habitapp.io";
-  const racha = data.rachaGlobal || perfil?.racha_actual || 24;
-  const puntos = perfil?.puntos ?? perfil?.puntostotales ?? 2840;
-  const habitosActivos = data.totalHabitosActivos ?? 6;
-  const tasaExito = data.eficienciaMensual || 94;
-  const diasTotales = data.diasActivosMensuales || 86;
+  const email = perfil?.email || perfil?.correo || "";
+  const racha = data.rachaGlobal ?? perfil?.racha_actual ?? 0;
+  const puntos = perfil?.puntos ?? perfil?.puntostotales ?? 0;
+  const habitosActivos = data.totalHabitosActivos ?? 0;
+  const tasaExito = data.eficienciaMensual ?? 0;
+  const diasTotales = data.diasActivosMensuales ?? 0;
 
   const handleShare = () => {
     if (typeof window === "undefined") return;
@@ -74,87 +74,28 @@ export function PerfilInteractiveView({ data }: Readonly<PerfilInteractiveViewPr
     }, 3000);
   };
 
-  // Logros predefinidos con la estética del diseño Figma
-  const logrosList = [
-    {
-      id: "logro-1",
-      nombre: "Madrugador",
-      desc: "5 días seguidos antes de las 7:00",
-      puntos: "+100 pts",
-      completado: true,
-      icon: <Sun className="w-6 h-6 text-amber-600 dark:text-amber-400" aria-hidden="true" />,
-      bgIcon: "bg-amber-50 dark:bg-amber-950/40",
-    },
-    {
-      id: "logro-2",
-      nombre: "7 Días Racha",
-      desc: "Semana perfecta sin fallar un hábito",
-      puntos: "+150 pts",
-      completado: true,
-      icon: <Flame className="w-6 h-6 text-rose-600 dark:text-rose-400 fill-rose-500" aria-hidden="true" />,
-      bgIcon: "bg-rose-50 dark:bg-rose-950/40",
-    },
-    {
-      id: "logro-3",
-      nombre: "Mente Clara",
-      desc: "15 sesiones de respiración o meditación",
-      puntos: "+120 pts",
-      completado: true,
-      icon: <Sparkles className="w-6 h-6 text-purple-600 dark:text-purple-400" aria-hidden="true" />,
-      bgIcon: "bg-purple-50 dark:bg-purple-950/40",
-    },
-    {
-      id: "logro-4",
-      nombre: "Hidratación Pro",
-      desc: "Alcanzar meta de agua 20 días",
-      puntos: "+80 pts",
-      completado: false,
-      progresoTexto: "17/20 d",
-      progresoPorcentaje: 85,
-      icon: <Droplet className="w-6 h-6 text-blue-600 dark:text-blue-400 fill-blue-500" aria-hidden="true" />,
-      bgIcon: "bg-blue-50 dark:bg-blue-900/30",
-    },
-  ];
+  // Mapeo dinámico de logros reales obtenidos por el usuario
+  const logrosGanados = Array.isArray(data.logros) ? data.logros : [];
+  const logrosList = logrosGanados.map((l: any, idx: number) => ({
+    id: l.idlogro || `logro-${idx}`,
+    nombre: l.nombre || "Logro de Hábitos",
+    desc: l.descripcion || "Completado en tus rutinas de bienestar",
+    puntos: l.puntos_recompensa ? `+${l.puntos_recompensa} pts` : "+50 pts",
+    completado: true,
+    icon: <Sparkles className="w-6 h-6 text-purple-600 dark:text-purple-400" aria-hidden="true" />,
+    bgIcon: "bg-purple-50 dark:bg-purple-950/40",
+  }));
 
-  // Lista de amigos con fallback si no hay amigos registrados
-  const fallbackAmigos = [
-    {
-      id: "f-1",
-      nombre: "David Gómez",
-      subtitulo: "18 días en racha",
-      isRacha: true,
-      color: "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300",
-      initials: "DG",
-    },
-    {
-      id: "f-2",
-      nombre: "Clara Sánchez",
-      subtitulo: "12 días • Reto meditación",
-      isRacha: false,
-      color: "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300",
-      initials: "CS",
-    },
-    {
-      id: "f-3",
-      nombre: "Sofía Aranda",
-      subtitulo: "31 días • Top 10 ranking",
-      isRacha: false,
-      color: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300",
-      initials: "SA",
-    },
-  ];
-
-  const amigosDisplay =
-    data.amigos && data.amigos.length > 0
-      ? data.amigos.map((a: any, idx: number) => ({
-          id: a.idamigo || a.id || `amigo-${idx}`,
-          nombre: `${a.nombre || "Amigo"} ${a.apellido || ""}`.trim(),
-          subtitulo: a.racha ? `${a.racha} días en racha` : "Compañero de hábitos",
-          isRacha: !!a.racha,
-          color: getFriendColor(idx),
-          initials: `${a.nombre?.charAt(0) || "A"}${a.apellido?.charAt(0) || ""}`.toUpperCase(),
-        }))
-      : fallbackAmigos;
+  // Lista de amigos reales obtenidos del endpoint /users/friends
+  const amigosList = Array.isArray(data.amigos) ? data.amigos : [];
+  const amigosDisplay = amigosList.map((a: any, idx: number) => ({
+    id: a.idusuario || a.idamigo || a.id || `amigo-${idx}`,
+    nombre: `${a.nombre || "Amigo"} ${a.apellido || ""}`.trim(),
+    subtitulo: a.puntostotales ? `${Number(a.puntostotales).toLocaleString()} pts` : a.racha ? `${a.racha} días en racha` : "Compañero de hábitos",
+    isRacha: Boolean(a.racha),
+    color: getFriendColor(idx),
+    initials: `${a.nombre?.charAt(0) || "A"}${a.apellido?.charAt(0) || ""}`.toUpperCase(),
+  }));
 
   return (
     <div className="flex flex-col w-full max-w-7xl mx-auto space-y-7 pb-16">
@@ -291,7 +232,7 @@ export function PerfilInteractiveView({ data }: Readonly<PerfilInteractiveViewPr
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-semibold flex items-center gap-1">
                   <TrendingUp className="w-3.5 h-3.5" aria-hidden="true" />
-                  +320 esta semana
+                  {puntos > 0 ? "Puntaje activo" : "Comienza hoy"}
                 </span>
               </div>
               <div className="flex items-baseline gap-2 mt-1">
@@ -326,7 +267,7 @@ export function PerfilInteractiveView({ data }: Readonly<PerfilInteractiveViewPr
                 Logros y Medallas
               </h3>
               <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                12 de 24
+                {logrosList.length} {logrosList.length === 1 ? "desbloqueado" : "desbloqueados"}
               </span>
             </div>
             <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-0.5">
@@ -334,25 +275,24 @@ export function PerfilInteractiveView({ data }: Readonly<PerfilInteractiveViewPr
             </span>
           </div>
 
-          {/* Badges 2x2 Bento Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {logrosList.map((logro) => (
-              <div
-                key={logro.id}
-                className="flex items-start gap-3.5 p-4 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-md transition-all"
-              >
-                <div className={`w-12 h-12 rounded-2xl ${logro.bgIcon} flex items-center justify-center shrink-0`}>
-                  {logro.icon}
-                </div>
-                <div className="flex flex-col min-w-0 w-full">
-                  <span className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                    {logro.nombre}
-                  </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {logro.desc}
-                  </span>
-
-                  {logro.completado ? (
+          {/* Badges Bento Grid or Empty State */}
+          {logrosList.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {logrosList.map((logro) => (
+                <div
+                  key={logro.id}
+                  className="flex items-start gap-3.5 p-4 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-md transition-all"
+                >
+                  <div className={`w-12 h-12 rounded-2xl ${logro.bgIcon} flex items-center justify-center shrink-0`}>
+                    {logro.icon}
+                  </div>
+                  <div className="flex flex-col min-w-0 w-full">
+                    <span className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                      {logro.nombre}
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      {logro.desc}
+                    </span>
                     <div className="flex items-center gap-2 mt-2.5">
                       <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold">
                         Completado
@@ -361,28 +301,23 @@ export function PerfilInteractiveView({ data }: Readonly<PerfilInteractiveViewPr
                         {logro.puntos}
                       </span>
                     </div>
-                  ) : (
-                    <div className="flex flex-col gap-1 mt-2.5">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-blue-600 dark:text-blue-400 font-bold">
-                          En progreso: {logro.progresoPorcentaje}%
-                        </span>
-                        <span className="text-slate-400 dark:text-slate-500">
-                          {logro.progresoTexto}
-                        </span>
-                      </div>
-                      <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-blue-600 dark:bg-blue-500 transition-all duration-500"
-                          style={{ width: `${logro.progresoPorcentaje}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 px-6 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center mb-3">
+                <Trophy className="w-7 h-7" />
               </div>
-            ))}
-          </div>
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                Aún no has desbloqueado medallas
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-1">
+                Completa tus hábitos diarios y acumula rachas continuas para ganar insignias y reconocimientos en tu vitrina.
+              </p>
+            </div>
+          )}
         </section>
 
         {/* RIGHT: Friends (5 cols) */}
@@ -393,7 +328,7 @@ export function PerfilInteractiveView({ data }: Readonly<PerfilInteractiveViewPr
                 Amigos
               </h3>
               <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                {amigosDisplay.length} amigos
+                {amigosDisplay.length} {amigosDisplay.length === 1 ? "amigo" : "amigos"}
               </span>
             </div>
             <button
@@ -407,43 +342,57 @@ export function PerfilInteractiveView({ data }: Readonly<PerfilInteractiveViewPr
           </div>
 
           <div className="flex flex-col gap-2.5 bg-white dark:bg-[#111827] rounded-3xl p-4 sm:p-5 shadow-xs border border-slate-200/80 dark:border-slate-800">
-            {amigosDisplay.map((amigo) => (
-              <div
-                key={amigo.id}
-                className="flex items-center justify-between gap-3 p-2.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={`w-10 h-10 rounded-2xl ${amigo.color} font-bold flex items-center justify-center shrink-0 text-xs`}
-                  >
-                    {amigo.initials}
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
-                      {amigo.nombre}
-                    </span>
-                    <div className="flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400 font-medium">
-                      {amigo.isRacha && (
-                        <Flame className="w-3 h-3 text-amber-500 fill-amber-500" aria-hidden="true" />
-                      )}
-                      <span className="truncate">{amigo.subtitulo}</span>
+            {amigosDisplay.length > 0 ? (
+              amigosDisplay.map((amigo) => (
+                <div
+                  key={amigo.id}
+                  className="flex items-center justify-between gap-3 p-2.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`w-10 h-10 rounded-2xl ${amigo.color} font-bold flex items-center justify-center shrink-0 text-xs`}
+                    >
+                      {amigo.initials}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                        {amigo.nombre}
+                      </span>
+                      <div className="flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+                        {amigo.isRacha && (
+                          <Flame className="w-3 h-3 text-amber-500 fill-amber-500" aria-hidden="true" />
+                        )}
+                        <span className="truncate">{amigo.subtitulo}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleSaludar(amigo.id)}
-                  className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    saludos[amigo.id]
-                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                  }`}
-                >
-                  {saludos[amigo.id] ? "¡Saludado! 🎉" : "Saludar 👋"}
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSaludar(amigo.id)}
+                    className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      saludos[amigo.id]
+                        ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    {saludos[amigo.id] ? "¡Saludado! 🎉" : "Saludar 👋"}
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2.5">
+                  <UserPlus className="w-6 h-6" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                  Aún no tienes amigos añadidos
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mt-1">
+                  Conecta con tus compañeros de bienestar para compartir logros y motivarse mutuamente.
+                </p>
               </div>
-            ))}
+            )}
 
             {/* Bottom Action Strip */}
             <button

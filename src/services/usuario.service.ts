@@ -8,6 +8,7 @@
 import { ok, err } from "@/lib/result";
 import type { Result } from "@/lib/result";
 import { usuarioRepository } from "@/repositories/usuario.repository";
+import { getValidAccessToken } from "@/lib/api/client";
 import type { PerfilDashboardData, ProfileForEdit, UpdateProfileDTO } from "@/domain/perfil.types";
 import type { UserProfileDto, UpdateUserProfileDto } from "@/domain/usuario.types";
 
@@ -44,16 +45,16 @@ export class UsuarioService {
         sugerenciasRes,
         logrosRes,
       ] = await Promise.all([
-        usuarioRepository.get<any>("users/me/profile"),
-        usuarioRepository.get<any[]>("records/historial"),
+        usuarioRepository.get<any>("users/me"),
+        usuarioRepository.get<any[]>("users/records/historial"),
         usuarioRepository.get<any[]>("users/me/points-history?limit=5"),
-        usuarioRepository.get<any[]>("friends"),
-        usuarioRepository.get<any[]>("friends/suggestions?limit=12"),
+        usuarioRepository.get<any[]>("users/friends"),
+        usuarioRepository.get<any[]>("users/friends/suggestions?limit=12"),
         usuarioRepository.get<any[]>("users/me/achievements"),
       ]);
 
       const perfil = perfilRes.success ? perfilRes.data : null;
-      const puntos = perfil?.puntos ?? 0;
+      const puntos = perfil?.puntostotales ?? perfil?.puntos ?? 0;
       const registrosReales = historialRes.success ? historialRes.data : [];
       const historialPuntos = puntosRes.success ? puntosRes.data : [];
       const amigos = amigosRes.success ? amigosRes.data : [];
@@ -215,11 +216,30 @@ export class UsuarioService {
       formData.append("file", file);
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
-      const response = await fetch(`${API_URL}/users/me/avatar`, {
+      let token = await getValidAccessToken(false);
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      let response = await fetch(`${API_URL}/users/me/avatar`, {
         method: "POST",
-        credentials: "include", // envía las cookies HttpOnly del JWT
+        headers,
         body: formData,
       });
+
+      if (response.status === 401) {
+        token = await getValidAccessToken(true);
+        if (token) {
+          const retryFormData = new FormData();
+          retryFormData.append("file", file);
+          response = await fetch(`${API_URL}/users/me/avatar`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: retryFormData,
+          });
+        }
+      }
 
       if (!response.ok) {
         let errorMessage = "Error al subir imagen";

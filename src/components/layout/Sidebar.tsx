@@ -13,6 +13,7 @@ import {
   BarChart3,
   LogOut,
   Shield,
+  Dumbbell,
   PanelLeftClose,
   PanelLeftOpen,
   Plus
@@ -34,11 +35,24 @@ function getSidebarNavLinks(user: User) {
     { name: 'Ajustes', href: '/ajustes', icon: Settings },
   ];
 
-  const roleUpper = (user?.role || user?.nombrerol || '').toUpperCase();
-  if (roleUpper === 'ADMIN' || roleUpper === 'ADMINISTRADOR') {
+  const roleUpper = (user?.nombrerol || '').toUpperCase();
+  const rawRole = (user?.role || '').toUpperCase();
+  const isAdmin =
+    roleUpper === 'ADMINISTRADOR' ||
+    roleUpper === 'ADMIN' ||
+    rawRole === 'ADMIN' ||
+    rawRole === 'ADMINISTRADOR';
+  const isTrainer =
+    roleUpper === 'ENTRENADOR' ||
+    roleUpper === 'TRAINER' ||
+    rawRole === 'ENTRENADOR' ||
+    rawRole === 'TRAINER';
+
+  if (isAdmin) {
     links.push({ name: 'Administrador', href: '/admin', icon: Shield });
-  } else if (roleUpper === 'TRAINER' || roleUpper === 'ENTRENADOR') {
-    links.push({ name: 'Entrenador', href: '/entrenador', icon: Shield });
+    links.push({ name: 'Entrenador', href: '/entrenador', icon: Dumbbell });
+  } else if (isTrainer) {
+    links.push({ name: 'Entrenador', href: '/entrenador', icon: Dumbbell });
   }
 
   return links;

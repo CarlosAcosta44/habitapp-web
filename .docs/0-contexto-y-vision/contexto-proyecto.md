@@ -1,172 +1,75 @@
 # Contexto y Planeación General — HabitApp (Sistema de Gestión de Hábitos Saludables)
 
-Este documento centraliza y resume el contexto del proyecto basándose en los documentos de arquitectura, base de datos, casos de uso, objetivos, requerimientos y stack tecnológico presentes en la carpeta `.docs`.
+Este documento centraliza el contexto arquitectónico y funcional actualizado de **HabitApp**, alineado con la arquitectura **Next.js 16 (Frontend)** + **NestJS (Backend Custom Auth & API REST)** + **Supabase PostgreSQL (Persistencia exclusiva en Base de Datos)**.
 
 ---
 
 ## 🚀 1. Visión General y Objetivos
-**HabitApp** es una plataforma digital diseñada para ayudar a las personas a mejorar su calidad de vida a través del seguimiento de hábitos positivos. El sistema utiliza **gamificación** (puntos y rachas) para mantener la motivación de los usuarios y fomenta la interacción social mediante un módulo de **comunidad**. Además, permite la vinculación con **entrenadores** para asesoría profesional.
+**HabitApp** es una plataforma digital diseñada para ayudar a las personas a mejorar su calidad de vida a través del seguimiento de hábitos positivos, salud mental y bienestar físico. El sistema utiliza **gamificación** (puntos, niveles, logros y rachas) para mantener la motivación diaria, fomenta la interacción social mediante un módulo de **comunidad** (foros, retos, artículos y hábitos compartidos) y permite la supervisión clínica/deportiva mediante **entrenadores certificados**.
 
-### Roles del Sistema
-1. **Usuario:** Actor principal. Registra hábitos, reporta cumplimiento, interactúa en foros y acumula puntos.
-2. **Entrenador:** Profesional que asigna rutinas personalizadas y supervisa el progreso de sus clientes.
-3. **Administrador:** Modera la comunidad, gestiona usuarios y contenido destacado.
+### Roles del Sistema (`gestion.roles`)
+1. **Usuario (`Usuario`):** Registra hábitos diarios, marca progreso, participa en foros y retos comunitarios, acumula puntos/logros y puede vincularse con un Entrenador certificado para recibir rutinas y recomendaciones personalizadas.
+2. **Entrenador (`Entrenador`):** Profesional certificado con acceso al **Portal del Entrenador (`/entrenador`)**. Gestiona su cartera de alumnos vinculados, diseña plantillas maestras de rutinas con hábitos modulares, asigna rutinas (que se materializan automáticamente como hábitos diarios activos en el panel del alumno), audita el mapa de calor de 70 días de cada pupilo (`/entrenador/clientes/[id]`) y envía recomendaciones in-app.
+3. **Administrador (`Administrador`):** Supervisa la salud global de la plataforma (`/admin`), gestiona usuarios, roles y estados de cuenta (`/admin/usuarios`), modera foros y comentarios comunitarios (`/admin/moderacion`) y cuenta con acceso transversal al portal de entrenadores.
 
 ---
 
 ## 🏗️ 2. Arquitectura y Stack Tecnológico
-El proyecto combina un frontend Next.js ya organizado por capas con un backend objetivo basado en **arquitectura modular NestJS inspirada en Clean Architecture**.
+El proyecto implementa una **Arquitectura Limpia (Clean Architecture)** donde **Supabase funciona única y exclusivamente como motor de base de datos PostgreSQL y almacenamiento de archivos (Storage) consumido por el backend NestJS**. El frontend jamás se comunica directamente con Supabase.
 
-- **Frontend:** Next.js 14+ (App Router) con estilización a través de **Tailwind CSS**. Uso de React Server Components, Server Actions y separaciones por dominios (features).
-- **Gestión de Estado:** Arquitectura minimalista sin dependencias extra (sin Redux, Zustand, etc.). El estado pesado (hábitos, rachas, puntos) se gestiona vía *Server Actions* y la caché nativa de Next.js. *React Context* se usa solo para datos de sesión del usuario autenticado.
-- **Diseño UI/UX:** Enfoque orientado a móviles (similar a una App nativa), con adaptación a escritorio. Los prototipos están en la carpeta de documentación (`/Diseños`).
-- **Backend NestJS:** Arquitectura modular por negocio (`users`, `coach`, `admin`, `notifications`, `reports`) con controllers, services, repositories, DTOs y entities.
-- **Backend (BaaS):** Supabase (PostgreSQL, Auth, Storage, Edge Functions). Fuente de verdad para persistencia con seguridad por RLS y automatizaciones mediante triggers.
-- **Validación:** Zod en las Server Actions para validar la entrada antes de tocar la lógica de negocio.
-- **Manejo de Errores:** Patrón `Result<T>` en servicios y repositorios — sin excepciones no capturadas, los errores son valores explícitos.
-- **Infraestructura:** Frontend desplegable en Vercel o target equivalente; backend NestJS desplegable como API independiente.
-- **Colaboración:** Git/GitHub con Gitflow manual y commits semánticos.
+- **Frontend (`habitapp-web`):** Next.js 16 (App Router + Turbopack), React 19, TypeScript estricto y Tailwind CSS.
+- **Backend (`habitapp-api`):** NestJS modular (`auth`, `users`, `habits`, `community`, `coach`, `admin`, `reports`, `notifications`) con `Controllers -> Services -> Repositories`.
+- **Autenticación (Custom Auth JWT):** Gestionada 100% por NestJS (`/api/v1/auth/login`, `/register`, `/refresh`). Emite `access_token` y `refresh_token` almacenados en cookies `HttpOnly`. El cliente HTTP del frontend (`src/lib/api/client.ts`) intercepta respuestas `401` y renueva silenciosamente el token en memoria y cookies sin interrumpir la sesión del usuario.
+- **Base de Datos:** PostgreSQL en Supabase dividida en 3 esquemas relacionales:
+  - `gestion`: `usuarios`, `roles`, `entrenadores`/`administradores`, `notificaciones`, `amigos`, `logros`, `usuario_logro`, `historial_puntos`.
+  - `seguimiento`: `habitos`, `registro_habitos`, `categorias_habitos`, `recordatorios`, `entrenadores`, `usuario_entrenador`, `rutinas`, `usuario_rutina`, `seguimientos`.
+  - `comunidad`: `foros`, `comentarios`, `articulos`, `retos`, `usuario_reto`, `reacciones`, `habitos_comunidad`.
 
-### Flujo actual del frontend
+### Flujo de Capas en el Frontend (`habitapp-web`)
 
 ```
-UI / Page (Server Component)
-  └── Server Action       ← Valida sesión + valida datos con Zod
-        └── Service        ← Lógica de negocio y reglas de dominio
-              └── Repository ← Única capa que habla con Supabase
-                    └── Supabase (PostgreSQL + RLS + Triggers)
+UI / Page (Server Component / Client Component)
+  └── Server Action (src/actions/*.actions.ts)   ← Valida sesión y entrada con Zod + revalida caché
+        └── Service (src/services/*.service.ts)  ← Lógica de negocio y transformación de dominio
+              └── Repository (src/repositories/) ← Extiende BaseRepository, consume apiClient
+                    └── Backend NestJS API (/api/v1/*)
+                          └── Supabase PostgreSQL (Esquemas: gestion, seguimiento, comunidad)
 ```
 
-### Estructura objetivo del backend NestJS
+### Reglas Estrictas entre Capas del Frontend
 
-```
-src/
-├── config/
-├── common/
-│   ├── decorators/
-│   ├── guards/
-│   ├── filters/
-│   ├── interceptors/
-│   ├── pipes/
-│   └── dto/
-├── supabase/
-├── auth/
-├── health/
-├── users/
-│   ├── controllers/
-│   ├── services/
-│   ├── repositories/
-│   ├── dto/
-│   ├── entities/
-│   └── users.module.ts
-├── coach/
-│   ├── controllers/
-│   ├── services/
-│   ├── repositories/
-│   ├── dto/
-│   ├── entities/
-│   └── coach.module.ts
-├── admin/
-│   ├── controllers/
-│   ├── services/
-│   ├── repositories/
-│   ├── dto/
-│   ├── entities/
-│   └── admin.module.ts
-├── notifications/
-├── reports/
-└── main.ts
-```
-
-No se utilizará una Clean Architecture estricta con `domain/`, `application/`, `infrastructure/` y `presentation/` replicadas por módulo.
-
-### Estructura actual del frontend
-
-```
-src/
-├── app/                   # Rutas y páginas (Next.js App Router)
-│   ├── (auth)/            # Grupo público: login, registro
-│   └── (dashboard)/       # Grupo protegido: hábitos, comunidad
-├── actions/               # Server Actions (controladores)
-├── services/              # Lógica de negocio por dominio
-├── repositories/          # Acceso a datos — solo queries a Supabase
-├── lib/supabase/          # Clientes de Supabase (server, client, middleware)
-├── types/
-│   ├── database.types.ts  # Generado por Supabase CLI (no editar)
-│   ├── domain/            # Tipos del negocio en frontend
-│   └── common/            # Result<T>, paginación y utilidades
-└── middleware.ts           # Protección de rutas por sesión
-```
-
-### Reglas entre capas del frontend
-
-| Capa | Puede llamar a | No puede llamar a |
+| Capa | Puede llamar a | Prohibido llamar a |
 |---|---|---|
-| **UI / Page** | Actions, muestra datos | Services, Repositories, Supabase |
-| **Server Action** | Service | Repository, Supabase directo |
-| **Service** | Repository | Otro Service, Supabase directo |
-| **Repository** | Supabase Client | Nada más |
+| **UI / Page (`src/app`, `src/components`)** | Server Actions (`src/actions`), Services (solo lectura en Server Components) | `fetch()` directo, Supabase SDK |
+| **Server Action (`src/actions`)** | Services (`src/services`), `requireUser` | Repositories directo, Supabase SDK |
+| **Service (`src/services`)** | Repositories (`src/repositories`) | Cookies, FormData, Supabase SDK |
+| **Repository (`src/repositories`)** | `BaseRepository` / `apiClient` (`src/lib/api/client.ts`) | Base de datos directa |
 
 ---
 
-## 📦 3. Módulos y Alcance (Casos de Uso)
+## 🔄 3. Funcionamiento del Módulo de Entrenadores, Clientes y Rutinas
 
-### A. Gestión de Usuarios (CU1 - CU9)
-- Registro y autenticación mediante Supabase Auth.
-- Perfiles generados automáticamente vía Triggers en PostgreSQL.
-- Administración de roles (Usuario, Entrenador, Admin).
-- Gestión y actualización de la información personal de cada usuario.
+### A. ¿Cómo un usuario se convierte en Entrenador?
+- Un **Administrador** puede ascender a cualquier usuario al rol `Entrenador` desde `/admin/usuarios` (`PATCH /api/v1/users/:id/role`).
+- Al asignarse el rol `Entrenador`, el backend crea o verifica automáticamente su ficha profesional en `seguimiento.entrenadores` (`identrenador`, `idusuario`, `especialidad`, `experiencia`, `certificacion`).
 
-### B. Seguimiento de Hábitos (CU10 - CU23)
-- Creación, edición y eliminación de hábitos con frecuencias customizables y categorías.
-- Registro de cumplimiento diario.
-- Lógica de Gamificación: Cálculo de rachas continuas y asignación automática de puntos basados en triggers.
-- Seguimiento personalizado por parte de entrenadores autorizados.
+### B. ¿Cómo se vinculan los Usuarios (Clientes) con un Entrenador?
+La vinculación se almacena en la tabla `seguimiento.usuario_entrenador` (`idusuario`, `identrenador`, `fechainicio`) y es **bidireccional**:
+1. **Desde la cuenta del Usuario (Autovinculación):**
+   - El usuario entra a **Comunidad → Especialistas** (`/comunidad?tab=especialistas`), donde se listan los entrenadores reales registrados.
+   - Al hacer clic en **"Vincular Coach"**, se ejecuta `POST /api/v1/users/me/trainer/:trainerId`, creando el vínculo en `seguimiento.usuario_entrenador` y enviando una notificación automática al entrenador.
+   - En **Ajustes → Acompañamiento Profesional** (`/ajustes`), el usuario visualiza su entrenador activo, las rutinas que este le ha asignado y puede desvincularse en cualquier momento (`DELETE /api/v1/users/me/trainer/:trainerId`).
+2. **Desde la cuenta del Entrenador (`/entrenador`):**
+   - El entrenador hace clic en **"Vincular Alumno"**, consulta los usuarios disponibles de la plataforma (`GET /api/v1/coach/available-clients`) y vincula o desvincula pupilos con un clic (`POST / DELETE /api/v1/coach/clients/:clientId/link`).
+   - En su panel **solo aparecen los clientes realmente vinculados a ese entrenador** (cero datos quemados).
 
-### C. Comunidad (CU24 - CU38)
-- Ranking global gamificado basado en puntos.
-- Listado de amistades y red social.
-- Foros de discusión por categorías temáticas y soporte para artículos educativos.
-- Moderación de contenido por creadores de foros y administradores.
-
----
-
-## 📅 4. Planeación Sugerida de Desarrollo (Fases)
-
-Basado en las dependencias técnicas, se sugiere abordar el desarrollo en las siguientes fases (Sprints/Milestones):
-
-### Fase 1: Fundamentos y Base de Datos
-- Creación del esquema de base de datos en Supabase ejecutando los scripts SQL (`1. Esquemas`, `2. Restricciones`, `3. Indices`).
-- Configuración de políticas de seguridad (RLS).
-- Inserción de datos sintéticos (`4. Script Datos Sinteticos`).
-- Setup del repositorio GitHub (configuración de protecciones en `main` y `develop`).
-
-### Fase 2: Autenticación y Estructura Base Next.js
-- Inicialización del proyecto Next.js y configuración de la arquitectura (`src/app`, `features/`, `core/`).
-- Integración de Supabase Auth en el cliente y servidor.
-- Implementación de middlewares para protección de rutas `(auth)` vs `(dashboard)`.
-- Vistas de login, registro, y recuperación de contraseñas.
-
-### Fase 3: Módulo de Seguimiento de Hábitos (Core)
-- CRUD de hábitos personalizados y categorías.
-- Interfaz gráfica principal (Dashboard) para visualizar hábitos del día.
-- Implementación del registro de cumplimiento diario (Toggle optimista).
-- Funciones de base de datos (Triggers) para cálculo de rachas y puntos básicos.
-
-### Fase 4: Gamificación y Comunidad
-- Implementación visual de los puntos y el ranking global.
-- Creación de perfiles públicos de usuario.
-- Desarrollo de los foros de discusión, comentarios y reacciones.
-- Gestión de amigos y artículos.
-
-### Fase 5: Módulo de Entrenadores
-- Vistas específicas para el rol de entrenador.
-- Funcionalidad de asignar rutinas a usuarios.
-- Dashboard de entrenador para visualizar el avance de sus clientes.
-
-### Fase 6: Pulido, Notificaciones y Despliegue
-- Implementación de automatizaciones y notificaciones (recordatorios).
-- Pruebas exhaustivas y QA.
-- Exportación del proyecto (`next build` -> `out/`).
-- Despliegue frontend en Vercel o plataforma equivalente y backend NestJS en Railway/Fly o plataforma equivalente.
- 
+### C. ¿Cómo funcionan las Rutinas y sus Hábitos?
+1. **Creación de Plantillas Maestras (`seguimiento.rutinas`):**
+   - Desde `/entrenador`, el coach crea plantillas indicando: **Título/Objetivo** (`objetivo`), **Categoría** (`tipo`), **Nivel** (`nivel`), **Duración en días** (`duracion`), **Descripción del protocolo** (`descripcion`) y la lista de **Hábitos Diarios Incluidos**.
+2. **Asignación de Rutina a un Cliente (`POST /api/v1/coach/clients/:clientId/routines/:routineId/assign`):**
+   - Registra la asignación activa en `seguimiento.usuario_rutina`.
+   - **Materialización Automática de Hábitos:** El backend inserta automáticamente cada hábito de la rutina como un hábito activo (`estado: 'Activo'`, etiquetado con `[Coach: NombreRutina]`) en `seguimiento.habitos` para el alumno, asociado a la categoría correspondiente y con fecha de finalización según la duración de la rutina.
+   - Envía una notificación in-app a `gestion.notificaciones` informando al alumno.
+3. **Seguimiento y Auditoría (`/entrenador/clientes/[id]`):**
+   - El alumno ve y marca diariamente los hábitos asignados en su dashboard `/habitos`.
+   - El entrenador supervisa en tiempo real el progreso diario (`Hoy: X/Y hábitos`), racha actual, tasa de adherencia, mapa de calor histórico de 70 días y filtra entre hábitos **"Asignados por Coach"** y **"Personales"**.

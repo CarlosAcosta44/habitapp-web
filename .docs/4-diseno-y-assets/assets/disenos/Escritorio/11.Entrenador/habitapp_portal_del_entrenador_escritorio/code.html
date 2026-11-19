@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"error":"#ba1a1a","surface-container-lowest":"#ffffff","surface-variant":"#e6e0ef","surface-tint":"#5e38eb","error-container":"#ffdad6","on-background":"#1c1a25","primary-fixed":"#e6deff","tertiary-container":"#bc4c22","secondary-container":"#b6a8fe","on-secondary-fixed-variant":"#483b88","on-tertiary-fixed-variant":"#832600","tertiary-fixed-dim":"#ffb59d","surface-container":"#f1ebfa","inverse-primary":"#c9beff","background":"#fdf8ff","surface-container-high":"#ece6f5","on-tertiary":"#ffffff","primary-fixed-dim":"#c9beff","on-primary-fixed-variant":"#4608d4","outline-variant":"#c9c4d8","on-error-container":"#93000a","inverse-on-surface":"#f4eefd","inverse-surface":"#312f3a","on-secondary-fixed":"#1b065c","on-tertiary-container":"#fff1ed","surface-bright":"#fdf8ff","secondary-fixed-dim":"#c9beff","on-primary":"#ffffff","on-tertiary-fixed":"#390c00","on-secondary":"#ffffff","on-secondary-container":"#463987","on-primary-fixed":"#1b0063","on-surface":"#1c1a25","secondary":"#6053a2","surface-container-highest":"#e6e0ef","on-primary-container":"#f7f2ff","surface-dim":"#ddd7e6","on-surface-variant":"#484556","on-error":"#ffffff","tertiary":"#9b340a","primary-container":"#704efd","secondary-fixed":"#e6deff","surface-container-low":"#f7f1ff","outline":"#797587","primary":"#572de4","surface":"#fdf8ff","tertiary-fixed":"#ffdbd0"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"space-2xl":"2rem","space-lg":"1.25rem","space-xl":"1.5rem","screen-edge":"1.25rem","space-md":"1rem","space-sm":"0.75rem","card-padding":"1.25rem","space-3xl":"2.5rem","space-xs":"0.5rem","space-2xs":"0.25rem","gutter-default":"0.75rem"},fontFamily:{"headline-md":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"numeric-stat":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"]},fontSize:{"headline-md":["22px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"headline-sm":["18px",{lineHeight:"24px",fontWeight:"600"}],"body-sm":["12px",{lineHeight:"16px",fontWeight:"400"}],"label-md":["13px",{lineHeight:"18px",fontWeight:"600"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.04em",fontWeight:"600"}],"numeric-stat":["24px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"700"}],"label-lg":["15px",{lineHeight:"20px",fontWeight:"600"}],"headline-lg":["28px",{lineHeight:"36px",letterSpacing:"-0.02em",fontWeight:"700"}],"display":["36px",{lineHeight:"44px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}]}}}}</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-4 top-4 bottom-4 w-72 bg-surface-container-lowest rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between p-card-padding"><div class="flex flex-col gap-space-lg"><div class="flex items-center justify-between pb-space-xs"><div class="flex items-center gap-space-sm"><img alt="icon.png" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrB0bflQdBWvAVYxkswHu8ug86mYl-dDGRBStQ32ERGDOUkwSFjFGwcW4rcxogOE13QeuEUpL34_I-27OnUjiUWEK-02c3QZQY0HBOypN3T8KJiuJn5Eoi9Bc0B23wKC3gJi3Vgrw_3MoVaXweNhvm1keuCimAwGng1v60n8GIApPIPyM_2d6jNsN0vWc0uXCIVxQfXy2yx6XLqEVMND-HXDKCh0iiLXEfhO5sZcBTvmV5hexhkEmtrtAHimJikVmMB0yWkeo13Bug"/><div><span class="font-headline-sm text-headline-sm text-on-surface block tracking-tight">HabitApp</span><span class="font-label-sm text-label-sm text-on-surface-variant block">Portal Entrenador</span></div></div><button class="w-9 h-9 rounded-full bg-surface-container-low hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span></button></div><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-space-2xs rounded-full w-fit"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span><span class="font-label-sm text-label-sm text-primary font-semibold">Coach &amp; Bienestar</span></div><nav class="flex flex-col gap-space-2xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold shadow-[0_4px_14px_rgba(112,78,253,0.18)]"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="panel-general" href="#"><span class="material-symbols-outlined text-[22px]">dashboard</span><span class="font-label-lg text-label-lg">Panel General</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="mis-alumnos" href="#"><span class="material-symbols-outlined text-[22px]">group</span><span class="font-label-lg text-label-lg">Mis Alumnos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="rutinas-y-habitos" href="#"><span class="material-symbols-outlined text-[22px]">checklist</span><span class="font-label-lg text-label-lg">Rutinas y Hábitos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="sesiones-y-calendario" href="#"><span class="material-symbols-outlined text-[22px]">event</span><span class="font-label-lg text-label-lg">Sesiones y Calendario</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="ajustes" href="#"><span class="material-symbols-outlined text-[22px]">settings</span><span class="font-label-lg text-label-lg">Ajustes</span></a></nav></div><div class="flex flex-col gap-space-sm pt-space-md bg-surface-container-low p-space-sm rounded-xl"><div class="flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-headline-sm text-headline-sm">CV</div><div class="overflow-hidden"><span class="font-label-md text-label-md text-on-surface block truncate">Carlos Vega</span><div class="flex items-center gap-space-2xs"><span class="material-symbols-outlined text-primary text-[14px]">verified</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Verificado</span></div></div></div><div class="flex items-center gap-space-2xs"><a class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ayuda" href="#" title="Centro de Ayuda"><span class="material-symbols-outlined text-[18px]">help</span></a><a class="w-8 h-8 rounded-full flex items-center justify-center text-error hover:bg-error-container hover:text-on-error-container transition-colors" data-path="login" href="#" title="Cerrar sesión"><span class="material-symbols-outlined text-[18px]">logout</span></a></div></div></div></aside><div class="pl-80"><header class="fixed top-0 left-80 right-0 h-20 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-2xl"><div class="flex items-center gap-space-md flex-1 max-w-lg"><div class="flex items-center w-full bg-surface-container-low px-space-md py-space-xs rounded-xl focus-within:bg-surface-container-lowest focus-within:shadow-[0_0_0_2px_#704efd] transition-all"><span class="material-symbols-outlined text-on-surface-variant mr-space-xs text-[20px]">search</span><input class="bg-transparent border-0 outline-none w-full text-on-surface placeholder:text-outline font-body-md text-body-md" placeholder="Buscar alumno, rutina o métrica..." type="text"/></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-space-xs rounded-full shadow-[0_1px_4px_rgba(0,0,0,0.03)]"><span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span><span class="font-label-sm text-label-sm text-on-surface-variant">Sincronizado hoy</span></div><img alt="icon.png" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrB0bflQdBWvAVYxkswHu8ug86mYl-dDGRBStQ32ERGDOUkwSFjFGwcW4rcxogOE13QeuEUpL34_I-27OnUjiUWEK-02c3QZQY0HBOypN3T8KJiuJn5Eoi9Bc0B23wKC3gJi3Vgrw_3MoVaXweNhvm1keuCimAwGng1v60n8GIApPIPyM_2d6jNsN0vWc0uXCIVxQfXy2yx6XLqEVMND-HXDKCh0iiLXEfhO5sZcBTvmV5hexhkEmtrtAHimJikVmMB0yWkeo13Bug"/><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-20 px-space-2xl pb-space-3xl bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Top Summary & Editorial Header -->
+<header class="flex flex-col gap-space-md mb-space-2xl">
+<div class="flex items-center justify-between">
+<nav aria-label="Migas de pan" class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="hover:text-primary transition-colors cursor-pointer">Portal Entrenador</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-semibold">Panel de Gestión</span>
+</nav>
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-md py-space-2xs rounded-full">
+<span class="material-symbols-outlined text-primary text-[16px]">verified</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold tracking-wide">Coach Certificado HabitApp</span>
+</div>
+</div>
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-lg">
+<div class="space-y-space-2xs max-w-2xl">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Portal del Entrenador</h1>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          Monitorea el cumplimiento de tus pupilos, gestiona plantillas y envía recomendaciones personalizadas de salud mental y hábitos.
+        </p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<div class="relative inline-block">
+<button class="h-11 px-space-md rounded-full bg-surface-container-lowest text-on-surface hover:bg-surface-container flex items-center gap-space-xs shadow-sm transition-all text-label-md font-label-md" id="viewFilterBtn">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">calendar_view_week</span>
+<span>Vista Semanal</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span>
+</button>
+</div>
+<button class="h-11 px-space-lg rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md flex items-center gap-space-xs shadow-[0_8px_20px_rgba(112,78,253,0.22)] hover:scale-[1.02] active:scale-[0.98] transition-all" onclick="document.getElementById('modalCrearRutina').classList.remove('hidden')">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Nueva Rutina</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Metric / KPI Highlights Bento -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-space-lg mb-space-2xl">
+<!-- KPI 1 -->
+<div class="p-card-padding rounded-2xl bg-surface-container-lowest shadow-[0_2px_12px_rgba(72,69,86,0.04)] relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all">
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-low flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]">group</span>
+</div>
+<span class="px-space-sm py-space-2xs rounded-full bg-surface-container-low text-primary font-label-sm text-label-sm font-semibold flex items-center gap-space-2xs">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +3 este mes
+        </span>
+</div>
+<div>
+<span class="font-display text-display text-on-surface font-bold tracking-tight block">24</span>
+<span class="font-label-md text-label-md text-on-surface-variant block mt-space-2xs">Clientes Asignados Activos</span>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+<span>Capacidad mensual: 80%</span>
+<span class="text-primary font-semibold">24 / 30 cupos</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden mt-space-2xs">
+<div class="bg-primary h-full rounded-full" style="width: 80%"></div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="p-card-padding rounded-2xl bg-surface-container-lowest shadow-[0_2px_12px_rgba(72,69,86,0.04)] relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all">
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-low flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]">dataset</span>
+</div>
+<span class="px-space-sm py-space-2xs rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-medium">
+          42 asignaciones activas
+        </span>
+</div>
+<div>
+<span class="font-display text-display text-on-surface font-bold tracking-tight block">8</span>
+<span class="font-label-md text-label-md text-on-surface-variant block mt-space-2xs">Plantillas de Rutina Creadas</span>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+<span>Más replicada:</span>
+<span class="text-on-surface font-medium truncate max-w-[150px]">Hidratación &amp; Energía</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden mt-space-2xs">
+<div class="bg-secondary h-full rounded-full" style="width: 65%"></div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="p-card-padding rounded-2xl bg-surface-container-lowest shadow-[0_2px_12px_rgba(72,69,86,0.04)] relative overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all">
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]">donut_large</span>
+</div>
+<span class="px-space-sm py-space-2xs rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm font-semibold flex items-center gap-space-2xs">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +4.2% vs sem anterior
+        </span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-display text-display text-on-surface font-bold tracking-tight">88.4%</span>
+<span class="font-label-md text-label-md text-secondary font-semibold">Tasa Global</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant block mt-space-2xs">Cumplimiento Promedio Semanal</span>
+<div class="mt-space-md pt-space-sm flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+<span>21 en racha positiva</span>
+<span class="text-error font-medium">3 requieren foco</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden mt-space-2xs">
+<div class="bg-primary-container h-full rounded-full" style="width: 88.4%"></div>
+</div>
+</div>
+</section>
+<!-- Interactive Search, Filter & Tabs Bar -->
+<section class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md mb-space-lg">
+<!-- Segmented Tab Navigation -->
+<div class="flex items-center bg-surface-container-low p-1.5 rounded-full shadow-inner max-w-fit">
+<button class="flex items-center gap-space-xs px-space-lg py-space-xs rounded-full bg-surface-container-lowest text-primary shadow-[0_2px_8px_rgba(0,0,0,0.06)] font-label-md text-label-md transition-all" id="tabClientes" onclick="switchTab('clientes')">
+<span class="material-symbols-outlined text-[18px]">group</span>
+<span>Mis Clientes</span>
+<span class="ml-space-2xs px-2 py-0.5 rounded-full bg-primary text-on-primary text-label-sm font-label-sm">24</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-lg py-space-xs rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all" id="tabRutinas" onclick="switchTab('rutinas')">
+<span class="material-symbols-outlined text-[18px]">checklist</span>
+<span>Gestión de Rutinas</span>
+<span class="ml-space-2xs px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-label-sm font-label-sm">8</span>
+</button>
+</div>
+<!-- Live Search & Sort Control -->
+<div class="flex items-center gap-space-sm flex-1 lg:max-w-md justify-end">
+<div class="flex items-center w-full bg-surface-container-lowest px-space-md py-space-xs rounded-xl shadow-sm focus-within:ring-2 focus-within:ring-primary transition-all">
+<span class="material-symbols-outlined text-outline mr-space-xs text-[18px]">search</span>
+<input class="bg-transparent border-0 outline-none w-full text-on-surface placeholder:text-outline font-body-sm text-body-sm" id="searchInput" oninput="filtrarClientes()" placeholder="Buscar cliente por nombre o correo..." type="text"/>
+</div>
+<button class="h-10 px-space-md rounded-xl bg-surface-container-lowest text-on-surface-variant hover:text-on-surface flex items-center gap-space-2xs shadow-sm font-label-md text-label-md shrink-0">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span class="hidden sm:inline">Filtros</span>
+</button>
+</div>
+</section>
+<!-- Main View Container: Split Layout (Clients River + Sticky Routine Library) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-xl items-start">
+<!-- LEFT PANEL: Dynamic Tab Content (Mis Clientes / Gestión Rutinas) -->
+<div class="xl:col-span-8 flex flex-col gap-space-md" id="panelClientes">
+<!-- Client 1: Marina Soler -->
+<article class="cliente-card p-card-padding rounded-2xl bg-surface-container-lowest shadow-[0_2px_10px_rgba(72,69,86,0.03)] hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-space-md" data-email="marina@ejemplo.com" data-name="Marina Soler">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="relative shrink-0">
+<div class="w-13 h-13 rounded-2xl bg-primary-fixed text-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold shadow-inner">
+              MS
+            </div>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Marina Soler</span>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Nutrición &amp; Yoga</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">marina@ejemplo.com</span>
+<div class="flex items-center gap-space-md mt-space-xs text-body-sm font-body-sm">
+<span class="inline-flex items-center gap-1 text-tertiary font-semibold bg-tertiary-fixed/40 px-2 py-0.5 rounded-full text-label-sm">
+                🔥 24 días de racha
+              </span>
+<span class="text-on-surface-variant">Hoy: <strong class="text-on-surface">5/6 hábitos</strong></span>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-space-md shrink-0">
+<!-- Mini Progress Dial -->
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-xl">
+<div class="relative w-9 h-9 flex items-center justify-center">
+<svg class="w-9 h-9 -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="83, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute font-label-sm text-label-sm font-bold text-on-surface">83%</span>
+</div>
+<div class="flex flex-col text-left">
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">Cumplimiento</span>
+<span class="font-body-sm text-body-sm text-outline">Meta activa</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-xs w-full sm:w-auto">
+<button class="h-9 w-9 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-primary flex items-center justify-center transition-all" onclick="abrirRecomendacion('Marina Soler')" title="Enviar Recomendación">
+<span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
+</button>
+<button class="h-9 px-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-all" onclick="abrirAsignarModal('Marina Soler')" title="Asignar Rutina">
+<span class="material-symbols-outlined text-[16px]">library_add</span>
+<span class="hidden md:inline">Asignar</span>
+</button>
+<a class="h-9 px-space-sm rounded-xl bg-primary text-on-primary font-label-sm text-label-sm flex items-center gap-1 hover:bg-primary/90 transition-all shadow-sm" href="#">
+<span>Progreso</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</article>
+<!-- Client 2: David Gómez -->
+<article class="cliente-card p-card-padding rounded-2xl bg-surface-container-lowest shadow-[0_2px_10px_rgba(72,69,86,0.03)] hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-space-md" data-email="david.g@ejemplo.com" data-name="David Gómez">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="relative shrink-0">
+<div class="w-13 h-13 rounded-2xl bg-secondary-fixed text-secondary flex items-center justify-center font-headline-sm text-headline-sm font-bold shadow-inner">
+              DG
+            </div>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-secondary rounded-full ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">David Gómez</span>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm">Fuerza &amp; Descanso</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">david.g@ejemplo.com</span>
+<div class="flex items-center gap-space-md mt-space-xs text-body-sm font-body-sm">
+<span class="inline-flex items-center gap-1 text-tertiary font-semibold bg-tertiary-fixed/40 px-2 py-0.5 rounded-full text-label-sm">
+                🔥 18 días de racha
+              </span>
+<span class="text-on-surface-variant">Hoy: <strong class="text-primary font-semibold">4/4 hábitos (100%)</strong></span>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-space-md shrink-0">
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-xl">
+<div class="relative w-9 h-9 flex items-center justify-center">
+<svg class="w-9 h-9 -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-primary-container" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute material-symbols-outlined text-primary text-[18px]">check</span>
+</div>
+<div class="flex flex-col text-left">
+<span class="font-label-sm text-label-sm text-primary font-semibold">Completado</span>
+<span class="font-body-sm text-body-sm text-outline">Día perfecto</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs w-full sm:w-auto">
+<button class="h-9 w-9 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-primary flex items-center justify-center transition-all" onclick="abrirRecomendacion('David Gómez')" title="Enviar Recomendación">
+<span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
+</button>
+<button class="h-9 px-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-all" onclick="abrirAsignarModal('David Gómez')" title="Asignar Rutina">
+<span class="material-symbols-outlined text-[16px]">library_add</span>
+<span class="hidden md:inline">Asignar</span>
+</button>
+<a class="h-9 px-space-sm rounded-xl bg-primary text-on-primary font-label-sm text-label-sm flex items-center gap-1 hover:bg-primary/90 transition-all shadow-sm" href="#">
+<span>Progreso</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</article>
+<!-- Client 3: Sofía Aranda (Atención requerida) -->
+<article class="cliente-card p-card-padding rounded-2xl bg-surface-container-lowest shadow-[0_2px_10px_rgba(72,69,86,0.03)] hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-space-md border-l-4 border-l-error" data-email="sofia.aranda@ejemplo.com" data-name="Sofía Aranda">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="relative shrink-0">
+<div class="w-13 h-13 rounded-2xl bg-error-container text-on-error-container flex items-center justify-center font-headline-sm text-headline-sm font-bold">
+              SA
+            </div>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-error rounded-full ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Sofía Aranda</span>
+<span class="px-space-xs py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Requiere Atención</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">sofia.aranda@ejemplo.com</span>
+<div class="flex items-center gap-space-md mt-space-xs text-body-sm font-body-sm">
+<span class="inline-flex items-center gap-1 text-error font-semibold bg-error-container/60 px-2 py-0.5 rounded-full text-label-sm">
+                ⚠️ 0 días (2 días sin registrar)
+              </span>
+<span class="text-on-surface-variant">Hoy: <strong class="text-error">1/4 hábitos (25%)</strong></span>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-space-md shrink-0">
+<div class="flex items-center gap-space-xs bg-error-container/30 px-space-sm py-1.5 rounded-xl">
+<div class="relative w-9 h-9 flex items-center justify-center">
+<svg class="w-9 h-9 -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-error" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="25, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute font-label-sm text-label-sm font-bold text-error">25%</span>
+</div>
+<div class="flex flex-col text-left">
+<span class="font-label-sm text-label-sm text-error font-semibold">Alerta baja</span>
+<span class="font-body-sm text-body-sm text-outline">Reactivar</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs w-full sm:w-auto">
+<button class="h-9 px-space-sm rounded-xl bg-error text-on-error font-label-sm text-label-sm flex items-center gap-1 shadow-sm hover:scale-[1.02] transition-transform" onclick="abrirRecomendacion('Sofía Aranda')" title="Enviar Recomendación Urgente">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+<span>Recomendar</span>
+</button>
+<button class="h-9 px-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-all" onclick="abrirAsignarModal('Sofía Aranda')" title="Asignar Rutina">
+<span class="material-symbols-outlined text-[16px]">library_add</span>
+<span class="hidden md:inline">Asignar</span>
+</button>
+<a class="h-9 px-space-sm rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center gap-1 hover:bg-surface-container transition-all" href="#">
+<span>Progreso</span>
+</a>
+</div>
+</div>
+</article>
+<!-- Client 4: Carlos Mendoza -->
+<article class="cliente-card p-card-padding rounded-2xl bg-surface-container-lowest shadow-[0_2px_10px_rgba(72,69,86,0.03)] hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-space-md" data-email="carlos.mendoza@ejemplo.com" data-name="Carlos Mendoza">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="relative shrink-0">
+<div class="w-13 h-13 rounded-2xl bg-surface-container-high text-on-surface-variant flex items-center justify-center font-headline-sm text-headline-sm font-bold shadow-inner">
+              CM
+            </div>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Carlos Mendoza</span>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Anti-Estrés</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">carlos.mendoza@ejemplo.com</span>
+<div class="flex items-center gap-space-md mt-space-xs text-body-sm font-body-sm">
+<span class="inline-flex items-center gap-1 text-tertiary font-semibold bg-tertiary-fixed/40 px-2 py-0.5 rounded-full text-label-sm">
+                🔥 9 días de racha
+              </span>
+<span class="text-on-surface-variant">Hoy: <strong class="text-on-surface">3/4 hábitos (75%)</strong></span>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-space-md shrink-0">
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-xl">
+<div class="relative w-9 h-9 flex items-center justify-center">
+<svg class="w-9 h-9 -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="75, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute font-label-sm text-label-sm font-bold text-on-surface">75%</span>
+</div>
+<div class="flex flex-col text-left">
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">En progreso</span>
+<span class="font-body-sm text-body-sm text-outline">Constante</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs w-full sm:w-auto">
+<button class="h-9 w-9 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-primary flex items-center justify-center transition-all" onclick="abrirRecomendacion('Carlos Mendoza')" title="Enviar Recomendación">
+<span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span>
+</button>
+<button class="h-9 px-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-all" onclick="abrirAsignarModal('Carlos Mendoza')" title="Asignar Rutina">
+<span class="material-symbols-outlined text-[16px]">library_add</span>
+<span class="hidden md:inline">Asignar</span>
+</button>
+<a class="h-9 px-space-sm rounded-xl bg-primary text-on-primary font-label-sm text-label-sm flex items-center gap-1 hover:bg-primary/90 transition-all shadow-sm" href="#">
+<span>Progreso</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</article>
+<!-- Client 5: Laura Rivas (Top Pupila) -->
+<article class="cliente-card p-card-padding rounded-2xl bg-surface-container-lowest shadow-[0_2px_10px_rgba(72,69,86,0.03)] hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-space-md" data-email="laura.rivas@ejemplo.com" data-name="Laura Rivas">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="relative shrink-0">
+<div class="w-13 h-13 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold shadow-md">
+              LR
+            </div>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-tertiary-container rounded-full ring-2 ring-surface-container-lowest flex items-center justify-center text-[10px] text-on-tertiary">★</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Laura Rivas</span>
+<span class="px-space-xs py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-bold">Top Pupila 🏆</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">laura.rivas@ejemplo.com</span>
+<div class="flex items-center gap-space-md mt-space-xs text-body-sm font-body-sm">
+<span class="inline-flex items-center gap-1 text-tertiary font-bold bg-tertiary-fixed/60 px-2 py-0.5 rounded-full text-label-sm">
+                🔥 31 días ininterrumpidos
+              </span>
+<span class="text-on-surface-variant">Hoy: <strong class="text-primary font-semibold">3/3 hábitos (100%)</strong></span>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-space-md shrink-0">
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-xl">
+<div class="relative w-9 h-9 flex items-center justify-center">
+<svg class="w-9 h-9 -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-primary-container" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute material-symbols-outlined text-primary text-[18px]">verified</span>
+</div>
+<div class="flex flex-col text-left">
+<span class="font-label-sm text-label-sm text-primary font-semibold">Insignia Oro</span>
+<span class="font-body-sm text-body-sm text-outline">100% racha</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs w-full sm:w-auto">
+<button class="h-9 w-9 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-primary flex items-center justify-center transition-all" onclick="abrirRecomendacion('Laura Rivas')" title="Enviar Felicitación">
+<span class="material-symbols-outlined text-[18px]">sentiment_very_satisfied</span>
+</button>
+<button class="h-9 px-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-all" onclick="abrirAsignarModal('Laura Rivas')" title="Asignar Nueva Meta">
+<span class="material-symbols-outlined text-[16px]">library_add</span>
+<span class="hidden md:inline">Asignar</span>
+</button>
+<a class="h-9 px-space-sm rounded-xl bg-primary text-on-primary font-label-sm text-label-sm flex items-center gap-1 hover:bg-primary/90 transition-all shadow-sm" href="#">
+<span>Progreso</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</article>
+<!-- Pagination / Count Footer -->
+<div class="flex items-center justify-between pt-space-sm text-on-surface-variant font-body-sm text-body-sm">
+<span>Mostrando 5 de 24 clientes asignados</span>
+<div class="flex items-center gap-space-xs">
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest shadow-sm flex items-center justify-center text-outline disabled:opacity-40" disabled="">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<span class="font-label-md text-label-md px-2 text-on-surface">Página 1 de 5</span>
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest shadow-sm flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- RIGHT PANEL: Sticky Routine Library Preview (GET /coach/routines) -->
+<aside class="xl:col-span-4 flex flex-col gap-space-lg sticky top-24">
+<!-- Routine Library Card -->
+<div class="p-card-padding rounded-2xl bg-surface-container-lowest shadow-[0_2px_12px_rgba(72,69,86,0.04)] flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">shelves</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Biblioteca de Rutinas</h2>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-semibold">8 Plantillas</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Plantillas modulares listas para clonar o asignar a tus clientes de manera personalizada.
+        </p>
+<!-- Routine Template 1 -->
+<div class="p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col gap-space-xs group">
+<div class="flex items-center justify-between">
+<h3 class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors font-semibold">
+              Hidratación &amp; Energía
+            </h3>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-semibold">
+              12 pupilos
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+            Protocolo matutino de 500ml agua + electrolitos, caminata activa y respiración diafragmática.
+          </p>
+<div class="flex items-center justify-between pt-space-2xs text-body-sm font-body-sm text-outline">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">checklist_rtl</span> 4 hábitos base
+            </span>
+<div class="flex items-center gap-space-2xs">
+<button class="p-1 rounded-lg text-on-surface-variant hover:text-primary transition-colors" onclick="duplicarRutina('Hidratación &amp; Energía')" title="Clonar plantilla">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+</button>
+<button class="p-1 rounded-lg text-on-surface-variant hover:text-primary transition-colors" title="Editar plantilla">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Routine Template 2 -->
+<div class="p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col gap-space-xs group">
+<div class="flex items-center justify-between">
+<h3 class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors font-semibold">
+              Higiene del Sueño Profundo
+            </h3>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
+              9 pupilos
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+            Apagado de pantallas 60m antes, infusión relajante, lectura física y registro de gratitud.
+          </p>
+<div class="flex items-center justify-between pt-space-2xs text-body-sm font-body-sm text-outline">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">checklist_rtl</span> 3 hábitos base
+            </span>
+<div class="flex items-center gap-space-2xs">
+<button class="p-1 rounded-lg text-on-surface-variant hover:text-primary transition-colors" onclick="duplicarRutina('Higiene del Sueño')" title="Clonar plantilla">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+</button>
+<button class="p-1 rounded-lg text-on-surface-variant hover:text-primary transition-colors" title="Editar plantilla">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Routine Template 3 -->
+<div class="p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col gap-space-xs group">
+<div class="flex items-center justify-between">
+<h3 class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors font-semibold">
+              Anti-Estrés y Mindfulness
+            </h3>
+<span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-semibold">
+              15 pupilos
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+            Sesión de meditación 10m, pausas activas en jornada laboral y estiramientos cervicales.
+          </p>
+<div class="flex items-center justify-between pt-space-2xs text-body-sm font-body-sm text-outline">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">checklist_rtl</span> 4 hábitos base
+            </span>
+<div class="flex items-center gap-space-2xs">
+<button class="p-1 rounded-lg text-on-surface-variant hover:text-primary transition-colors" onclick="duplicarRutina('Anti-Estrés y Mindfulness')" title="Clonar plantilla">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+</button>
+<button class="p-1 rounded-lg text-on-surface-variant hover:text-primary transition-colors" title="Editar plantilla">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CTA Crear Rutina Base -->
+<button class="w-full py-space-sm px-space-md rounded-xl bg-surface-container-high hover:bg-surface-container text-primary font-label-md text-label-md flex items-center justify-center gap-space-xs transition-colors border-dashed border-2 border-primary/20" onclick="document.getElementById('modalCrearRutina').classList.remove('hidden')">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Crear Nueva Rutina Base</span>
+</button>
+</div>
+<!-- Quick Advice / Clinical Note Widget -->
+<div class="p-card-padding rounded-2xl bg-gradient-to-br from-primary/10 via-surface-container-low to-surface-container-lowest shadow-[0_2px_12px_rgba(72,69,86,0.03)] flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+<span class="font-label-md text-label-md font-semibold">Recordatorio del Coach</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+          Los pupilos con más de 2 días de inactividad incrementan su tasa de abandono en un 42%. Prioriza enviar una recomendación motivacional breve hoy.
+        </p>
+<button class="text-primary font-label-sm text-label-sm font-semibold flex items-center gap-1 hover:underline text-left" onclick="abrirRecomendacion('Sofía Aranda')">
+<span>Intervenir caso de Sofía Aranda</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</aside>
+</div>
+<!-- MODAL: Enviar Recomendación Personalizada -->
+<div class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-50 flex items-center justify-center p-space-md hidden transition-opacity" id="modalRecomendacion">
+<div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full p-card-padding shadow-2xl flex flex-col gap-space-md transform scale-100 transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-9 h-9 rounded-full bg-primary-fixed text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Enviar Recomendación</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant" id="modalRecomendacionDestinatario">Para: Pupilo</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-outline" onclick="document.getElementById('modalRecomendacion').classList.add('hidden')">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Tipo de Intervención</label>
+<div class="grid grid-cols-3 gap-space-xs">
+<button class="py-1.5 px-2 rounded-lg bg-surface-container-high text-primary font-label-sm text-label-sm text-center font-medium focus:bg-primary focus:text-on-primary" type="button">
+            Motivación
+          </button>
+<button class="py-1.5 px-2 rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm text-center font-medium hover:bg-surface-container-high" type="button">
+            Ajuste de Meta
+          </button>
+<button class="py-1.5 px-2 rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm text-center font-medium hover:bg-surface-container-high" type="button">
+            Feedback
+          </button>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-semibold" for="recomendacionTexto">Mensaje o Consejo de Bienestar</label>
+<textarea class="w-full bg-surface-container-low rounded-xl p-space-sm text-body-md text-on-surface outline-none focus:ring-2 focus:ring-primary resize-none placeholder:text-outline" id="recomendacionTexto" placeholder="Escribe aquí tu recomendación personalizada... Ej: 'He notado que te cuesta completar el hábito nocturno, probemos adelantarlo 30 minutos.'" rows="4"></textarea>
+</div>
+<div class="flex items-center justify-end gap-space-xs pt-space-xs">
+<button class="px-space-md py-space-xs rounded-full text-on-surface-variant hover:bg-surface-container font-label-md text-label-md transition-colors" onclick="document.getElementById('modalRecomendacion').classList.add('hidden')">
+          Cancelar
+        </button>
+<button class="px-space-lg py-space-xs rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-[0_4px_12px_rgba(87,45,228,0.25)] hover:scale-[1.02] active:scale-[0.98] transition-all" onclick="enviarRecomendacionConfirmada()">
+          Enviar Directo
+        </button>
+</div>
+</div>
+</div>
+<!-- MODAL: Asignar / Clonar Rutina -->
+<div class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-50 flex items-center justify-center p-space-md hidden transition-opacity" id="modalAsignar">
+<div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full p-card-padding shadow-2xl flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">assignment</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Asignar Rutina a Pupilo</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant" id="modalAsignarDestinatario">Para: Pupilo</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-outline" onclick="document.getElementById('modalAsignar').classList.add('hidden')">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Seleccionar Rutina Plantilla</label>
+<div class="space-y-space-2xs">
+<label class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors">
+<div class="flex items-center gap-space-xs">
+<input checked="" class="text-primary accent-primary" name="rutinaSelect" type="radio"/>
+<span class="font-label-md text-label-md text-on-surface">Hidratación &amp; Energía (4 hábitos)</span>
+</div>
+<span class="text-outline text-label-sm">Popular</span>
+</label>
+<label class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors">
+<div class="flex items-center gap-space-xs">
+<input class="text-primary accent-primary" name="rutinaSelect" type="radio"/>
+<span class="font-label-md text-label-md text-on-surface">Higiene del Sueño Profundo (3 hábitos)</span>
+</div>
+</label>
+<label class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors">
+<div class="flex items-center gap-space-xs">
+<input class="text-primary accent-primary" name="rutinaSelect" type="radio"/>
+<span class="font-label-md text-label-md text-on-surface">Anti-Estrés y Mindfulness (4 hábitos)</span>
+</div>
+</label>
+</div>
+</div>
+<div class="flex items-center gap-space-xs p-space-sm rounded-xl bg-primary-fixed/30 text-on-primary-fixed-variant">
+<span class="material-symbols-outlined text-[18px]">info</span>
+<span class="font-body-sm text-body-sm leading-tight">Al asignar, se creará una copia editable e independiente en el perfil del alumno sin alterar tu plantilla maestra.</span>
+</div>
+<div class="flex items-center justify-end gap-space-xs pt-space-xs">
+<button class="px-space-md py-space-xs rounded-full text-on-surface-variant hover:bg-surface-container font-label-md text-label-md transition-colors" onclick="document.getElementById('modalAsignar').classList.add('hidden')">
+          Cancelar
+        </button>
+<button class="px-space-lg py-space-xs rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-[0_4px_12px_rgba(87,45,228,0.25)] hover:scale-[1.02] transition-all" onclick="confirmarAsignacion()">
+          Asignar Rutina
+        </button>
+</div>
+</div>
+</div>
+<!-- MODAL: Crear Nueva Rutina Base -->
+<div class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-50 flex items-center justify-center p-space-md hidden transition-opacity" id="modalCrearRutina">
+<div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full p-card-padding shadow-2xl flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-9 h-9 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">add_task</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Crear Rutina Base</h3>
+</div>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-outline" onclick="document.getElementById('modalCrearRutina').classList.add('hidden')">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Título de la Rutina</label>
+<input class="w-full bg-surface-container-low rounded-xl px-space-md py-space-xs text-body-md text-on-surface outline-none focus:ring-2 focus:ring-primary" placeholder="Ej: Protocolo de Enfoque Matutino" type="text"/>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Descripción del Objetivo</label>
+<textarea class="w-full bg-surface-container-low rounded-xl p-space-sm text-body-md text-on-surface outline-none focus:ring-2 focus:ring-primary resize-none" placeholder="Describe brevemente el impacto en la salud mental del pupilo..." rows="2"></textarea>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Hábitos incluidos (mínimo 1)</label>
+<div class="space-y-space-2xs">
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-space-2xs rounded-lg">
+<span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+<input class="bg-transparent border-0 outline-none text-body-sm text-on-surface w-full" type="text" value="Beber 500ml de agua al despertar"/>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-space-2xs rounded-lg">
+<span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+<input class="bg-transparent border-0 outline-none text-body-sm text-on-surface w-full" type="text" value="Exposición a luz natural 10 minutos"/>
+</div>
+</div>
+<button class="text-primary font-label-sm text-label-sm flex items-center gap-1 mt-1 hover:underline">
+<span class="material-symbols-outlined text-[16px]">add</span> Añadir otro hábito a la lista
+        </button>
+</div>
+<div class="flex items-center justify-end gap-space-xs pt-space-xs">
+<button class="px-space-md py-space-xs rounded-full text-on-surface-variant hover:bg-surface-container font-label-md text-label-md transition-colors" onclick="document.getElementById('modalCrearRutina').classList.add('hidden')">
+          Descartar
+        </button>
+<button class="px-space-lg py-space-xs rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md shadow-[0_4px_12px_rgba(112,78,253,0.22)] hover:scale-[1.02] transition-all" onclick="document.getElementById('modalCrearRutina').classList.add('hidden'); alert('¡Rutina plantilla creada exitosamente!');">
+          Guardar Plantilla
+        </button>
+</div>
+</div>
+</div>
+<!-- Toast Notifier -->
+<div class="fixed bottom-6 right-6 bg-on-surface text-surface px-space-md py-space-sm rounded-xl shadow-xl flex items-center gap-space-xs opacity-0 pointer-events-none transition-opacity duration-300 z-50" id="toastSuccess">
+<span class="material-symbols-outlined text-secondary-container text-[20px]">check_circle</span>
+<span class="font-body-sm text-body-sm font-medium" id="toastMessage">Acción completada con éxito</span>
+</div>
+<script>
+    function showToast(msg) {
+      const toast = document.getElementById('toastSuccess');
+      const messageSpan = document.getElementById('toastMessage');
+      if (toast && messageSpan) {
+        messageSpan.textContent = msg;
+        toast.classList.remove('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'pointer-events-none');
+        }, 3200);
+      }
+    }
+
+    function switchTab(tab) {
+      const btnClientes = document.getElementById('tabClientes');
+      const btnRutinas = document.getElementById('tabRutinas');
+      
+      if (tab === 'clientes') {
+        btnClientes.className = 'flex items-center gap-space-xs px-space-lg py-space-xs rounded-full bg-surface-container-lowest text-primary shadow-[0_2px_8px_rgba(0,0,0,0.06)] font-label-md text-label-md transition-all';
+        btnRutinas.className = 'flex items-center gap-space-xs px-space-lg py-space-xs rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all';
+        showToast('Mostrando listado de 24 clientes asignados');
+      } else {
+        btnRutinas.className = 'flex items-center gap-space-xs px-space-lg py-space-xs rounded-full bg-surface-container-lowest text-primary shadow-[0_2px_8px_rgba(0,0,0,0.06)] font-label-md text-label-md transition-all';
+        btnClientes.className = 'flex items-center gap-space-xs px-space-lg py-space-xs rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all';
+        showToast('Modo biblioteca de rutinas activado');
+      }
+    }
+
+    function filtrarClientes() {
+      const input = document.getElementById('searchInput');
+      const filter = input.value.toLowerCase();
+      const cards = document.querySelectorAll('.cliente-card');
+
+      cards.forEach(card => {
+        const name = card.getAttribute('data-name')?.toLowerCase() || '';
+        const email = card.getAttribute('data-email')?.toLowerCase() || '';
+        if (name.includes(filter) || email.includes(filter)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    let destinatarioActual = '';
+
+    function abrirRecomendacion(nombre) {
+      destinatarioActual = nombre;
+      document.getElementById('modalRecomendacionDestinatario').textContent = 'Para: ' + nombre;
+      document.getElementById('modalRecomendacion').classList.remove('hidden');
+    }
+
+    function enviarRecomendacionConfirmada() {
+      const texto = document.getElementById('recomendacionTexto').value;
+      document.getElementById('modalRecomendacion').classList.add('hidden');
+      document.getElementById('recomendacionTexto').value = '';
+      showToast('Recomendación enviada con éxito a ' + destinatarioActual);
+    }
+
+    function abrirAsignarModal(nombre) {
+      destinatarioActual = nombre;
+      document.getElementById('modalAsignarDestinatario').textContent = 'Para: ' + nombre;
+      document.getElementById('modalAsignar').classList.remove('hidden');
+    }
+
+    function confirmarAsignacion() {
+      document.getElementById('modalAsignar').classList.add('hidden');
+      showToast('Rutina asignada exitosamente a ' + destinatarioActual);
+    }
+
+    function duplicarRutina(nombreRutina) {
+      showToast('Copia creada de plantilla: "' + nombreRutina + '"');
+    }
+  </script>
+</div></main></div></body></html>

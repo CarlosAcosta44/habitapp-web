@@ -5,9 +5,8 @@
  */
 
 import { requireUserStrict } from "@/lib/auth/require-user";
-import { UsuarioService } from "@/services/usuario.service";
-import { RegistroService } from "@/services/registro.service";
-import { getLocalDateString } from "@/lib/date-utils";
+import { ReportesService } from "@/services/reportes.service";
+import { coachService } from "@/services/coach.service";
 import { AjustesClient } from "./AjustesClient";
 
 export const metadata = {
@@ -17,54 +16,32 @@ export const metadata = {
 
 export default async function AjustesPage() {
   const user = await requireUserStrict();
-  const usuarioService = new UsuarioService();
-  const registroService = new RegistroService();
+  const reportesService = new ReportesService();
 
-  const [perfilRes, historialRes] = await Promise.all([
-    usuarioService.getPerfilMe(),
-    registroService.getHistorialUsuario(),
+  const [reportesRes, trainerRes] = await Promise.all([
+    reportesService.getEstadisticas(user.id, "week"),
+    coachService.getMyTrainerAndRoutines(),
   ]);
 
-  const perfil = perfilRes.success ? perfilRes.data : null;
-  const registros =
-    historialRes.success && Array.isArray(historialRes.data) ? historialRes.data : [];
-
-  // Calcular racha real
-  const completedDates = new Set(
-    registros.filter((r: any) => r.completado).map((r: any) => r.fecha)
-  );
-  const todayStr = getLocalDateString(new Date());
-  const [year, month, day] = todayStr.split("-").map(Number);
-  const todayDate = new Date(year, month - 1, day);
-  const ayerDate = new Date(todayDate);
-  ayerDate.setDate(todayDate.getDate() - 1);
-  const ayerStr = getLocalDateString(ayerDate);
-
-  const hasToday = completedDates.has(todayStr);
-  const hasYesterday = completedDates.has(ayerStr);
-  let racha = 0;
-  if (hasToday || hasYesterday) {
-    const cur = hasToday ? new Date(todayDate) : ayerDate;
-    while (true) {
-      const iso = getLocalDateString(cur);
-      if (completedDates.has(iso)) {
-        racha++;
-        cur.setDate(cur.getDate() - 1);
-      } else {
-        break;
-      }
-    }
-  }
+  const realStreak = reportesRes.success && reportesRes.data ? (reportesRes.data.racha_actual ?? 0) : 0;
+  const trainers = trainerRes.success && trainerRes.data?.trainers ? trainerRes.data.trainers : [];
+  const routines = trainerRes.success && trainerRes.data?.routines ? trainerRes.data.routines : [];
 
   const currentUserData = {
-    nombre: perfil?.nombre || user.nombre || "Usuario",
-    apellido: perfil?.apellido || user.apellido || "",
+    nombre: user.nombre || "Usuario",
+    apellido: user.apellido || "",
     email: user.email,
-    fotoperfil: perfil?.fotoperfil || (user as any).fotoperfil || null,
-    nombrerol: perfil?.nombrerol || user.nombrerol || "Usuario",
-    puntostotales: perfil?.puntostotales ?? user.puntostotales ?? 0,
-    racha: racha > 0 ? racha : 24,
+    fotoperfil: (user as any).fotoperfil || null,
+    nombrerol: user.nombrerol || "Usuario",
+    puntostotales: user.puntostotales ?? 0,
+    racha: realStreak,
   };
 
-  return <AjustesClient user={currentUserData} />;
+  return (
+    <AjustesClient
+      user={currentUserData}
+      initialTrainers={trainers}
+      initialRoutines={routines}
+    />
+  );
 }

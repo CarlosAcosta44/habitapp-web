@@ -34,30 +34,34 @@ Next.js es un framework de React orientado a producción que permite construir a
 
 | Característica | Beneficio para el proyecto |
 |----------------|---------------------------|
-| **App Router** | Gestión de rutas clara y escalable por módulos (gestión, seguimiento, comunidad) |
-| **Static Export (SSG)** | Renderizado y build de Next.js para despliegue en Vercel o plataforma equivalente |
-| **Client-side Rendering** | Interacción en tiempo real y carga dinámica de datos directamente desde Supabase |
-| **React Components** | Reutilización de componentes de interfaz para mayor velocidad de desarrollo |
-| **TypeScript nativo** | Tipado estricto para mayor confiabilidad del código |
+| **App Router** | Gestión de rutas clara y escalable por módulos (hábitos, comunidad, reportes, entrenador, admin) |
+| **Server Components & Actions** | Renderizado híbrido rápido y mutaciones seguras con validación Zod |
+| **Renovación JWT Silenciosa** | `apiClient` intercepta respuestas 401 y renueva el `access_token` automáticamente vía `/auth/refresh` |
+| **React Components** | Reutilización de componentes de interfaz sin datos mockeados (Zero-Mock Policy) |
+| **TypeScript nativo** | Tipado estricto con patrón `Result<T>` para mayor confiabilidad del código |
 
-### Estructura de módulos en Next.js
+### Estructura de rutas en Next.js (`src/app`)
 
 ```
-app/
+src/app/
 ├── (auth)/
 │   ├── login/
-│   └── register/
-├── (dashboard)/
-│   ├── habitos/
-│   ├── reportes/
-│   └── perfil/
-├── comunidad/
-│   ├── foros/
-│   ├── ranking/
-│   └── articulos/
-└── admin/
-    ├── usuarios/
-    └── moderacion/
+│   ├── register/
+│   ├── forgot-password/
+│   └── update-password/
+└── (dashboard)/
+    ├── habitos/
+    ├── comunidad/
+    ├── reportes/
+    ├── ranking/
+    ├── perfil/
+    ├── ajustes/
+    ├── notificaciones/
+    ├── entrenador/
+    │   └── clientes/[id]/
+    └── admin/
+        ├── usuarios/
+        └── moderacion/
 ```
 
 ### Rol en el proyecto
@@ -367,9 +371,9 @@ v2.0.0 → Cambio que rompe compatibilidad hacia atrás
 
 | Tecnología | Categoría | Responsabilidad principal |
 |------------|-----------|--------------------------|
-| **Next.js** | Frontend | Interfaz de usuario, rutas, SSR, consumo de APIs |
-| **NestJS** | Backend API | Arquitectura modular, Swagger, guards, services y repositories |
-| **Supabase** | Backend / BaaS | Base de datos, autenticación, almacenamiento, triggers, realtime |
+| **Next.js 16** | Frontend | Interfaz de usuario, App Router, Server Components, Server Actions y `apiClient` |
+| **NestJS** | Backend API | Custom Auth JWT, lógica de negocio, validación DTOs, Swagger, Guards y Repositories |
+| **Supabase PostgreSQL** | Base de Datos | Persistencia relacional (`gestion`, `seguimiento`, `comunidad`) y Storage accedidos exclusivamente por NestJS |
 | **Vercel / Railway / Fly** | Infraestructura | Despliegue frontend y backend por ambientes |
 | **GitHub** | Repositorio | Código fuente, PRs, CI/CD, gestión de tareas |
 | **Gitflow** | Flujo de trabajo | Estrategia de ramas para desarrollo paralelo y ordenado |

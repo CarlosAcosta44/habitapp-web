@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
-import path from "node:path";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: path.resolve(__dirname),
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion"],
   },
   async headers() {
     return [
@@ -37,8 +35,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  silent: true,
-  org: "habitapp",
-  project: "frontend",
-});
+export default nextConfig;

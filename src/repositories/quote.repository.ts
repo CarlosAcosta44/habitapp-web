@@ -10,7 +10,9 @@ import type { DailyQuote } from "@/domain/quote.types";
 
 export class QuoteRepository {
   async getDailyQuote(): Promise<Result<DailyQuote>> {
-    return apiClient.get<DailyQuote>("admin/quotes/daily");
+    return apiClient.get<DailyQuote>("admin/quotes/daily", {
+      next: { revalidate: 3600 },
+    });
   }
 }
 

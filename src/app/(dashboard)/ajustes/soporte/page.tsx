@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Mail, MessageCircle, HelpCircle, FileText } from "lucide-react";
+import { ArrowLeft, Mail, MessageCircle, HelpCircle } from "lucide-react";
 
 export default function SoportePage() {
   return (
