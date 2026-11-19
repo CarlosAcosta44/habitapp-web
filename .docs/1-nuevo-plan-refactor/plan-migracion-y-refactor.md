@@ -1,52 +1,24 @@
-# Plan de Migración y Refactorización (Frontend Web)
+# Plan de Migración y Refactorización (Frontend Web & Backend API) — Estado Completado
 
-**Objetivo Principal:** Evolucionar el frontend de HabitApp para desconectarlo completamente de Supabase directo, integrarlo con el nuevo Backend NestJS (Custom Auth) y refactorizar su código para que cumpla estrictamente con Clean Architecture y sea 100% testeable.
+**Objetivo Principal:** Desconectar completamente el frontend de HabitApp de llamadas directas a Supabase, integrarlo con el Backend NestJS (Custom Auth JWT) bajo Arquitectura Limpia de 4 capas, eliminar el 100% de datos mockeados y completar los módulos de Usuario, Comunidad, Entrenador y Administrador.
 
 ---
 
-## 1. Desconexión de Supabase y Migración a Custom Auth
-Actualmente, el frontend utiliza el SDK de Supabase (`@supabase/supabase-js` o `@supabase/ssr`) para registrar usuarios, iniciar sesión y recuperar datos directamente de la base de datos. Esto es un riesgo de seguridad y rompe la arquitectura.
+## 1. Desconexión de Supabase Auth y Consolidación de Custom Auth (✅ Completado)
+1. **Supabase exclusivamente como Base de Datos:** El frontend `habitapp-web` no realiza llamadas directas a Supabase Auth ni PostgREST. Todo el acceso ocurre mediante `habitapp-api` (NestJS).
+2. **Cliente HTTP Centralizado (`src/lib/api/client.ts`):**
+   - Inyecta automáticamente `Authorization: Bearer <access_token>` y `x-timezone-offset`.
+   - **Renovación Silenciosa en `401`:** Si el `access_token` expira, `apiClient` invoca automáticamente `/api/v1/auth/refresh` usando el `refresh_token`, actualiza la caché en memoria para renders concurrentes de Server Components, persiste las nuevas cookies `HttpOnly` y reintenta la petición original sin pedirle al usuario que vuelva a iniciar sesión.
 
-**Plan de acción:**
-1. **Eliminar el SDK de Supabase Auth:** Destruir todas las llamadas a `supabase.auth.signUp()`, `signInWithPassword()`, `getUser()`, etc.
-2. **Implementar el cliente HTTP (Backend):** Crear un cliente base (ej. usando `axios` o `fetch` con interceptores) que apunte a la API de NestJS (`http://localhost:4000/api/v1`).
-3. **Gestión de Sesión con JWT:** 
-   - El frontend enviará las credenciales a `/auth/login` (NestJS).
-   - NestJS devolverá un `access_token` (JWT).
-   - El frontend guardará este token de forma segura (ej. en cookies `HttpOnly` mediante Server Actions de Next.js) y lo inyectará en el header `Authorization: Bearer <token>` de cada petición futura.
+## 2. Arquitectura Limpia de 4 Capas en Frontend (✅ Completado)
+* **Capa 1: UI / Presentación (`src/app` y `src/components`)** — Server Components para carga inicial paralela (`Promise.all`) y Client Components interactivos sin datos quemados.
+* **Capa 2: Server Actions (`src/actions/*.actions.ts`)** — Validación con Zod, control de sesión (`requireUser`) y revalidación de rutas (`revalidatePath`).
+* **Capa 3: Services (`src/services/*.service.ts`)** — Lógica de dominio retornando objetos `Result<T>`.
+* **Capa 4: Repositories (`src/repositories/*.repository.ts`)** — Heredan de `BaseRepository`, encapsulando las peticiones HTTP hacia NestJS.
 
-## 2. Refactorización Arquitectónica Estricta
-El frontend tiene Next.js (App Router), pero la lógica está mezclada en los componentes. Implementaremos una separación de responsabilidades estricta.
-
-**Nueva Estructura de Capas (Por Módulo):**
-* **Capa 1: UI / Presentación (`/app` y `/components`)**
-  * Solo dibuja interfaces. No hace fetch directo ni contiene lógica de negocio.
-  * Consumen `Server Actions` o `Hooks` personalizados.
-* **Capa 2: Server Actions / Controladores**
-  * Intermedian entre la UI y los servicios. Capturan los datos del formulario, los validan y llaman al servicio.
-* **Capa 3: Services (Lógica de Negocio)**
-  * Aplican las reglas de negocio en el lado del cliente o servidor.
-* **Capa 4: Repositories / API Clients (Infraestructura)**
-  * Clases o funciones especializadas únicamente en hacer `fetch()` hacia el Backend NestJS. Mapean los JSON del backend a interfaces locales.
-
-## 3. Testabilidad (100% Testeable)
-Al extraer la lógica de obtención de datos hacia los `Repositories` y la lógica de negocio a los `Services`, los componentes de React se vuelven "tontos" (Dumb Components).
-- Podremos crear pruebas unitarias (con Jest) para los `Services` sin necesitar renderizar componentes.
-- Los componentes se probarán con React Testing Library simulando (mocking) las respuestas de los Server Actions.
-
-## 4. Fases de Ejecución
-
-### Fase 1: Preparación y Autenticación
-1. Configurar variables de entorno (`NEXT_PUBLIC_API_URL`).
-2. Construir la utilidad de cliente HTTP base con interceptores para inyectar el token.
-3. Refactorizar las pantallas de Login y Registro para que usen la nueva API del Backend en lugar de Supabase.
-
-### Fase 2: Refactorización por Módulos
-1. **Módulo de Usuarios/Perfil:** Refactorizar cómo se obtiene y actualiza el perfil del usuario activo.
-2. **Módulo de Hábitos:** Extraer toda la lógica de rachas y creación de hábitos a `HabitsService` y `HabitsRepository`.
-3. **Módulo de Comunidad:** Reemplazar las suscripciones en tiempo real de Supabase (si existían) por polling o WebSockets genéricos contra el backend NestJS.
-
-### Fase 3: Limpieza y Pruebas
-1. Purgar el paquete `@supabase/supabase-js` del `package.json` del frontend.
-2. Escribir pruebas unitarias para los 3 servicios principales.
-3. Asegurar que las variables de entorno relacionadas con Supabase ya no existan en Vercel.
+## 3. Módulos Integrados con Datos 100% Reales (✅ Completado)
+1. **Dashboard de Hábitos (`/habitos`) y Progreso (`/reportes`, `/ranking`):** CRUD de hábitos, soft-delete para preservar historial, cálculo real de rachas y mapas de calor.
+2. **Comunidad y Bienestar (`/comunidad`):** Foros, comentarios anidados con imágenes, hábitos compartidos clonables, retos comunitarios con check-in diario y directorio de especialistas con vinculación real de entrenador.
+3. **Perfil (`/perfil`) y Ajustes (`/ajustes`):** Datos reales de cuenta, correo, logros, amigos y sección de *Acompañamiento Profesional* conectada al entrenador y rutinas reales del usuario.
+4. **Portal del Entrenador (`/entrenador` y `/entrenador/clientes/[id]`):** Gestión de pupilos vinculados, creación de plantillas de rutinas con hábitos modulares, asignación con materialización automática en `seguimiento.habitos`, heatmap real de 70 días y envío de recomendaciones in-app.
+5. **Panel de Administración (`/admin`, `/admin/usuarios`, `/admin/moderacion`):** KPIs globales reales, gestión de roles (`Usuario`, `Entrenador`, `Administrador`) y estados de cuenta (`Activo`, `Suspendido`), y moderación de foros/comentarios.

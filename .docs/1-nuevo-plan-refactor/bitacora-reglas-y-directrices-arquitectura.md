@@ -1,117 +1,109 @@
 # 🛡️ Bitácora de Cambios, Reglas de Oro y Directrices de Arquitectura
 
-Este documento consolida todo el trabajo realizado en la rama `feature/clean-architecture-migration` (Frontend) y `feature/custom-auth-migration` (Backend), así como las reglas de ingeniería, lecciones aprendidas y advertencias críticas para que las próximas sesiones y desarrolladores no rompan la arquitectura ni reintroduzcan errores ya solventados.
+Este documento consolida la arquitectura vigente de **HabitApp** en `habitapp-web` (Frontend Next.js 16) y `habitapp-api` (Backend NestJS), así como las **Reglas de Oro**, el flujo completo de **Entrenadores, Clientes y Rutinas**, el sistema de **Renovación Silenciosa de Sesión JWT** y la organización oficial de `.docs`.
 
 ---
 
-## 📌 1. Resumen de lo Realizado en Esta Rama
+## 📌 1. Estado Actual de los Módulos del Sistema
 
-### A. Desconexión de Supabase y Migración a Custom Auth (NestJS)
-- **Frontend Independiente:** Eliminada la dependencia del cliente JS de Supabase para login, registro y consultas directas en componentes de usuario.
-- **Flujo de Autenticación JWT:** Login y registro envían credenciales a la API de NestJS (`/api/v1/auth/login`, `/api/v1/auth/register`). El backend emite un JWT firmado que el frontend almacena en una cookie HTTP-only (`auth_token`) gestionada por Server Actions de Next.js (`loginAction`, `registerAction`, `logoutAction`).
-- **Middleware & Guardias:** Middleware en Next.js valida la existencia de la cookie y redirige según estado de autenticación. En el backend, las rutas protegidas usan `@UseGuards(JwtAuthGuard)` de NestJS Passport.
-- **Clean Architecture en Backend:** Se refactorizaron los servicios monolíticos a repositorios específicos (`HabitsRepository`, `RecordsRepository`, `CommunityRepository`, `AdminRepository`, `CoachRepository`, `UsersRepository`), aislando las consultas a la base de datos y haciendo los servicios 100% testeables con Jest.
+### A. Autenticación Custom Auth (NestJS) y Renovación Silenciosa en `apiClient`
+- **Supabase sólo como Base de Datos:** El frontend no utiliza `@supabase/supabase-js` para autenticación ni consultas. Toda comunicación ocurre vía HTTP REST hacia NestJS (`NEXT_PUBLIC_API_URL`, por defecto `http://localhost:4000/api/v1`).
+- **Renovación Automática de Tokens en `src/lib/api/client.ts`:**
+  - Las cookies `access_token` y `refresh_token` (`HttpOnly`, 7 días) autentican cada petición.
+  - Si cualquier petición en `apiClient` recibe `401 Unauthorized` (por expiración del `access_token`), `apiClient` invoca automáticamente `/auth/refresh` usando el `refresh_token`, almacena el nuevo token en una caché en memoria deduplicada (`refreshedAccessTokens`) para que los renders paralelos de Server Components utilicen el token fresco de inmediato, actualiza las cookies cuando el contexto lo permite y reintenta la petición original de forma transparente.
+  - Los endpoints `multipart/form-data` (`updateAvatar` en `usuario.service.ts` y `uploadComunidadImageAction` en `comunidad.actions.ts`) utilizan `getValidAccessToken()` con reintento automático en `401`.
 
-### B. Módulo de Hábitos y Dashboard Diario
-- **Historial de Días Pasados:** Los hábitos completados o existentes en días anteriores se preservan fielmente. Al navegar en el selector de fechas semanal/calendario, los días pasados muestran los hábitos activos en esa fecha histórica y su estado de cumplimiento registrado.
-- **Soft-Delete y Archivo de Hábitos:** Los hábitos no se borran físicamente si tienen historial; se marcan con estado `'Inactivo'`. El contenedor de hábitos archivados se muestra en una sección colapsable al final de la lista para mantener limpia la vista principal.
-- **Persistencia de Registros Diarios:** Al marcar o desmarcar un hábito, se envía la fecha local explícita (`YYYY-MM-DD`) para evitar desfases de zona horaria (UTC vs Local).
+### B. Módulo de Entrenadores, Clientes y Rutinas (`/entrenador` y `/entrenador/clientes/[id]`)
+- **Cero Datos Quemados (Zero-Mock Policy):**
+  - Eliminados todos los clientes semilla, rutinas ficticias, hábitos de respaldo (`"Hidratación consciente"`, etc.), fórmulas simuladas de heatmap (`offset % 3 === 0`), recomendaciones estáticas y porcentajes de adherencia por defecto (`80%`/`85%`).
+  - Cuando un entrenador inicia sesión, solo visualiza los alumnos legítimamente vinculados a su `identrenador` en `seguimiento.usuario_entrenador` y las rutinas creadas por él en `seguimiento.rutinas`.
+- **Flujo Bidireccional de Vinculación Cliente ↔ Entrenador:**
+  1. **Desde el Usuario (`/comunidad?tab=especialistas` y `/ajustes`):** Cualquier usuario puede vincularse o desvincularse de un entrenador certificado mediante `POST / DELETE /api/v1/users/me/trainer/:trainerId`. En `/ajustes` (sección *Acompañamiento Profesional*), el usuario consulta su entrenador real activo y las rutinas asignadas (reemplazando el antiguo mock de *"Dra. Elena Vidal"*).
+  2. **Desde el Entrenador (`/entrenador`):** El coach puede vincular usuarios disponibles (`GET /coach/available-clients`, `POST /coach/clients/:clientId/link`) o desvincularlos (`DELETE /coach/clients/:clientId/link`).
+- **Ciclo Completo de Rutinas (`seguimiento.rutinas` → `seguimiento.usuario_rutina` → `seguimiento.habitos`):**
+  - El entrenador crea plantillas de rutina con **Título/Objetivo**, **Categoría** (`tipo`), **Nivel** (`nivel`), **Duración en días** (`duracion`), **Descripción** y **Hábitos Diarios Modulares**.
+  - Al asignar una rutina a un pupilo (`POST /coach/clients/:clientId/routines/:routineId/assign`), el backend:
+    1. Registra la relación activa en `seguimiento.usuario_rutina`.
+    2. Materializa los hábitos de la rutina en `seguimiento.habitos` para el alumno con el prefijo `[Coach: NombreRutina]`.
+    3. Envía una notificación in-app al alumno en `gestion.notificaciones`.
+  - En `/entrenador/clientes/[id]`, `ReportsService.getUserSummary` clasifica automáticamente los hábitos con `[Coach:` como `tipo: 'Asignado'`, permitiendo filtrar entre **Todos**, **Asignados por Coach** y **Personales**.
 
-### C. Módulo de Comunidad y Bienestar
-- **Arquitectura de Pestañas:**
-  - **Todo:** Vista resumen con foros destacados, hábitos compartidos, y widgets laterales de especialistas y retos.
-  - **Foros:** Listado paginado/filtrado de foros y la tarjeta/botón de acción exclusiva para "Crear Foro".
-  - **Hábitos Compartidos:** Muro de hábitos creados y publicados por la comunidad, con opción de agregarlos a los hábitos propios.
-  - **Retos:** Vista de desafíos con recompensas reales (`puntos_recompensa`), cálculo exacto de participantes desde `comunidad.usuario_reto` y modal de inscripción interactivo.
-  - **Especialistas:** Directorio de profesionales y entrenadores con opción de contacto o seguimiento.
-- **Creación de Foros con Categoría Dinámica:** Modal de creación de foro permite escribir categorías personalizadas (estilo tags `#`) además de sugerencias predefinidas, validando la longitud estricta de la base de datos.
-- **Subida Nativa de Imágenes:** En comentarios y foros, se reemplazó el campo de URL en texto plano por un selector nativo de archivos (`<input type="file">`). La imagen se sube mediante Server Action al bucket de Supabase Storage (`comunidad-media`) y se asocia la URL pública al comentario/publicación.
-- **Conteo Real de Miembros:** El contador de comunidad refleja los miembros reales registrados/activos de la plataforma.
+### C. Módulo de Administración (`/admin`, `/admin/usuarios`, `/admin/moderacion`)
+- **Dashboard Analítico (`/admin`):** Métricas 100% reales desde `gestion.usuarios`, `seguimiento.habitos`, `seguimiento.registro_habitos` y `comunidad.foros`.
+- **Gestión de Usuarios y Roles (`/admin/usuarios`):**
+  - Paginación y búsqueda real sobre `gestion.usuarios`.
+  - Cambio de rol (`PATCH /users/:id/role`) compatible con `{ nombrerol, role }` insensible a mayúsculas/minúsculas (`Usuario`, `Entrenador`, `Administrador`). Si un usuario es promovido a `Entrenador`, se asegura automáticamente su registro en `seguimiento.entrenadores`.
+  - Suspensión/reactivación de cuentas (`PATCH /users/:id/status`) con protección contra auto-bloqueo o auto-degradación de rol del propio administrador.
+- **Moderación Comunitaria (`/admin/moderacion`):** Inspección y eliminación real de foros y comentarios con registro de acciones en sesión.
 
-### E. Auditoría de Seguridad, Calidad de Código y SonarQube / SonarCloud
-- **Remoción de Secretos y Vulnerabilidades Bloqueantes (`secrets:S8215`):**
-  - Se eliminó el hash bcrypt de contraseñas de demostración en `.docs/3-base-datos-y-sql/scripts/sql/seguridad/1. RLS_Politicas.sql`, reemplazándolo por `<HASH_DE_CONTRASEÑA_TEMPORAL>`, resolviendo la alerta de seguridad crítica en GitHub Advanced Security y SonarCloud (Security Rating A).
-- **Configuración Centralizada de Sonar (`sonar-project.properties`):**
-  - Se configuró el archivo raíz excluyendo documentación, scripts SQL de referencia, mocks y assets para enfocar el análisis de calidad estrictamente en `src/`.
-- **Eliminación de Código Duplicado (DRY) con `BaseRepository`:**
-  - Se creó `src/repositories/base.repository.ts` implementando métodos HTTP reutilizables (`get`, `post`, `put`, `patch`, `delete`) con tipado genérico `Result<T>`.
-  - Se refactorizaron los 10 repositorios (`admin`, `amigos`, `auth`, `coach`, `comunidad`, `habito`, `notification`, `registro`, `reportes`, `usuario`) para extender de `BaseRepository`, reduciendo la duplicación a menos del 1.5% (umbral de SonarQube: 3.0%).
-- **Manejo Estricto de Promesas Flotantes (`typescript:S9383`):**
-  - Corrección de promesas sin manejar en `ForoDetalleInteractiveView`, `HabitDetailModal`, `ArchivedHabitsModal`, `NewHabitModal`, `CreateForoModal` y `ShareHabitModal`, marcándolas con `void` explícito o envolviéndolas en `startTransition` / `await`.
-- **Accesibilidad y Semántica WCAG (`typescript:S1082`, `S6848`, `S1077`):**
-  - Reemplazo de `div` con `onClick` en backdrops de modales por botones accesibles o contenedores semánticos con `role="presentation"`.
-  - Inclusión de `aria-hidden="true"` en todos los iconos SVG decorativos.
-- **Reducción de Complejidad Cognitiva y Limpieza de Código Muerto:**
-  - Descomposición de componentes complejos (`HabitItemCard`, `MotivationalBanner`, `DashboardInteractiveView`, `ActiveChallengesWidget`, `StreakWidget`).
-  - Eliminación de ternarios anidados (`S3358`), imports no utilizados (`S1128`) y variables asignadas sin uso (`S1854`).
-  - Verificación de CI local: `npm run lint` (0 errores), `npx tsc --noEmit` (0 errores) y `npm run build` (31 rutas optimizadas limpias).
+### D. Navegación por Rol y Perfil de Usuario (`/perfil`)
+- `Sidebar.tsx` normaliza `user.nombrerol` y `user.role`, habilitando enlaces a **Entrenador** (`/entrenador`) para entrenadores y ambos enlaces (**Administrador** `/admin` y **Entrenador** `/entrenador`) para administradores.
+- `PerfilPage` (`/perfil`) muestra exclusivamente datos reales del usuario autenticado (correo real desde `gestion.usuarios.email`, racha real, hábitos activos, tasa de cumplimiento mensual, puntos, logros desbloqueados de `gestion.usuario_logro` y amigos reales de `gestion.amigos`).
 
 ---
 
-## ⚠️ 2. Reglas de Oro y Advertencias Críticas (¡LEER OBLIGATORIAMENTE!)
+## ⚠️ 2. Las 12 Reglas de Oro de Ingeniería (¡OBLIGATORIAS!)
 
-### Regla 1: NUNCA mezclar el JWT de NestJS con el cliente Supabase
-- **Advertencia:** El token JWT que emite el backend NestJS está firmado con su propio secreto (`SUPABASE_JWT_SECRET` o `JWT_SECRET`). El cliente `@supabase/supabase-js` en el navegador **NO** debe usarse para validar esta sesión, porque arrojará `"Token inválido"`.
-- **Acción requerida:** Toda petición autenticada debe realizarse a través de `apiClient` hacia la API de NestJS (`http://localhost:4000/api/v1`), inyectando el header `Authorization: Bearer <token>` extraído de las cookies con `requireUserStrict()`.
+### Regla 1: Supabase es EXCLUSIVAMENTE nuestra Base de Datos
+- **Prohibido** usar Supabase Auth o el cliente de Supabase directamente desde `habitapp-web`.
+- Toda operación debe pasar por `apiClient` hacia `habitapp-api` (NestJS), y sólo los Repositorios de NestJS interactúan con PostgreSQL/Storage en Supabase.
 
-### Regla 2: Preservación Sagrada del Historial de Hábitos
-- **Advertencia:** NUNCA ejecutar `DELETE FROM seguimiento.registro_habitos` al eliminar o archivar un hábito. Un usuario que consulta el día de ayer, la semana pasada o el mes pasado **DEBE** ver los hábitos que completó y los que tenía asignados en esa fecha.
-- **Acción requerida:**
-  - El borrado de hábitos en el backend siempre debe ser un Soft-Delete: `UPDATE habitos SET estado = 'Inactivo' WHERE idhabito = ...`.
-  - En el frontend, al renderizar un día pasado (`selectedDate < today`), se deben filtrar los hábitos cuya `fechaInicio <= selectedDate` y que tengan registro o hayan estado activos, sin ocultarlos por el estado actual de hoy.
-  - Al completar un hábito en cualquier fecha, siempre enviar el string `YYYY-MM-DD` generado localmente (`format(date, 'yyyy-MM-dd')` o `toLocalDateString()`). NUNCA usar `new Date().toISOString()` porque en zonas horarias UTC-5/UTC-4 cambia el día después de las 7:00 PM.
+### Regla 2: Política de Cero Datos Quemados (Zero-Mock Data)
+- **Prohibido** inicializar estados de React con arrays de clientes, hábitos, recomendaciones, especialistas (como *"Dra. Elena Vidal"*) o estadísticas inventadas (como rachas de `24` días o adherencias del `80%`/`85%`).
+- Si una consulta devuelve `0` registros, la interfaz debe renderizar un **Estado Vacío (Empty State)** claro y accionable.
 
-### Regla 3: Restricciones de Longitud en PostgreSQL (`VARCHAR(45)`)
-- **Advertencia:** En el esquema de base de datos (`comunidad.foros`), las columnas `titulo` y `categoria` son de tipo `VARCHAR(45)`. Si el frontend envía más de 45 caracteres, la base de datos rechaza la transacción con el error: `value too long for type character varying(45)`.
-- **Acción requerida:**
-  - Todos los inputs, esquemas Zod y DTOs de NestJS para foros deben tener un límite máximo de **45 caracteres** (`maxLength={45}`, `@MaxLength(45)`).
+### Regla 3: Renovación Silenciosa de Tokens vía `apiClient` y `getValidAccessToken()`
+- Nunca leer `cookies().get("access_token")` manualmente para hacer `fetch()` crudos sin respaldo de refresh.
+- Usar siempre `apiClient` (para JSON) o `getValidAccessToken()` (para `multipart/form-data`), garantizando que cualquier expiración de token se renueve silenciosamente mediante `refresh_token`.
 
-### Regla 4: Subida de Archivos Multimedia (Imágenes)
-- **Advertencia:** NUNCA obligar al usuario final a pegar un enlace HTTP de una imagen externa.
-- **Acción requerida:**
-  - Usar siempre `<input type="file" accept="image/*">`.
-  - La carga debe pasar por el Server Action `uploadComunidadImageAction` que envía el `FormData` al backend o al Storage de Supabase usando el Service Role Key del servidor, devolviendo una URL pública HTTPS lista para guardar en la columna `imagen_url` o `adjuntos`.
+### Regla 4: Preservación Sagrada del Historial de Hábitos
+- **Prohibido** hacer `DELETE` físico de hábitos con historial o de `seguimiento.registro_habitos`. Usar siempre Soft-Delete (`estado = 'Inactivo'`).
+- Al registrar cumplimiento diario, enviar siempre la fecha local `YYYY-MM-DD` (nunca `new Date().toISOString()` directo sin ajustar zona horaria).
 
-### Regla 5: Arquitectura Limpia Estricta en Frontend
-```
-UI (React Components) ──> Server Actions (Next.js) ──> Services (Domain Logic) ──> Repositories (BaseRepository / NestJS API)
-```
-- **Prohibido:** No llamar a `fetch()` directo en los componentes visuales ni en los Server Actions.
-- **Prohibido:** No poner lógica de negocio pesada en los Server Actions (estos solo validan con Zod, resuelven auth y delegan al servicio).
-- **Obligatorio:** Los servicios y repositorios siempre devuelven objetos tipo `Result<T>` (`{ success: boolean, data?: T, error?: string }`).
+### Regla 5: Restricciones de Longitud en PostgreSQL (`VARCHAR`)
+- `seguimiento.habitos`: `nombre` es `VARCHAR(45)`, `descripcion` es `VARCHAR(200)`.
+- `comunidad.foros`: `titulo` y `categoria` son `VARCHAR(45)`.
+- `seguimiento.rutinas`: `tipo` es `VARCHAR(30)`, `nivel` es `VARCHAR(20)`, `objetivo` es `VARCHAR(200)`, `descripcion` es `VARCHAR(500)`.
+- Validar y truncar siempre antes de insertar para evitar errores `22001 (value too long)`.
 
-### Regla 6: Pruebas Unitarias y Repositorios en Backend
-- **Advertencia:** En `habitapp-api`, los servicios (`AdminService`, `CoachService`, `HabitsService`, etc.) inyectan **Repositorios**, no el cliente de Supabase directo.
-- **Acción requerida:** Cuando crees o actualices pruebas unitarias en `*.spec.ts`, debes mockear el Repositorio correspondiente (`AdminRepository`, `CoachRepository`, etc.) con métodos `jest.fn()`, nunca reintroducir mocks de llamadas encadenadas de Supabase (`.schema().from().select().eq()`).
+### Regla 6: Vinculación Bidireccional y Verificación en Entrenadores
+- Todo acceso del entrenador al progreso o recomendaciones de un alumno en `CoachService` debe verificar primero `getClientTrainerRelationship(trainerId, clientId)` en `seguimiento.usuario_entrenador`.
+- Toda asignación de rutina debe materializar sus hábitos en `seguimiento.habitos` con prefijo `[Coach: ...]` para que el alumno pueda cumplirlos y el coach pueda auditarlos.
 
-### Regla 7: Cero Secretos o Hashes Reales en el Repositorio (SonarQube Security Rating A)
-- **Advertencia:** GitHub Secret Scanning y SonarCloud detectan automáticamente cualquier string con estructura de hash bcrypt (`$2b$10$...`), contraseñas en claro o tokens, bloqueando el Quality Gate.
-- **Acción requerida:** En archivos `.sql`, `.md`, scripts o seeds de prueba, nunca escribir hashes reales; usar placeholders explicativos como `<HASH_DE_CONTRASEÑA_TEMPORAL>`.
+### Regla 7: Arquitectura Limpia Estricta en Frontend (4 Capas)
+- `UI (Components/Pages) ──> Server Actions (src/actions) ──> Services (src/services) ──> Repositories (BaseRepository / apiClient)`.
+- Todos los servicios y repositorios devuelven `Result<T>` (`{ success: boolean, data?: T, error?: string }`).
 
-### Regla 8: Manejo Obligatorio de Promesas Flotantes (`typescript:S9383`)
-- **Advertencia:** Dejar llamadas a funciones asíncronas sin `await`, sin capturar errores o sin el operador `void` hace fallar la fiabilidad (Reliability) en SonarCloud.
-- **Acción requerida:** En manejadores de eventos o llamadas secundarias que no retornan promesas al llamador, usar `void funcionAsincrona().catch(...)` o envolver en `startTransition(async () => { await ... })`.
+### Regla 8: Subida Nativa de Archivos Multimedia
+- Usar siempre `<input type="file" accept="image/*">` procesado mediante Server Actions hacia NestJS (`POST /users/me/avatar` o `POST /users/community/upload-image`).
 
-### Regla 9: Accesibilidad y Semántica en Modales e Iconos (`typescript:S1082`, `S6848`, `S1077`)
-- **Advertencia:** SonarQube penaliza elementos `<div>` interactivos con `onClick` sin listeners de teclado o roles semánticos.
-- **Acción requerida:**
-  - Backdrops de modales deben estructurarse usando `<button type="button" aria-label="Cerrar modal" ...>` o contenedores con `role="presentation"` que ignoren clics en el contenido interno.
-  - Todo icono SVG decorativo debe llevar explícitamente el atributo `aria-hidden="true"`.
+### Regla 9: Pruebas Unitarias Desacopladas en Backend
+- Los servicios de NestJS inyectan Repositorios (`UsersRepository`, `CoachRepository`, `AdminRepository`, etc.). En pruebas unitarias (`*.spec.ts`), mockear siempre el Repositorio correspondiente.
 
-### Regla 10: Reutilización de Repositorios con `BaseRepository`
-- **Advertencia:** Replicar bloques idénticos de `fetch` con parseo de JSON en cada repositorio dispara la métrica de código duplicado de SonarQube por encima del 3.0%.
-- **Acción requerida:** Todo nuevo repositorio debe extender de `BaseRepository<T>` y utilizar `this.get()`, `this.post()`, `this.put()`, `this.patch()`, `this.delete()`.
+### Regla 10: Cero Secretos o Hashes Reales en Documentación o SQL (`secrets:S8215`)
+- Nunca incluir hashes bcrypt reales ni tokens en archivos `.sql` o `.md`. Usar placeholders como `<HASH_DE_CONTRASEÑA_TEMPORAL>`.
+
+### Regla 11: Manejo Estricto de Promesas Flotantes (`typescript:S9383`)
+- En eventos de UI, envolver llamadas asíncronas con `void funcionAsincrona()` o `startTransition(async () => { await ... })`.
+
+### Regla 12: Accesibilidad WCAG y Reutilización con `BaseRepository`
+- Iconos decorativos con `aria-hidden="true"` y todos los repositorios extendiendo de `BaseRepository`.
 
 ---
 
-## 🎨 3. Referencia de Diseños y Próximos Pasos
+## 🎨 3. Estructura Organizada de Diseños de Pantalla (`.docs/4-diseno-y-assets/`)
 
-Todos los diseños oficiales de Figma exportados en HTML y CSS viven en:
-`.docs/4-diseno-y-assets/assets/Nuevos diseños HabitApp/`
+Los diseños de referencia (`screen.png` + `code.html`) están organizados por módulo dentro de `.docs/4-diseno-y-assets/assets/disenos/Escritorio/` (y su contraparte en `Movil/`):
 
-Especial atención a las siguientes carpetas para el próximo chat:
-1. `habitapp_dashboard_diario_escritorio/code.html`: Pantalla principal del dashboard diario, métricas de racha, lista de hábitos matutinos, vespertinos y nocturnos.
-2. `habitapp_comunidad_y_bienestar_escritorio_vista_general/code.html`: Vista general de comunidad con sus 5 pestañas.
-3. `habitapp_detalle_de_foro_escritorio_hilos_anidados/code.html`: Vista de detalle de un foro con hilos de comentarios anidados, respuestas y reacciones.
-4. `habitapp_retos_y_desaf_os_escritorio/code.html`: Pantalla y catálogo completo de retos comunitarios.
-5. `habitapp_especialistas_de_la_comunidad_escritorio/code.html`: Pantalla y listado de especialistas/coaches.
+1. `1.Pre-inicio/` — Landing page de bienvenida.
+2. `2.Iniciar sesion/` — Login, autenticación y recuperación de contraseña.
+3. `3.Crear cuenta/` — Registro de nuevos usuarios.
+4. `4.Dashboard/` — `habitapp_dashboard_diario_escritorio` y `habitapp_detalle_del_h_bito_modal_escritorio`.
+5. `5.Crear-habitos/` — `habitapp_crear_h_bito_modal_escritorio`.
+6. `6.Retos/` — `habitapp_retos_y_desaf_os_escritorio`.
+7. `7.Comunidad/` — Vista general, foros, detalle de foro con hilos anidados, crear foro, hábitos comunitarios, compartir hábito, artículos/guías y directorio de especialistas.
+8. `8.Reportes-ranking/` — `habitapp_progreso_y_m_tricas_escritorio` y `ranking.png`.
+9. `9.Perfil/` — `habitapp_perfil_de_usuario_escritorio` y `habitapp_editar_perfil_escritorio`.
+10. `10.Ajustes/` — `habitapp_ajustes_escritorio`.
+11. `11.Entrenador/` — `habitapp_portal_del_entrenador_escritorio` y `habitapp_detalle_y_progreso_del_cliente_escritorio`.
+12. `12.Administrador/` — `habitapp_panel_principal_admin_escritorio`, `habitapp_gesti_n_de_usuarios_y_roles_escritorio` y `habitapp_centro_de_moderaci_n_comunitaria_escritorio`.
