@@ -126,7 +126,7 @@ export function ArticleReaderModal({ isOpen, onClose, articulo }: ArticleReaderM
               <span>{categoria}</span>
             </span>
 
-            <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+            <span className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
               <span>{readingTime} min de lectura</span>
             </span>
