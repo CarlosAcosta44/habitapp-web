@@ -41,6 +41,7 @@
     "habitapp-backend",
     "habitapp",
     "**/*.spec.ts",
-    "**/*.spec.tsx"
+    "**/*.spec.tsx",
+    "tests/**"
   ]
 }
