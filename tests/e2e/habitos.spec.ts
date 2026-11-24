@@ -196,18 +196,4 @@ test.describe('PR-06 Suite E2E — Gestión de Hábitos, Check-in Optimista UTC-
     checkToday();
     expect(racha).toBe(1);
   });
-
-  test('CP-NF-003: Rendimiento del check-in diario bajo carga (100 VUs, p95 <= 800 ms, 0 duplicados)', async () => {
-    const p95CheckinMs = 418;
-    const duplicateRows = 0;
-    expect(p95CheckinMs).toBeLessThanOrEqual(800);
-    expect(duplicateRows).toBe(0);
-  });
-
-  test('CP-NF-004: Concurrencia transaccional en acreditación de puntos (100 VUs x 5 clics = +10 puntos exactos)', async () => {
-    const p95PointsMs = 385;
-    const netPointsAwardedPerUser = 10;
-    expect(p95PointsMs).toBeLessThanOrEqual(800);
-    expect(netPointsAwardedPerUser).toBe(10);
-  });
 });
