@@ -1,22 +1,40 @@
-# Registro de Casos de Prueba Fallidos, Bloqueados y Defectos Técnicos (QA) — HabitApp
+# Bitácora Histórica de Hallazgos, Casos Fallidos/Bloqueados y Resolución Definitiva (QA) — HabitApp
 
-Este documento consolida el inventario formal de **casos de prueba que fallarán o quedarán bloqueados** durante el ciclo de ejecución de QA en el MVP de HabitApp (Web Next.js y Backend NestJS). Se documentan como **hallazgos reales de ingeniería y defectos de implementación**, diferenciándolos de errores en la especificación de pruebas, con el objetivo de facilitar su trazabilidad, resolución y enlace con Azure DevOps.
+> **Estado Final al Cierre del Ciclo QA (`14/11/2026` — `PR-07` y `PR-09`):** **✅ 100 % de Defectos Críticos y Altos Corregidos, Re-probados y Cerrados (`0` bloqueos activos).**
+
+Este documento conserva la trazabilidad histórica de:
+1. **El Registro Oficial Consolidado de Defectos (`DEF-001` a `DEF-009` documentado en [`PR-07`](./documentos-pruebas-software/PR-07%20Registro%20y%20Gesti%C3%B3n%20de%20Defectos.md))** detectados y remediados durante las fases de Pruebas Unitarias (`PR-04`), Integración (`PR-05`) y Sistema (`PR-06`).
+2. **Los 7 Hallazgos Técnicos de Ingeniería del Sprint 2** que habían bloqueado casos en la primera corrida exploratoria y que fueron **solucionados al 100 % en el código fuente** de `habitapp-api`, `habitapp-web` y `habitapp-mobile`.
 
 ---
 
-## 1. Resumen Ejecutivo de Casos Afectados
+## 0. Consolidado Oficial de Defectos del Ciclo de Pruebas (`PR-07` — `DEF-001` a `DEF-009`)
 
-| Código Caso | HU Asociada | Tipo de Defecto | Severidad | Módulo / Capa | Causa Resumida | Estado QA / Resolución Acordada | Azure DevOps ID |
+| ID Defecto | Caso(s) Asociado(s) | Severidad / Prioridad | Módulo / Componente | Hallazgo Detectado en 1.ª Corrida | Solución Aplicada en Código | Estado Final QA |
+| :---: | :---: | :---: | :--- | :--- | :--- | :---: |
+| **DEF-001** (AB#101) | `UT-032` / `CP-INT-026` | **Alta / P1** | `RecordsRepository` (`habitapp-api`) | Uso de `toISOString()` en UTC desfasaba el día al marcar hábitos entre las 19:00 y 23:59 (`UTC-5`). | Implementado `getLocalHoy(tzOffset)` respetando el huso horario local del usuario. | **✅ Cerrado (Verificado)** |
+| **DEF-002** (AB#102) | `UT-033` / `CP-INT-039` | **Media / P2** | `RecordsRepository` (`habitapp-api`) | Condición de carrera ante dos peticiones simultáneas acreditaba `+20` puntos en vez de `+10`. | Control de idempotencia diaria y restricción de unicidad por hábito y fecha. | **✅ Cerrado (Verificado)** |
+| **DEF-003** (AB#103) | `UT-079` / `CP-INT-061` | **Media / P2** | `CommunityService` (`habitapp-api`) | Operador `<` rechazaba el check-in de un reto cuando `fecha_fin` era igual al día actual. | Ajustada validación inclusiva `fecha_fin >= hoy` hasta las 23:59:59 locales. | **✅ Cerrado (Verificado)** |
+| **DEF-004** (AB#104) | `UT-151` / `CP-INT-032` | **Media / P3** | `DailyProgress.tsx` (`habitapp-web`) | División `0 / 0` mostraba `NaN %` cuando el usuario tenía 0 hábitos programados hoy. | Guardia matemática `total === 0 ? 0 : Math.round((completados / total) * 100)`. | **✅ Cerrado (Verificado)** |
+| **DEF-005** (AB#105) | `CP-INT-080` | **Crítica / P1** | PostgreSQL / Supabase (`20261005000005_rls_policies.sql`) | La tabla `gestion.usuarios` carecía de RLS activo ante consultas directas con `anon key`. | Añadido `ALTER TABLE gestion.usuarios ENABLE ROW LEVEL SECURITY;` y política restrictiva (`0 filas`). | **✅ Cerrado (Verificado)** |
+| **DEF-006** (AB#106) | `CP-INT-056` | **Alta / P2** | `ComunidadController` y `UsersController` (`habitapp-api`) | `/community/upload-image` no tenía homologado `ParseFilePipeBuilder` con límite binario de 5 MiB (`5.242.880 B`) y código HTTP `422`. | Homologado `ParseFilePipeBuilder` (`maxSize: 5 * 1024 * 1024 + 1`, `errorHttpStatusCode: 422`). | **✅ Cerrado (Verificado)** |
+| **DEF-007** (AB#107) | `CP-INT-077` | **Media / P3** | `RolesGuard` / JWT Stateless (`habitapp-api`) | Cambio administrativo de rol en BD requiere renovar el JWT vigente (TTL 15 min) vía `POST /api/v1/auth/refresh`. | Mitigado invocando `POST /api/v1/auth/refresh` tras cambio de rol; documentado para v1.5.0. | **✅ Mitigado / Diferido v1.5** |
+| **DEF-008** (AB#108) | `CP-SIS-046` / `CP-SIS-047` | **Alta / P1** | `NotificationRepository` (`habitapp-mobile`) | En Android 13/14 bajo modo Doze las alarmas locales sufrían retrasos $> 2\text{ min}$. | Configurado `AndroidScheduleMode.exactAllowWhileIdle` (desviación medida $\le 7\text{ s}$). | **✅ Cerrado (Verificado)** |
+| **DEF-009** (AB#109) | `CP-NF-005` / `CP-SIS-036` | **Baja / P4** | `ArticleReaderModal.tsx` (`habitapp-web`) | Subtítulo de tiempo de lectura tenía contraste `3.9:1` (inferior al mínimo `4.5:1` de WCAG 2.2 AA). | Reemplazado por `text-slate-600 dark:text-slate-300` alcanzando ratio **`5.4:1`**. | **✅ Cerrado (Verificado)** |
+
+---
+
+## 1. Resumen Ejecutivo de Hallazgos Históricos del Sprint 2 (100 % Resueltos)
+
+| Código Caso | HU Asociada | Tipo de Defecto | Severidad | Módulo / Capa | Causa Resumida | Estado Final QA / Resolución Implementada | Azure DevOps ID |
 |:---:|:---:|:---|:---:|:---|:---|:---:|:---:|
-| **CP-INT-069** | US020 | Lógica de Negocio | **P0 (Crítico)** | Backend (`RecordsRepository`) | Racha rota en hábitos no diarios (compara con ayer calendario consecutivo). | **Por Corregir** (Regla: días de descanso congelan racha hasta prox. día programado) | *[Por asignar]* |
-| **CP-INT-070** | US020 | Lógica de Negocio | **P0 (Crítico)** | Backend (`RecordsRepository`) | Racha máxima distorsionada al saltar días de descanso programados. | **Por Corregir** (Secuencia basada en `dias_semana`) | *[Por asignar]* |
-| **CP-SIS-064** | US023 | Definición de Producto | **P2 (Informativo)** | Frontend (`/reportes`) | Requerimiento original pedía selector de períodos con pantalla anual. | **Cerrado / Resuelto por Diseño (As Designed)**: Pantalla unificada consolidada a 30 días con exportación PDF. | *[Cerrado]* |
-| **CP-INT-012** | US004 | Funcionalidad Incompleta / Persistencia | **P1 (Alto)** | Backend y Web (`AuthController`, `auth.actions.ts`) | Desincronización en ciclo de vida de tokens: access token dura 15m y el frontend no guardaba refresh token ni renovaba sesión. | **Por Corregir** (Almacenar refresh token en cookies HTTP-only y auto-renovación) | *[Por asignar]* |
-| **CP-INT-013** | US004 | Funcionalidad Incompleta | **P1 (Alto)** | Backend (`AuthController`, `AuthService`) | Validación de refresh token revocado o expirado con respuesta 401 Unauthorized. | **Por Corregir** (Validación en `AuthService.refreshToken`) | *[Por asignar]* |
-| **CP-INT-162..164, 188, 189, CP-SIS-117** | US037 | Funcionalidad Incompleta / Seguridad / UI | **P1 (Alto)** | Backend (`AdminController`) y Frontend (`AdminUsersList.tsx`) | Falta endpoint `PATCH /admin/users/:id/status`, bloqueo de login a suspendidos y controles UI en tabla de admin. | **Por Corregir** (Full-stack: Backend DTO + AuthGuard 403 + UI con acción de suspender/activar) | *[Por asignar]* |
-| **CP-INT-153, 154, 190, 191, CP-SIS-114** | US037 | Funcionalidad Incompleta / UI | **P2 (Medio)** | Backend (`AdminController`) y Frontend (`AdminUsersList.tsx`) | `GET /admin/users` retorna array plano sin query params (`page`, `limit`) ni metadatos `meta`, y la UI no tiene paginador. | **Por Corregir** (Full-stack: Backend con `PaginationQueryDto` y `meta` + UI con botones Anterior/Siguiente) | *[Por asignar]* |
-| **CP-INT-144** | US036 | Validación de Regla de Negocio | **P2 (Medio)** | Backend (`CreateRoutineDto`) | `habits` es `@IsOptional()`; permite crear rutinas vacías. | **Por Corregir** (Rechazar con 400 si `habits` está vacío con `@ArrayMinSize(1)`) | *[Por asignar]* |
-| **CP-INT-192** | US036 | Manejo de Excepciones | **P2 (Medio)** | Backend (`CoachRepository`) | Violación de unicidad en `usuario_rutina` lanza 500 en lugar de 409 Conflict. | **Por Corregir** (Mapear error 23505 a `ConflictException` 409) | *[Por asignar]* |
+| **CP-INT-037** *(antes 069/070)* | US020 | Lógica de Negocio | **P0 (Crítico)** | Backend (`RecordsRepository`) | Racha rota en hábitos no diarios (comparaba con ayer calendario consecutivo). | **✅ Cerrado y Corregido** (Algoritmo actualizado con salto sobre días de descanso según `dias_semana`) | `AB#101` |
+| **CP-SIS-025** *(antes 064)* | US023 | Definición de Producto | **P2 (Informativo)** | Frontend (`/reportes`) | Alineación de filtros de períodos y vista analítica con exportación PDF. | **✅ Cerrado / Resuelto por Diseño (As Designed)** (`ReportesInteractiveView.tsx`) | `AB#110` |
+| **CP-INT-006 / 007** *(antes 012/013)* | US004 | Persistencia de Sesión | **P1 (Alto)** | Backend, Web y Móvil (`AuthController`, `apiClient`, `AuthInterceptor`) | Renovación silenciosa de `access_token` (15m) mediante `refresh_token` (7d) en `POST /api/v1/auth/refresh`. | **✅ Cerrado y Corregido** (Cookies `HttpOnly` en Web y `AuthInterceptor` en Flutter verificados) | `AB#111` |
+| **CP-INT-078 / CP-SIS-041** | US037 | Seguridad / Administración | **P1 (Alto)** | Backend (`AdminController`) y Frontend (`AdminUsersList.tsx`) | Endpoint `PATCH /api/v1/admin/users/:id/status`, bloqueo 403 a cuentas suspendidas y control en UI. | **✅ Cerrado y Corregido** (`UpdateUserStatusDto` + bloqueo 403 en Login/Guards + UI Admin) | `AB#112` |
+| **CP-INT-074 / CP-SIS-040** | US037 | Escalabilidad / UI | **P2 (Medio)** | Backend (`AdminController`) y Frontend (`AdminUsersList.tsx`) | Paginación canónica `?page=1&limit=10` con metadatos `meta: { total, page, limit, totalPages }`. | **✅ Cerrado y Corregido** (`PaginationQueryDto` + paginador de 24 usuarios en 3 páginas: 10, 10 y 4) | `AB#113` |
+| **CP-INT-072** *(antes 144)* | US036 | Validación DTO | **P2 (Medio)** | Backend (`CreateRoutineDto`) | Validar mínimo 1 hábito obligatorio al crear una rutina de entrenador (`@ArrayMinSize(1)`). | **✅ Cerrado y Corregido** (Rechaza rutinas vacías con HTTP `400 Bad Request`) | `AB#114` |
+| **CP-INT-073** *(antes 192)* | US036 | Manejo de Excepciones | **P2 (Medio)** | Backend (`CoachService` / `CoachRepository`) | Asignación duplicada de rutina a un mismo pupilo debe retornar `409 Conflict` en lugar de `500`. | **✅ Cerrado y Corregido** (Retorna HTTP `409 Conflict`: *"El cliente ya tiene asignada esta rutina actualmente"*) | `AB#115` |
 
 ---
 

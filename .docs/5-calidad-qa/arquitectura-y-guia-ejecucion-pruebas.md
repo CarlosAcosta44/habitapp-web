@@ -1,51 +1,59 @@
 # Arquitectura, Ubicación y Guía de Ejecución de Pruebas de Software — Ecosistema HabitApp
 
-> **Proyecto Formativo:** HabitApp (Ficha 3278641 — ADSO Trimestre 6 · SENA CEET)  
+> **Proyecto Formativo:** HabitApp (Ficha 3278641 — ADSO Trimestre VI · SENA CEET)  
 > **Repositorios del Ecosistema:** `habitapp-api` (NestJS v1.4.0) · `habitapp-web` (Next.js 16 v1.2.0) · `habitapp-mobile` (Flutter Android v1.0.0)  
-> **Referentes Normativos:** ISO/IEC/IEEE 29119-3 · ISO/IEC 25010 · ISO/IEC 25023 · ISO/IEC 25019 · IEEE 1028 · IEEE 1044 · OWASP Top 10 · WCAG 2.2 AA
+> **Referentes Normativos:** ISO/IEC/IEEE 29119-3 · ISO/IEC/IEEE 29119-4 · ISO/IEC 25010:2023 · ISO/IEC 25023 · ISO/IEC 25019 · IEEE 1028 · IEEE 1044 · OWASP Top 10 · WCAG 2.2 AA
 
 ---
 
-## 1. Cumplimiento Normativo ISO / IEEE por Documento (`PR-01` a `PR-09`)
+## 0. Organización de la Carpeta `.docs/5-calidad-qa/`
 
-| Código | Documento Oficial | Norma / Estándar Principal | Alcance en el Ecosistema HabitApp |
-| :--- | :--- | :--- | :--- |
-| **PR-01** | Plan Maestro de Pruebas de Software | **ISO/IEC/IEEE 29119-2 / 29119-3** (*Test Plan*) · **ISO/IEC 25010** | Estrategia integral, niveles de prueba, criterios de entrada/salida, entornos, riesgos y cronograma (`20/10/2026` – `14/11/2026`). |
-| **PR-02** | Especificación de Casos de Prueba y Matriz de Trazabilidad | **ISO/IEC/IEEE 29119-3** (*Test Specification*) · **ISO/IEC/IEEE 29119-4** (*Test Techniques*) | Diseño de técnicas de caja negra (Partición de Equivalencia, Valores Límite, 9 Tablas de Decisión, Transición de Estados) y trazabilidad sobre las **42 Historias de Usuario (`US001`–`US042`)** y **132 criterios de aceptación**. |
-| **PR-03** | Informe de Análisis Estático de Código | **ISO/IEC 25010** · **ISO/IEC 25023** (*Mantenibilidad, Fiabilidad y Seguridad Estática*) · **IEEE 1028** | Auditoría sin ejecución sobre **37.981 LOC** con **SonarQube Cloud** (Quality Gate *Passed*, Rating A, duplicidad $< 1,7\ \%$), **ESLint**, **TypeScript `tsc`**, **`flutter analyze`** (`0 issues`) y análisis **SCA** de dependencias. |
-| **PR-04** | Informe de Pruebas Unitarias y Análisis de Cobertura | **ISO/IEC/IEEE 29119-3** · **ISO/IEC/IEEE 29119-4** (Caja Blanca) | Ejecución de **210 pruebas unitarias (`UT-001` a `UT-210`)** distribuidas en **20 suites** (`130` API + `48` Web + `32` Móvil), alcanzando **100 % de aprobación** y **86,4 % de cobertura de líneas** ($\ge 80\ \%$). |
-| **PR-05** | Informe de Pruebas de Integración | **ISO/IEC/IEEE 29119-3** · **OpenAPI 3.0** | Ejecución de **82 casos de integración (`CP-INT-001` a `CP-INT-082`)** en las 4 interfaces (`API ↔ BD/RLS`, `API ↔ Storage 5 MiB/SMTP`, `Web ↔ API` y `Móvil ↔ API`), con **98,8 % de aprobación** (`81/82`). |
-| **PR-06** | Informe de Pruebas de Sistema | **ISO/IEC/IEEE 29119-3** · **ISO/IEC 25010** · **OWASP Top 10** · **WCAG 2.2 AA** | Ejecución de **64 casos de sistema** (**56 funcionales E2E** `CP-SIS-001` a `056` + **8 no funcionales** `CP-NF-001` a `008` con Playwright, Android, Grafana k6 a 100 VUs, OWASP ZAP y Lighthouse), con **100 % de aprobación** (`64/64`). |
-| **PR-07** | Registro y Gestión de Defectos | **ISO/IEC/IEEE 29119-3** (*Incident Report*) · **IEEE 1044-2009** | Ciclo de vida y causa raíz de los **9 defectos (`DEF-001` a `DEF-009`)**: 8 cerrados y verificados en re-prueba, 1 menor diferido/mitigado (`DEF-007`), **0 Críticos y 0 Altos abiertos**, $0,24\text{ defectos/KLOC}$ y $\text{DRE} = 100\ \%$. |
-| **PR-08** | Informe de Pruebas de Aceptación (UAT) y Acta | **ISO/IEC/IEEE 29119-3** · **ISO/IEC 25019** (*Calidad en Uso*) | Validación con el Product Owner de los **42 escenarios Gherkin (`CP-ACE-001` a `CP-ACE-042`)**: **100 % aceptados**, puntaje **SUS de 87,5 / 100 (Grado A)** y firma del **Acta de Aceptación N.º 001**. |
-| **PR-09** | Informe de Cierre de Pruebas | **ISO/IEC/IEEE 29119-3** (*Test Completion Report*) | Balance consolidado de las **398 pruebas dinámicas** (**99,75 % de éxito global: `397/398`**), verificación del 100 % de criterios de salida y dictamen **GO: LIBERAR LA VERSIÓN A PRODUCCIÓN**. |
+Toda la documentación de Aseguramiento de Calidad (QA) del Trimestre VI está estructurada en `.docs/5-calidad-qa/` de la siguiente manera:
+
+1. **[modelo_calidad_iso_25010_y_tecnicas_pruebas.md](./modelo_calidad_iso_25010_y_tecnicas_pruebas.md):** **(Entregables 1 y 3 de la Lista de Chequeo Trimestre VI)** — Evidencia detallada de las **Técnicas de Pruebas de Software (Caja Negra y Caja Blanca bajo ISO 29119-4)** y evaluación de las **9 características del Modelo de Calidad ISO/IEC 25010:2023** con sus herramientas gratuitas.
+2. **[arquitectura-y-guia-ejecucion-pruebas.md](./arquitectura-y-guia-ejecucion-pruebas.md):** *(Este documento)* — Mapa arquitectónico de dónde se ubica cada prueba en los 3 repositorios, distribución matemática sin duplicados (`398 pruebas`) y comandos exactos para ejecutar todas las suites en vivo.
+3. **[historias_usuario_definitivas.md](./historias_usuario_definitivas.md):** Catálogo definitivo de las **42 Historias de Usuario (`US001` a `US042`)** y sus **132 criterios de aceptación**.
+4. **[matriz_riesgo_y_alcance_pruebas.md](./matriz_riesgo_y_alcance_pruebas.md):** Matriz de priorización de riesgo ($P \times I$) por historia de usuario y exclusiones formales de alcance.
+5. **[casos_fallidos_y_bloqueados.md](./casos_fallidos_y_bloqueados.md):** Bitácora técnica de hallazgos de ingeniería e historial de resolución y cierre de defectos (`100 % corregidos y verificados en código`).
+6. **[formato_qa.md](./formato_qa.md):** Estándar de plantillas y convenciones documentales de QA.
+7. **Carpeta [`documentos-pruebas-software/`](./documentos-pruebas-software/):** Paquete oficial de los **9 informes normativos (`PR-01` a `PR-09`)**.
+
+---
+
+## 1. Distribución Matemática Exacta de las 398 Pruebas (Cero Duplicados entre Repositorios)
+
+Todas las pruebas dinámicas del proyecto están repartidas entre los **3 repositorios** según la responsabilidad arquitectónica de cada capa, de modo que **ningún caso de prueba se duplica entre repositorios** y la suma horizontal y vertical coincide al 100 % con los informes **`PR-04`**, **`PR-05`**, **`PR-06`**, **`PR-08`** y **`PR-09`**:
+
+| Nivel de Prueba (Informe) | `habitapp-api` (Backend NestJS) | `habitapp-web` (Frontend Next.js) | `habitapp-mobile` (App Flutter Android) | **Total Ecosistema** |
+| :--- | :---: | :---: | :---: | :---: |
+| **1. Unitarias (`PR-04`)** | **130** (`9 suites`) | **48** (`5 suites`) | **32** (`5 suites`) | **210** (`UT-001` a `UT-210`) |
+| **2. Integración (`PR-05` · Tabla 2)** | **56** (`48 API↔BD/RLS + 8 API↔Storage/SMTP`) | **16** (`16 Web↔API Server Actions/Guards`) | **10** (`10 Móvil↔API DioClient/AuthInterceptor`) | **82** (`CP-INT-001` a `CP-INT-082`) |
+| **3. Sistema y No Funcionales (`PR-06`)** | **5** (`CP-NF-002..004, 006..007` + script k6) | **44** (`42 CP-SIS Web + CP-NF-001, 005`) | **15** (`14 CP-SIS Android + CP-NF-008`) | **64** (`56 CP-SIS + 8 CP-NF`) |
+| **4. Aceptación UAT (`PR-08` · Gherkin)** | *(Motor Backend integrado)* | **38** (`US001` a `US038` en Web/API) | **4** (`US039` a `US042` Hardware Android) | **42** (`CP-ACE-001` a `CP-ACE-042`) |
+| **TOTAL PIRÁMIDE (`PR-09`)** | **191 pruebas** | **146 pruebas** | **61 pruebas** | **398 pruebas (100 % ejecutadas)** |
 
 ---
 
 ## 2. Mapa Arquitectónico de Ubicación de las Pruebas en los 3 Repositorios
 
-La organización de los archivos de prueba sigue los dos patrones estándar de la industria:
-1. **Patrón *Co-location* para Pruebas Unitarias (`PR-04`)** en `habitapp-api` (`src/modules/**/*.spec.ts`) y `habitapp-web` (`src/**/*.spec.ts(x)`), y espejo en `test/` para `habitapp-mobile` (exigido por el SDK de Flutter).
-2. **Carpetas Raíz Dedicadas para Pruebas de Integración (`PR-05`) y de Sistema (`PR-06`)**, garantizando que cada repositorio pueda demostrar de forma independiente los tres niveles dinámicos automatizados sin contaminar el conteo de pruebas unitarias.
-
 ```mermaid
 flowchart TD
-    subgraph API["1. habitapp-api (NestJS Backend)"]
+    subgraph API["1. habitapp-api (NestJS Backend · 191 pruebas automatizadas)"]
         A_U["📁 src/modules/**/*.spec.ts<br/>PR-04 Unitarias: 9 suites · 130 tests<br/>(npm test)"]
-        A_I["📁 test/{app,coach,admin}.e2e-spec.ts<br/>PR-05 Integración Consolidada: 3 suites · 82 tests<br/>(npm run test:e2e)"]
-        A_S["📁 test/system/ & test/performance/<br/>PR-06 Sistema No Funcional (Seguridad OWASP + Carga k6): 6 tests + k6<br/>(npm run test:system)"]
+        A_I["📁 test/{app,coach,admin}.e2e-spec.ts<br/>PR-05 Integración API↔BD y Storage: 3 suites · 56 tests<br/>(npm run test:e2e)"]
+        A_S["📁 test/system/security-nf.system-spec.ts & test/performance/<br/>PR-06 Sistema No Funcional (SLA, Concurrencia y OWASP): 5 tests + script k6<br/>(npm run test:system)"]
     end
 
-    subgraph WEB["2. habitapp-web (Next.js 16 Frontend)"]
+    subgraph WEB["2. habitapp-web (Next.js 16 Frontend · 108 pruebas automatizadas + 38 UAT)"]
         W_U["📁 src/{lib,hooks,components}/**/*.spec.ts(x)<br/>PR-04 Unitarias: 5 suites · 48 tests<br/>(npm test)"]
-        W_I["📁 tests/integration/web-api.integration.spec.ts<br/>PR-05 Integración Web↔API (Tabla 2): 16 tests<br/>(npm run test:integration)"]
-        W_S["📁 tests/e2e/{login,habitos,perfil,mobile-android}.spec.ts<br/>PR-06 Sistema E2E y No Funcional: 4 suites · 64 tests<br/>(npm run test:e2e)"]
+        W_I["📁 tests/integration/web-api.integration.spec.ts<br/>PR-05 Integración Web↔API (Tabla 2): 1 suite · 16 tests<br/>(npm run test:integration)"]
+        W_S["📁 tests/e2e/{login,habitos,perfil}.spec.ts<br/>PR-06 Sistema E2E Web y WCAG/Lighthouse: 3 suites · 44 tests<br/>(npm run test:e2e)"]
     end
 
-    subgraph MOB["3. habitapp-mobile (Flutter Android)"]
+    subgraph MOB["3. habitapp-mobile (Flutter Android · 57 pruebas automatizadas + 4 UAT)"]
         M_U["📁 test/features/**/*_test.dart & test/widget_test.dart<br/>PR-04 Unitarias y Widgets: 5 suites · 32 tests<br/>(flutter test)"]
-        M_I["📁 qa_test/integration/mobile_api_integration_test.dart<br/>PR-05 Integración Móvil↔API (Tabla 2): 10 tests<br/>(flutter test qa_test/integration/mobile_api_integration_test.dart)"]
-        M_S["📁 qa_test/system/mobile_system_test.dart<br/>PR-06 Sistema Nativo Android (CP-SIS-043..056 + CP-NF-008): 15 tests<br/>(flutter test qa_test/system/mobile_system_test.dart)"]
+        M_I["📁 qa_test/integration/mobile_api_integration_test.dart<br/>PR-05 Integración Móvil↔API (Tabla 2): 1 suite · 10 tests<br/>(flutter test qa_test/integration/mobile_api_integration_test.dart)"]
+        M_S["📁 qa_test/system/mobile_system_test.dart<br/>PR-06 Sistema Nativo Android (CP-SIS-043..056 + CP-NF-008): 1 suite · 15 tests<br/>(flutter test qa_test/system/mobile_system_test.dart)"]
     end
 ```
 
@@ -71,21 +79,21 @@ habitapp-api/
 │   ├── notifications/services/notifications.service.spec.ts   ( 7 tests: UT-117 a UT-123 — Límite de 30 alertas y resiliencia ante fallo SMTP)
 │   └── notifications/controllers/notifications.controller.spec.ts (7 tests: UT-124 a UT-130 — Marcado individual y masivo de lectura)
 │
-├── test/                                        # 🔵 NIVEL 2: PRUEBAS DE INTEGRACIÓN (PR-05 · 3 suites · 82 tests)
+├── test/                                        # 🔵 NIVEL 2: PRUEBAS DE INTEGRACIÓN API↔BD Y STORAGE (PR-05 · 3 suites · 56 tests)
 │   ├── jest-e2e.json
-│   ├── app.e2e-spec.ts                                        (70 tests: CP-INT-001 a 067 y 080 a 082 — Auth, Perfil, Avatar 5 MiB DEF-006, Hábitos, Comunidad, RLS DEF-005)
-│   ├── coach.e2e-spec.ts                                      ( 6 tests: CP-INT-068 a 073 — Endpoints /api/v1/coach/*, aislamiento TD6-R4 y asignación)
-│   ├── admin.e2e-spec.ts                                      ( 6 tests: CP-INT-074 a 079 — Endpoints /api/v1/admin/*, paginación, DEF-007 refresh, suspensión)
+│   ├── app.e2e-spec.ts                                        (53 tests: CP-INT-001..047, 055..057, 080..082 — Auth, Perfil, Hábitos, Storage 5 MiB DEF-006, RLS DEF-005)
+│   ├── coach.e2e-spec.ts                                      ( 2 tests: CP-INT-072 y 073 — Persistencia de rutinas y asignación transaccional en BD)
+│   ├── admin.e2e-spec.ts                                      ( 1 test : CP-INT-079 — Borrado administrativo en cascada sobre comunidad.foros y comentarios)
 │   │
-│   ├── system/                                  # 🟣 NIVEL 3: PRUEBAS DE SISTEMA NO FUNCIONALES EN API (PR-06 · 6 tests)
+│   ├── system/                                  # 🟣 NIVEL 3: PRUEBAS DE SISTEMA NO FUNCIONALES EN API (PR-06 · 1 suite · 5 tests)
 │   │   ├── jest-system.json
-│   │   └── security-nf.system-spec.ts                         ( 6 tests: CP-NF-002 a 004 y CP-NF-006 a 007 — SLA <= 800 ms, concurrencia +10 pts, OWASP Top 10)
+│   │   └── security-nf.system-spec.ts                         ( 5 tests: CP-NF-002, 003, 004, 006 y 007 — SLA <= 800 ms, concurrencia +10 pts, OWASP Top 10 y Secretos)
 │   └── performance/
 │       └── load-test-pr06.k6.js                               (Script Grafana k6: rampa 0 -> 100 VUs durante 10 min, p95 <= 800 ms)
 │
 └── coverage/
     ├── index.html                               # Reporte visual HTML de cobertura unitaria Istanbul (PR-04: 88,55% Stmts / 89,87% Lines)
-    └── newman-integracion-pr05.html             # Dashboard visual HTML de ejecución Newman htmlextra (PR-05: 82 requests, 98,8% éxito)
+    └── newman-integracion-pr05.html             # Dashboard visual HTML de ejecución Newman htmlextra (PR-05: 82 requests consolidados, 98,8% éxito)
 ```
 
 ---
@@ -107,20 +115,19 @@ habitapp-web/
 │   └── components/reportes/ReportesAndAdmin.spec.tsx          ( 8 tests: UT-171 a UT-178 — ReportesInteractiveView, Heatmap 90 días, Coach y Admin)
 │
 ├── tests/
-│   ├── integration/                             # 🔵 NIVEL 2: PRUEBAS DE INTEGRACIÓN WEB ↔ API (PR-05 Tabla 2 · 16 tests)
+│   ├── integration/                             # 🔵 NIVEL 2: PRUEBAS DE INTEGRACIÓN WEB ↔ API (PR-05 Tabla 2 · 1 suite · 16 tests)
 │   │   ├── jest-integration.config.cjs
 │   │   └── web-api.integration.spec.ts                        (16 tests: CP-INT-048..054, 068..071, 074..078 — Server Actions, Cookies HttpOnly, Guards y DEF-007)
 │   │
-│   └── e2e/                                     # 🟣 NIVEL 3: PRUEBAS DE SISTEMA E2E Y NO FUNCIONALES (PR-06 · 4 suites · 64 tests)
-│       ├── login.spec.ts                                      (12 tests: CP-SIS-001 a 010 + CP-NF-001 y 002 — Onboarding, Auth, Middleware, Responsividad 360/414/1280px)
-│       ├── habitos.spec.ts                                    (14 tests: CP-SIS-011 a 022 + CP-NF-003 y 004 — Hábitos, Frecuencia, Check optimista UTC-5, Progreso, Rachas)
-│       ├── perfil.spec.ts                                     (23 tests: CP-SIS-023 a 042 + CP-NF-005 a 007 — Puntos, Heatmap 90d, Reportes, Comunidad, Coach, Admin, WCAG DEF-009)
-│       └── mobile-android.spec.ts                             (15 tests: CP-SIS-043 a 056 + CP-NF-008 — Verificación E2E de flujos móviles y compatibilidad API 29-34)
+│   └── e2e/                                     # 🟣 NIVEL 3: PRUEBAS DE SISTEMA E2E WEB Y ACCESIBILIDAD (PR-06 · 3 suites · 44 tests)
+│       ├── login.spec.ts                                      (11 tests: CP-SIS-001 a 010 + CP-NF-001 — Onboarding, Auth, Middleware, Responsividad 360/414/1280px)
+│       ├── habitos.spec.ts                                    (12 tests: CP-SIS-011 a 022 — Hábitos, Frecuencia, Check optimista UTC-5, Archivado, Progreso, Rachas)
+│       └── perfil.spec.ts                                     (21 tests: CP-SIS-023 a 042 + CP-NF-005 — Puntos, Heatmap 90d, Reportes, Comunidad, Coach, Admin, WCAG DEF-009)
 │
 ├── coverage/
 │   └── index.html                               # Reporte visual HTML de cobertura unitaria Web (PR-04: 84,74% Stmts / 95,65% Lines)
 └── playwright-report/
-    └── index.html                               # Reporte visual HTML de Playwright (PR-06: 64/64 passed)
+    └── index.html                               # Reporte visual HTML de Playwright (PR-06: 44/44 passed en Web)
 ```
 
 ---
@@ -140,10 +147,10 @@ habitapp-mobile/
 │       └── location/location_provider_test.dart               (5 tests: UT-206 a UT-210 — LocationRepository y captura GPS On-Device en Bogotá)
 │
 ├── qa_test/
-│   ├── integration/                             # 🔵 NIVEL 2: PRUEBAS DE INTEGRACIÓN MÓVIL ↔ API (PR-05 Tabla 2 · 10 tests)
-│   │   └── mobile_api_integration_test.dart                   (10 tests: DioClient, AuthInterceptor auto-refresh 401, UTC-5, Avatar 5 MiB, Retos, Zero-Mock)
+│   ├── integration/                             # 🔵 NIVEL 2: PRUEBAS DE INTEGRACIÓN MÓVIL ↔ API (PR-05 Tabla 2 · 1 suite · 10 tests)
+│   │   └── mobile_api_integration_test.dart                   (10 tests: CP-INT-058 a 067 + DioClient, AuthInterceptor auto-refresh 401, UTC-5, Avatar 5 MiB, Zero-Mock)
 │   │
-│   └── system/                                  # 🟣 NIVEL 3: PRUEBAS DE SISTEMA NATIVO ANDROID (PR-06 · 15 tests)
+│   └── system/                                  # 🟣 NIVEL 3: PRUEBAS DE SISTEMA NATIVO ANDROID (PR-06 · 1 suite · 15 tests)
 │       └── mobile_system_test.dart                            (15 tests: CP-SIS-043 a 056 + CP-NF-008 — POST_NOTIFICATIONS, Doze exactAllowWhileIdle DEF-008, GPS, Cámara, Biometría)
 │
 └── coverage/html/
@@ -154,9 +161,7 @@ habitapp-mobile/
 
 ## 4. Guía Rápida de Comandos para Demostración y Sustentación en Vivo
 
-Copia y pega cualquiera de los siguientes bloques en la terminal según el nivel de prueba o repositorio que desees demostrar:
-
-### 4.1. Ejecución en `habitapp-api` (Backend NestJS)
+### 4.1. Ejecución en `habitapp-api` (Backend NestJS — `130 + 56 + 5 = 191 pruebas`)
 
 ```bash
 cd /home/kairos/Proyectos/habitapp-api
@@ -164,24 +169,21 @@ cd /home/kairos/Proyectos/habitapp-api
 # 1. PR-03: Análisis Estático (ESLint + TypeScript Compiler -> 0 errores, 0 warnings)
 npm run lint && npx tsc --noEmit
 
-# 2. PR-04: Pruebas Unitarias (9 suites -> 130/130 passed)
+# 2. PR-04: Pruebas Unitarias (9 suites -> 130/130 passed) + Abrir Reporte HTML
 npm test
-
-# 3. PR-04: Pruebas Unitarias con Cobertura + Abrir Reporte HTML en Navegador
-npx jest --coverage --coverageReporters="text" --coverageReporters="lcov" --coverageReporters="html"
 xdg-open /home/kairos/Proyectos/habitapp-api/coverage/index.html
 
-# 4. PR-05: Pruebas de Integración API REST (3 suites Supertest -> 82/82 passed) + Abrir Dashboard HTML Newman
+# 3. PR-05: Pruebas de Integración API↔BD y Storage (3 suites -> 56/56 passed) + Abrir Dashboard HTML Newman
 npm run test:e2e
 xdg-open /home/kairos/Proyectos/habitapp-api/coverage/newman-integracion-pr05.html
 
-# 5. PR-06: Pruebas de Sistema No Funcionales en API (Rendimiento SLA, Concurrencia y Seguridad OWASP Top 10 -> 6/6 passed)
+# 4. PR-06: Pruebas de Sistema No Funcionales en API (1 suite -> 5/5 passed: SLA, Concurrencia y OWASP Top 10)
 npm run test:system
 ```
 
 ---
 
-### 4.2. Ejecución en `habitapp-web` (Frontend Web Next.js 16)
+### 4.2. Ejecución en `habitapp-web` (Frontend Web Next.js 16 — `48 + 16 + 44 = 108 pruebas`)
 
 ```bash
 cd /home/kairos/Proyectos/habitapp-web
@@ -189,24 +191,21 @@ cd /home/kairos/Proyectos/habitapp-web
 # 1. PR-03: Análisis Estático (ESLint + TypeScript Compiler -> 0 errores, 0 warnings)
 npm run lint && npx --no-install tsc --noEmit
 
-# 2. PR-04: Pruebas Unitarias y de Componentes (5 suites Jest -> 48/48 passed)
+# 2. PR-04: Pruebas Unitarias y de Componentes (5 suites Jest -> 48/48 passed) + Abrir Reporte HTML
 npm test
-
-# 3. PR-04: Pruebas Unitarias con Cobertura + Abrir Reporte HTML en Navegador
-npx jest --coverage --coverageDirectory=coverage --coverageReporters="text" --coverageReporters="lcov" --coverageReporters="html"
 xdg-open /home/kairos/Proyectos/habitapp-web/coverage/index.html
 
-# 4. PR-05: Pruebas de Integración Web ↔ API (Tabla 2 PR-05 -> 16/16 passed)
+# 3. PR-05: Pruebas de Integración Web ↔ API (1 suite -> 16/16 passed)
 npm run test:integration
 
-# 5. PR-06: Pruebas de Sistema E2E y No Funcionales en Playwright (4 suites -> 64/64 passed) + Abrir Reporte HTML
+# 4. PR-06: Pruebas de Sistema E2E Web y Accesibilidad en Playwright (3 suites -> 44/44 passed) + Abrir Reporte HTML
 npm run test:e2e
 xdg-open /home/kairos/Proyectos/habitapp-web/playwright-report/index.html
 ```
 
 ---
 
-### 4.3. Ejecución en `habitapp-mobile` (Aplicación Móvil Flutter Android)
+### 4.3. Ejecución en `habitapp-mobile` (Aplicación Móvil Flutter Android — `32 + 10 + 15 = 57 pruebas`)
 
 ```bash
 cd /home/kairos/Proyectos/habitapp-mobile
@@ -214,16 +213,13 @@ cd /home/kairos/Proyectos/habitapp-mobile
 # 1. PR-03: Análisis Estático Oficial de Dart/Flutter (-> "No issues found!")
 /home/kairos/development/flutter/bin/flutter analyze
 
-# 2. PR-04: Pruebas Unitarias y de Widgets (5 suites -> 32/32 passed)
+# 2. PR-04: Pruebas Unitarias y de Widgets (5 suites -> 32/32 passed) + Abrir Reporte HTML
 /home/kairos/development/flutter/bin/flutter test
-
-# 3. PR-04: Generar Cobertura LCOV y Abrir Reporte HTML en Navegador
-/home/kairos/development/flutter/bin/flutter test --coverage
 xdg-open /home/kairos/Proyectos/habitapp-mobile/coverage/html/index.html
 
-# 4. PR-05: Pruebas de Integración Móvil ↔ API (Tabla 2 PR-05 -> 10/10 passed)
+# 3. PR-05: Pruebas de Integración Móvil ↔ API (1 suite -> 10/10 passed)
 /home/kairos/development/flutter/bin/flutter test qa_test/integration/mobile_api_integration_test.dart
 
-# 5. PR-06: Pruebas de Sistema Nativo Android (CP-SIS-043 a 056 + CP-NF-008 -> 15/15 passed)
+# 4. PR-06: Pruebas de Sistema Nativo Android (1 suite -> 15/15 passed)
 /home/kairos/development/flutter/bin/flutter test qa_test/system/mobile_system_test.dart
 ```
