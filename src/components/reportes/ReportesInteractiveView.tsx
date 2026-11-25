@@ -42,7 +42,6 @@ export function ReportesInteractiveView({
 }: Readonly<ReportesInteractiveViewProps>) {
   const router = useRouter();
   const [isNewHabitModalOpen, setIsNewHabitModalOpen] = useState(false);
-  const [, setHoveredDay] = useState<number | null>(null);
 
   // Valores calculados con fallback elegante si el usuario es nuevo
   const cumplimiento = stats?.cumplimiento_global ?? stats?.tasa_diaria ?? 84;
@@ -288,8 +287,6 @@ export function ReportesInteractiveView({
                   return (
                     <div
                       key={diasNombres[idx]}
-                      onMouseEnter={() => setHoveredDay(idx)}
-                      onMouseLeave={() => setHoveredDay(null)}
                       className="flex flex-col items-center gap-1.5 h-full justify-end group cursor-pointer"
                     >
                       <span
