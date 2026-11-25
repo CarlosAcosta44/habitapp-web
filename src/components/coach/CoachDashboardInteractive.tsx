@@ -14,8 +14,6 @@ import {
   PlusCircle, 
   Sparkles, 
   CheckCircle2, 
-  AlertTriangle, 
-  Calendar,
   X,
   Send,
   Trash2,
@@ -1099,14 +1097,17 @@ export function CoachDashboardInteractive({
                   {routines.map((r) => (
                     <label
                       key={r.id}
+                      htmlFor={`routine-select-${r.id}`}
+                      aria-label={r.name}
                       className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
                         selectedRoutineId === r.id
                           ? "border-[#572de4] bg-indigo-50/50 dark:bg-indigo-950/30"
                           : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/40"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-3">
                         <input
+                          id={`routine-select-${r.id}`}
                           type="radio"
                           name="routineSelect"
                           value={r.id}
@@ -1114,11 +1115,11 @@ export function CoachDashboardInteractive({
                           onChange={(e) => setSelectedRoutineId(e.target.value)}
                           className="accent-[#572de4] w-4 h-4"
                         />
-                        <div>
+                        <span>
                           <span className="font-bold text-sm text-slate-900 dark:text-white block">{r.name}</span>
                           <span className="text-xs text-slate-400 block line-clamp-1">{r.description || "Sin descripción"}</span>
-                        </div>
-                      </div>
+                        </span>
+                      </span>
                     </label>
                   ))}
                 </div>

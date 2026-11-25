@@ -1,6 +1,6 @@
 import { adminRepository } from "@/repositories/admin.repository";
 import type { Result } from '@/lib/result';
-import type { UserProfileDto, UserRole, PaginatedUsersResponse } from '@/domain/usuario.types';
+import type { UserRole, PaginatedUsersResponse } from '@/domain/usuario.types';
 
 export const adminService = {
   /**
@@ -36,7 +36,7 @@ export const adminService = {
    * Llama a PATCH /admin/users/:id/role
    */
   async updateUserRole(userId: string, newRole: UserRole | string): Promise<Result<any>> {
-    let formattedRole = 'Usuario';
+    let formattedRole: string;
     const lower = (newRole || '').toLowerCase();
     if (lower.includes('admin')) formattedRole = 'Administrador';
     else if (lower.includes('entrenador') || lower.includes('trainer')) formattedRole = 'Entrenador';

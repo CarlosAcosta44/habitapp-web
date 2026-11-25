@@ -173,11 +173,4 @@ test.describe('PR-06 Suite E2E — Onboarding, Autenticación, Seguridad de Ruta
       expect(overflow).toBe(false);
     }
   });
-
-  test('CP-NF-002: Rendimiento de inicio de sesión bajo concurrencia (p95 <= 800 ms, 0% errores)', async () => {
-    const p95LoginMs = 342;
-    const errorRate = 0.0;
-    expect(p95LoginMs).toBeLessThanOrEqual(800);
-    expect(errorRate).toBeLessThan(0.01);
-  });
 });

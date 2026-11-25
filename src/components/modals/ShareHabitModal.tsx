@@ -33,8 +33,8 @@ export function ShareHabitModal({
   onShared,
   habitosPublicados = [],
   currentUserId,
-}: ShareHabitModalProps) {
-  const [isPending, startTransition] = useTransition();
+}: Readonly<ShareHabitModalProps>) {
+  const [, startTransition] = useTransition();
   const [sharedIds, setSharedIds] = useState<Record<string, boolean>>({});
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
@@ -93,19 +93,17 @@ export function ShareHabitModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md transition-all duration-300 animate-in fade-in"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose();
-      }}
-      role="presentation"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 animate-in fade-in"
     >
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label="Cerrar modal"
+        onClick={onClose}
+        className="fixed inset-0 w-full h-full bg-black/50 backdrop-blur-md cursor-default"
+      />
       <div
-        className="w-full max-w-[650px] bg-white dark:bg-[#111827] rounded-3xl shadow-[0_24px_60px_-12px_rgba(0,0,0,0.25)] border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
-        role="dialog"
-        aria-modal="true"
+        className="relative z-10 w-full max-w-[650px] bg-white dark:bg-[#111827] rounded-3xl shadow-[0_24px_60px_-12px_rgba(0,0,0,0.25)] border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
       >
         {/* Modal Header */}
         <div className="p-6 sm:p-7 pb-4 flex items-start justify-between gap-4 border-b border-slate-100 dark:border-slate-800">

@@ -7,14 +7,11 @@ import {
   Download,
   UserPlus,
   RotateCw,
-  SlidersHorizontal,
   Shield,
   ShieldCheck,
   ShieldAlert,
   CheckCircle2,
   XCircle,
-  Clock,
-  MoreVertical,
   ChevronLeft,
   ChevronRight,
   UserCheck,
@@ -22,8 +19,17 @@ import {
   Check,
   X,
   Mail,
-  AlertTriangle,
 } from "lucide-react";
+
+function getRoleBadgeStyle(roleUpper: string): { backgroundColor: string; color: string } {
+  if (roleUpper === "ADMINISTRADOR" || roleUpper === "ADMIN") {
+    return { backgroundColor: "rgba(87, 45, 228, 0.12)", color: "#572de4" };
+  }
+  if (roleUpper === "ENTRENADOR") {
+    return { backgroundColor: "rgba(147, 51, 234, 0.12)", color: "#9333ea" };
+  }
+  return { backgroundColor: "rgba(100, 116, 139, 0.12)", color: "#475569" };
+}
 import {
   getUsersAction,
   updateUserRoleAction,
@@ -228,7 +234,7 @@ export function AdminUsersManagement({
     link.setAttribute("download", `habitapp-usuarios-${new Date().toISOString().split("T")[0]}.csv`);
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
     showToast("success", "Archivo CSV generado y descargado correctamente.");
   };
 
@@ -352,11 +358,11 @@ export function AdminUsersManagement({
               Cuentas Suspendidas
             </span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className={`text-2xl font-extrabold ${users.filter((u: any) => (u.estado_cuenta || "").toLowerCase() === "suspendido").length > 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-white"}`}>
+              <span className={`text-2xl font-extrabold ${users.some((u: any) => (u.estado_cuenta || "").toLowerCase() === "suspendido") ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-white"}`}>
                 {users.filter((u: any) => (u.estado_cuenta || "").toLowerCase() === "suspendido").length}
               </span>
-              <span className={`text-xs font-semibold ${users.filter((u: any) => (u.estado_cuenta || "").toLowerCase() === "suspendido").length > 0 ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"}`}>
-                {users.filter((u: any) => (u.estado_cuenta || "").toLowerCase() === "suspendido").length > 0 ? "Sancionadas" : "Sin sanciones"}
+              <span className={`text-xs font-semibold ${users.some((u: any) => (u.estado_cuenta || "").toLowerCase() === "suspendido") ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"}`}>
+                {users.some((u: any) => (u.estado_cuenta || "").toLowerCase() === "suspendido") ? "Sancionadas" : "Sin sanciones"}
               </span>
             </div>
             <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">Por moderación / TOS</span>
@@ -561,20 +567,7 @@ export function AdminUsersManagement({
                           type="button"
                           onClick={() => openRoleModal(u)}
                           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all hover:ring-2 hover:ring-indigo-400/30 cursor-pointer"
-                          style={{
-                            backgroundColor:
-                              roleUpper === "ADMINISTRADOR" || roleUpper === "ADMIN"
-                                ? "rgba(87, 45, 228, 0.12)"
-                                : roleUpper === "ENTRENADOR"
-                                ? "rgba(147, 51, 234, 0.12)"
-                                : "rgba(100, 116, 139, 0.12)",
-                            color:
-                              roleUpper === "ADMINISTRADOR" || roleUpper === "ADMIN"
-                                ? "#572de4"
-                                : roleUpper === "ENTRENADOR"
-                                ? "#9333ea"
-                                : "#475569",
-                          }}
+                          style={getRoleBadgeStyle(roleUpper)}
                         >
                           <Shield className="w-3.5 h-3.5" />
                           <span>{roleName}</span>
@@ -721,9 +714,9 @@ export function AdminUsersManagement({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              <span className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                 Selecciona el nuevo rol:
-              </label>
+              </span>
               <div className="space-y-2">
                 {[
                   {
@@ -744,6 +737,8 @@ export function AdminUsersManagement({
                 ].map((r) => (
                   <label
                     key={r.id}
+                    htmlFor={`role-select-${r.id}`}
+                    aria-label={r.title}
                     className={`flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
                       selectedNewRole.toLowerCase() === r.id.toLowerCase()
                         ? "bg-indigo-50/60 dark:bg-indigo-950/30 border-[#572de4] text-slate-900 dark:text-white"
@@ -751,6 +746,7 @@ export function AdminUsersManagement({
                     }`}
                   >
                     <input
+                      id={`role-select-${r.id}`}
                       type="radio"
                       name="role-select"
                       value={r.id}
@@ -758,10 +754,10 @@ export function AdminUsersManagement({
                       onChange={() => setSelectedNewRole(r.id)}
                       className="mt-1 text-[#572de4] focus:ring-[#572de4]"
                     />
-                    <div>
+                    <span>
                       <span className="text-xs font-bold block">{r.title}</span>
-                      <span className="text-[11px] text-slate-400">{r.desc}</span>
-                    </div>
+                      <span className="text-[11px] text-slate-400 block">{r.desc}</span>
+                    </span>
                   </label>
                 ))}
               </div>
@@ -817,10 +813,11 @@ export function AdminUsersManagement({
             <form onSubmit={handleSendInvite} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label htmlFor="invite-nombre-input" className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                     Nombre *
                   </label>
                   <input
+                    id="invite-nombre-input"
                     type="text"
                     required
                     value={inviteForm.nombre}
@@ -830,10 +827,11 @@ export function AdminUsersManagement({
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label htmlFor="invite-apellido-input" className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                     Apellido
                   </label>
                   <input
+                    id="invite-apellido-input"
                     type="text"
                     value={inviteForm.apellido}
                     onChange={(e) => setInviteForm({ ...inviteForm, apellido: e.target.value })}
@@ -844,10 +842,11 @@ export function AdminUsersManagement({
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="invite-email-input" className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Correo Electrónico *
                 </label>
                 <input
+                  id="invite-email-input"
                   type="email"
                   required
                   value={inviteForm.email}
@@ -858,10 +857,11 @@ export function AdminUsersManagement({
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="invite-rol-select" className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Rol Inicial
                 </label>
                 <select
+                  id="invite-rol-select"
                   value={inviteForm.rol}
                   onChange={(e) => setInviteForm({ ...inviteForm, rol: e.target.value })}
                   className="w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-[#572de4]"

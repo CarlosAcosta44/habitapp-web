@@ -14,9 +14,9 @@ export function LandingFooter() {
           <div className="flex flex-wrap justify-center gap-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
             <Link href="/legal/privacy" className="hover:text-white transition-colors">Política de Privacidad</Link>
             <Link href="/legal/terms" className="hover:text-white transition-colors">Términos de Servicio</Link>
-            <a href="#" className="hover:text-white transition-colors">Google Login</a>
-            <a href="#" className="hover:text-white transition-colors">Apple Login</a>
-            <a href="#" className="hover:text-white transition-colors">Facebook Login</a>
+            <Link href="/login" className="hover:text-white transition-colors">Google Login</Link>
+            <Link href="/login" className="hover:text-white transition-colors">Apple Login</Link>
+            <Link href="/login" className="hover:text-white transition-colors">Facebook Login</Link>
           </div>
 
           <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest text-center md:text-right">

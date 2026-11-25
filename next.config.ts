@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
   },
-  async headers() {
-    return [
+  headers() {
+    return Promise.resolve([
       {
         source: "/(.*)",
         headers: [
@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-    ];
+    ]);
   },
 };
 

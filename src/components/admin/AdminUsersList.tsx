@@ -17,6 +17,25 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
+function getRoleBadgePresentation(nombrerol?: string) {
+  if (nombrerol === 'Administrador') {
+    return {
+      badgeClass: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
+      icon: <ShieldAlert className="w-3.5 h-3.5" aria-hidden="true" />,
+    };
+  }
+  if (nombrerol === 'Entrenador') {
+    return {
+      badgeClass: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
+      icon: <Star className="w-3.5 h-3.5" aria-hidden="true" />,
+    };
+  }
+  return {
+    badgeClass: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+    icon: <User className="w-3.5 h-3.5" aria-hidden="true" />,
+  };
+}
+
 export function AdminUsersList() {
   const [users, setUsers] = useState<UserProfileDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,16 +174,15 @@ export function AdminUsersList() {
                   </td>
 
                   <td className="py-4 px-4">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
-                      u.nombrerol === 'Administrador' ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' :
-                      u.nombrerol === 'Entrenador' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' :
-                      'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                    }`}>
-                      {u.nombrerol === 'Administrador' ? <ShieldAlert className="w-3.5 h-3.5" aria-hidden="true" /> :
-                       u.nombrerol === 'Entrenador' ? <Star className="w-3.5 h-3.5" aria-hidden="true" /> :
-                       <User className="w-3.5 h-3.5" aria-hidden="true" />}
-                      {u.nombrerol}
-                    </span>
+                    {(() => {
+                      const rolePresentation = getRoleBadgePresentation(u.nombrerol);
+                      return (
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${rolePresentation.badgeClass}`}>
+                          {rolePresentation.icon}
+                          {u.nombrerol}
+                        </span>
+                      );
+                    })()}
                   </td>
 
                   <td className="py-4 px-4">

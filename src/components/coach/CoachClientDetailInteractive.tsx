@@ -15,13 +15,9 @@ import {
   Calendar, 
   PlusCircle, 
   X,
-  MessageSquare,
   Eye,
   Check,
-  ChevronRight,
-  TrendingUp,
   Brain,
-  Droplet,
   Heart
 } from "lucide-react";
 import { 
@@ -51,6 +47,21 @@ function getHeatmapDayStatus(level: number): string {
   if (level === 3) return "100% completado";
   if (level > 0) return "Parcial";
   return "Sin registro";
+}
+
+function computeDayCompletionLevel(dayRecord: unknown): number {
+  if (!Array.isArray(dayRecord) || dayRecord.length === 0) return 0;
+  const completedCount = dayRecord.filter((r: any) => r.completado).length;
+  if (completedCount >= 3) return 3;
+  if (completedCount >= 2) return 2;
+  return completedCount >= 1 ? 1 : 0;
+}
+
+function getHeatmapSquareColor(level: number): string {
+  if (level === 3) return "bg-[#572de4]";
+  if (level === 2) return "bg-[#704efd]/60";
+  if (level === 1) return "bg-[#704efd]/20";
+  return "bg-slate-100 dark:bg-slate-800";
 }
 
 export function CoachClientDetailInteractive({
@@ -130,18 +141,7 @@ export function CoachClientDetailInteractive({
         const dayDate = new Date(today.getTime() - offset * 24 * 60 * 60 * 1000);
         const dateKey = dayDate.toISOString().split("T")[0];
         const dayRecord = records[dateKey];
-        
-        let completionLevel = 0;
-        if (dayRecord && Array.isArray(dayRecord) && dayRecord.length > 0) {
-          const completedCount = dayRecord.filter((r: any) => r.completado).length;
-          if (completedCount >= 3) {
-            completionLevel = 3;
-          } else if (completedCount >= 2) {
-            completionLevel = 2;
-          } else if (completedCount >= 1) {
-            completionLevel = 1;
-          }
-        }
+        const completionLevel = computeDayCompletionLevel(dayRecord);
 
         const dayNames = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
         daysInWeek.push({
@@ -388,7 +388,8 @@ export function CoachClientDetailInteractive({
           <div className="flex items-center gap-4 text-xs font-bold text-slate-600 dark:text-slate-300">
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-md bg-[#572de4]" />
-              Días Perfectos: <strong className="text-slate-900 dark:text-white">{perfectDaysCount}</strong>
+              <span>Días Perfectos:</span>
+              <strong className="text-slate-900 dark:text-white">{perfectDaysCount}</strong>
             </span>
             <span className="text-slate-300 dark:text-slate-700">•</span>
             <span className="flex items-center gap-1.5">
@@ -422,10 +423,7 @@ export function CoachClientDetailInteractive({
               <div className="grid grid-flow-col grid-rows-7 gap-2 flex-1">
                 {heatmapWeeks.map((week, wIdx) =>
                   week.map((day, dIdx) => {
-                    let colorClass = "bg-slate-100 dark:bg-slate-800";
-                    if (day.level === 3) colorClass = "bg-[#572de4]";
-                    else if (day.level === 2) colorClass = "bg-[#704efd]/60";
-                    else if (day.level === 1) colorClass = "bg-[#704efd]/20";
+                    const colorClass = getHeatmapSquareColor(day.level);
 
                     return (
                       <div
@@ -665,7 +663,7 @@ export function CoachClientDetailInteractive({
                     <div className="flex items-center justify-between text-xs text-slate-400">
                       <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                         <span className="w-2 h-2 rounded-full bg-[#572de4]" />
-                        Coach (Tú)
+                        <span>Coach (Tú)</span>
                       </span>
                       <span className="text-[#572de4] font-semibold flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />
@@ -720,14 +718,17 @@ export function CoachClientDetailInteractive({
                   {availableRoutines.map((r) => (
                     <label
                       key={r.id}
+                      htmlFor={`routine-select-detail-${r.id}`}
+                      aria-label={r.name}
                       className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
                         selectedRoutineId === r.id
                           ? "border-[#572de4] bg-indigo-50/50 dark:bg-indigo-950/30"
                           : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/40"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-3">
                         <input
+                          id={`routine-select-detail-${r.id}`}
                           type="radio"
                           name="routineSelectDetail"
                           value={r.id}
@@ -735,11 +736,11 @@ export function CoachClientDetailInteractive({
                           onChange={(e) => setSelectedRoutineId(e.target.value)}
                           className="accent-[#572de4] w-4 h-4"
                         />
-                        <div>
+                        <span>
                           <span className="font-bold text-sm text-slate-900 dark:text-white block">{r.name}</span>
                           <span className="text-xs text-slate-400 block line-clamp-1">{r.description || "Sin descripción"}</span>
-                        </div>
-                      </div>
+                        </span>
+                      </span>
                     </label>
                   ))}
                 </div>

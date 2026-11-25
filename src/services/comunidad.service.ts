@@ -10,8 +10,6 @@ import { comunidadRepository } from "@/repositories/comunidad.repository";
 import type { Reto } from "@/domain/reto.types";
 
 export class ComunidadService {
-  constructor() {}
-
   // ─── Estadísticas de Comunidad ──────────────────────────────────────────────
   async getStats(): Promise<Result<{ totalMiembros: number; conectados: number }>> {
     try {

@@ -15,7 +15,6 @@ import {
   clearSessionCookies,
 } from '@/lib/auth/session-cookies'
 import { AuthService }      from '@/services/auth.service'
-import { HabitoService }    from '@/services/habito.service'
 
 const authService = new AuthService()
 import {
@@ -60,23 +59,22 @@ async function crearHabitosOnboarding(presetIds: string[], token: string): Promi
 
     const hoy = new Date().toISOString().split('T')[0]
 
-    for (const id of validIds) {
-      const preset = ONBOARDING_HABIT_PRESETS.find(p => p.id === id)
-      if (!preset) continue
+    const createTasks = validIds
+      .map((id) => ONBOARDING_HABIT_PRESETS.find((p) => p.id === id))
+      .filter((preset): preset is NonNullable<typeof preset> => Boolean(preset && categoriaPorNombre.get(preset.categoria)))
+      .map((preset) =>
+        apiClient.post('/habitos', {
+          nombre:       preset.nombre,
+          descripcion:  `Hábito inicial — ${preset.categoria}`,
+          fechaInicio:  hoy,
+          puntos:       preset.puntos,
+          idCategoria:  categoriaPorNombre.get(preset.categoria),
+          metaDiaria:   1,
+          unidadMedida: 'vez',
+        }, { headers: customHeaders })
+      )
 
-      const idCategoria = categoriaPorNombre.get(preset.categoria)
-      if (!idCategoria) continue
-
-      await apiClient.post('/habitos', {
-        nombre:       preset.nombre,
-        descripcion:  `Hábito inicial — ${preset.categoria}`,
-        fechaInicio:  hoy,
-        puntos:       preset.puntos,
-        idCategoria,
-        metaDiaria:   1,
-        unidadMedida: 'vez',
-      }, { headers: customHeaders })
-    }
+    await Promise.all(createTasks)
   } catch (error) {
     console.warn('[Onboarding] Error al crear hábitos iniciales:', error)
   }
@@ -121,8 +119,9 @@ export async function registerAction(
   _prev: RegisterActionState | null,
   formData: FormData
 ): Promise<RegisterActionState> {
+  const rawHabitPresets = formData.get('habit_presets_json')
   const habitIdsRaw = parseHabitPresetIds(
-    String(formData.get('habit_presets_json') ?? '[]')
+    typeof rawHabitPresets === 'string' ? rawHabitPresets : '[]'
   )
 
   const parsed = RegisterSchema.safeParse({

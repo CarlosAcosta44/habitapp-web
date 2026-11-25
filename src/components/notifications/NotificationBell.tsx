@@ -12,13 +12,14 @@ import { useNotifications } from './NotificationsContext';
 
 export function NotificationBell() {
   const { unreadCount, openNotifications } = useNotifications();
+  const unreadSuffix = unreadCount > 0 ? ` — ${unreadCount} sin leer` : '';
 
   return (
     <button
       type="button"
       onClick={openNotifications}
       id="notification-bell"
-      aria-label={`Notificaciones${unreadCount > 0 ? ` — ${unreadCount} sin leer` : ''}`}
+      aria-label={`Notificaciones${unreadSuffix}`}
       className="relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900 transition-all text-slate-500 dark:text-slate-400 hover:text-[#572de4] dark:hover:text-indigo-400 active:scale-95 cursor-pointer"
       title="Abrir notificaciones"
     >

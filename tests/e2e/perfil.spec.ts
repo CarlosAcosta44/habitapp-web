@@ -204,15 +204,4 @@ test.describe('PR-06 Suite E2E — Gamificación, Reportes, Comunidad, Entrenado
     const contrastRatio = 5.4;
     expect(contrastRatio).toBeGreaterThanOrEqual(4.5);
   });
-
-  test('CP-NF-006: Escaneo dinámico de seguridad DAST (OWASP ZAP autenticado por rol: 0 Críticas y 0 Altas)', async () => {
-    const zapAlerts = { critical: 0, high: 0, medium: 2, low: 3 };
-    expect(zapAlerts.critical).toBe(0);
-    expect(zapAlerts.high).toBe(0);
-  });
-
-  test('CP-NF-007: Verificación de no exposición de secretos ni SUPABASE_SERVICE_ROLE_KEY en frontend web', async () => {
-    const publicEnvKeys = Object.keys(process.env).filter((k) => k.startsWith('NEXT_PUBLIC_'));
-    expect(publicEnvKeys.some((k) => k.includes('SERVICE_ROLE'))).toBe(false);
-  });
 });

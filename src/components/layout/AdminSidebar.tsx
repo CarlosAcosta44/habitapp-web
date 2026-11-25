@@ -19,7 +19,14 @@ interface AdminSidebarProps {
   user: User;
 }
 
-export function AdminSidebar({ user }: AdminSidebarProps) {
+function getAdminDisplayName(user: User): string {
+  if (user?.nombre) {
+    return user.apellido ? `${user.nombre} ${user.apellido}` : user.nombre;
+  }
+  return user?.full_name || 'Administrador';
+}
+
+export function AdminSidebar({ user }: Readonly<AdminSidebarProps>) {
   const pathname = usePathname();
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
@@ -78,7 +85,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200 truncate uppercase tracking-wider leading-tight pb-1">
-              {user?.nombre ? (user.apellido ? `${user.nombre} ${user.apellido}` : user.nombre) : (user?.full_name || 'Administrador')}
+              {getAdminDisplayName(user)}
             </p>
             <p className="text-[10px] text-rose-500 dark:text-rose-400 font-bold truncate uppercase tracking-widest flex items-center gap-1">
               <Shield className="w-2.5 h-2.5" /> {user?.nombrerol || 'ADMIN'}

@@ -68,20 +68,20 @@ export default function SobreNosotrosClient() {
         <div className="relative z-10">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Nuestra Visión</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-lg">
-            HabitApp no es solo un tracker de tareas; es un ecosistema de bienestar. Nuestro objetivo general es 
-            <span className="text-indigo-600 dark:text-indigo-400 font-semibold px-1">
-              gestionar y presentar datos sobre hábitos saludables 
+            <span>HabitApp no es solo un tracker de tareas; es un ecosistema de bienestar. Nuestro objetivo general es </span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-semibold">
+              gestionar y presentar datos sobre hábitos saludables
             </span>
-            para que tomes decisiones informadas sobre tu estilo de vida, motivándote a prevenir enfermedades y mejorar tu salud integral.
+            <span> para que tomes decisiones informadas sobre tu estilo de vida, motivándote a prevenir enfermedades y mejorar tu salud integral.</span>
           </p>
         </div>
       </div>
 
       {/* ── Grid de Ejes ─────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
-        {sections.map((s, idx) => (
+        {sections.map((s) => (
           <div 
-            key={idx}
+            key={s.title}
             className={`p-6 rounded-3xl border ${s.color} hover:scale-[1.02] transition-transform duration-300`}
           >
             <div className="mb-4">{s.icon}</div>
@@ -97,8 +97,8 @@ export default function SobreNosotrosClient() {
       <div className="mb-16">
         <h2 className="text-[11px] font-bold text-indigo-400 uppercase tracking-[0.2em] mb-8 text-center">Interacción de Roles</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {roles.map((r, i) => (
-            <div key={i} className="p-5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col items-center text-center">
+          {roles.map((r) => (
+            <div key={r.name} className="p-5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col items-center text-center">
               <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-indigo-500 dark:text-indigo-400 mb-3">
                 {r.icon}
               </div>

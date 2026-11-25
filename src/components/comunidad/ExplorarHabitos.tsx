@@ -28,7 +28,7 @@ export function ExplorarHabitos() {
           </div>
         </div>
         <button className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-bold transition-colors flex items-center gap-1 group">
-          Ver todos 
+          <span>Ver todos</span>
           <span className="group-hover:translate-x-1 transition-transform">→</span>
         </button>
       </div>
@@ -58,13 +58,13 @@ export function ExplorarHabitos() {
             {/* Participantes */}
             <div className="relative z-10 flex items-center justify-between mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/50">
               <div className="flex -space-x-2">
-                {[...Array(3)].map((_, i) => (
+                {["A", "B", "C"].map((letter) => (
                   <div
-                    key={i}
+                    key={letter}
                     className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-white dark:border-slate-900 flex items-center justify-center"
                   >
                     <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold">
-                      {String.fromCharCode(65 + i)}
+                      {letter}
                     </span>
                   </div>
                 ))}

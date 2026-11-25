@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "jest",
     "test:cov": "jest --coverage",
+    "test:integration": "jest --config ./tests/integration/jest-integration.config.cjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },

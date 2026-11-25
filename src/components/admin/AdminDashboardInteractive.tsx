@@ -4,14 +4,11 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   Users,
-  Shield,
-  Activity,
   AlertTriangle,
   Download,
   Settings,
   RefreshCw,
   ChevronRight,
-  TrendingUp,
   UserCheck,
   Flame,
   FileText,
@@ -22,6 +19,12 @@ import {
   ExternalLink,
   ShieldAlert,
 } from "lucide-react";
+
+function getRangeBadgeLabel(range: "7d" | "30d" | "year"): string {
+  if (range === "7d") return "7 Días";
+  if (range === "30d") return "30 Días";
+  return "Anual";
+}
 
 interface AdminDashboardInteractiveProps {
   initialTotalUsers: number;
@@ -184,7 +187,7 @@ export function AdminDashboardInteractive({
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            {initialActiveUsers} cuentas con estado activo
+            <span>{initialActiveUsers} cuentas con estado activo</span>
           </p>
         </div>
 
@@ -208,7 +211,7 @@ export function AdminDashboardInteractive({
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-1">
             <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-            Supervisión directa de clientes y rutinas
+            <span>Supervisión directa de clientes y rutinas</span>
           </p>
         </div>
 
@@ -232,7 +235,7 @@ export function AdminDashboardInteractive({
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-1">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-            Publicaciones abiertas para debate ciudadano
+            <span>Publicaciones abiertas para debate ciudadano</span>
           </p>
         </div>
 
@@ -256,7 +259,7 @@ export function AdminDashboardInteractive({
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-1">
             <span className={`w-1.5 h-1.5 rounded-full ${initialSuspendedUsers > 0 ? "bg-rose-500" : "bg-emerald-500"}`} />
-            {initialSuspendedUsers > 0 ? "Usuarios bloqueados por infracción" : "Todas las cuentas operando normalmente"}
+            <span>{initialSuspendedUsers > 0 ? "Usuarios bloqueados por infracción" : "Todas las cuentas operando normalmente"}</span>
           </p>
         </div>
       </div>
@@ -274,7 +277,7 @@ export function AdminDashboardInteractive({
                     Crecimiento y Actividad de la Plataforma
                   </h3>
                   <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold text-[11px]">
-                    {range === "7d" ? "7 Días" : range === "30d" ? "30 Días" : "Anual"}
+                    {getRangeBadgeLabel(range)}
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -322,7 +325,7 @@ export function AdminDashboardInteractive({
 
             {/* SVG Visual Graph */}
             <div className="w-full h-56 relative flex flex-col justify-end pt-4">
-              <svg className="w-full h-44 overflow-visible" preserveAspectRatio="none" viewBox="0 0 700 180">
+              <svg aria-hidden="true" className="w-full h-44 overflow-visible" preserveAspectRatio="none" viewBox="0 0 700 180">
                 <defs>
                   <linearGradient id="primaryCurveGrad" x1="0" x2="0" y1="0" y2="1">
                     <stop offset="0%" stopColor="#572de4" stopOpacity="0.28" />

@@ -13,14 +13,12 @@ import {
   Zap,
   Utensils,
   Moon,
-  Smile,
   Droplets,
   BookOpen,
   Heart,
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Clock,
   Target,
 } from 'lucide-react';
 import {
@@ -41,7 +39,7 @@ export function ArchivedHabitsModal({
   onClose,
   onReactivate,
   onDelete,
-}: ArchivedHabitsModalProps) {
+}: Readonly<ArchivedHabitsModalProps>) {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -64,7 +62,7 @@ export function ArchivedHabitsModal({
       const data = await getArchivadosAction();
       setHabitos(Array.isArray(data) ? data : []);
     } catch (_err: unknown) {
-      // Notificar al usuario amigablemente en caso de error de red
+      console.warn('Error al cargar hábitos archivados:', _err);
       setErrorMsg('No se pudieron cargar los hábitos archivados.');
     } finally {
       setIsLoading(false);
@@ -171,19 +169,17 @@ export function ArchivedHabitsModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose();
-      }}
-      role="presentation"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
     >
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label="Cerrar modal"
+        onClick={onClose}
+        className="fixed inset-0 w-full h-full bg-slate-950/60 backdrop-blur-sm cursor-default"
+      />
       <div
-        className="relative w-full max-w-2xl bg-white dark:bg-[#111827] rounded-3xl shadow-[0_20px_50px_rgba(87,45,228,0.2)] border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[88vh] animate-in zoom-in-95 duration-200"
-        role="dialog"
-        aria-modal="true"
+        className="relative z-10 w-full max-w-2xl bg-white dark:bg-[#111827] rounded-3xl shadow-[0_20px_50px_rgba(87,45,228,0.2)] border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[88vh] animate-in zoom-in-95 duration-200"
       >
         {/* ── Encabezado del Modal ── */}
         <div className="px-5 sm:px-6 pt-5 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
@@ -233,12 +229,13 @@ export function ArchivedHabitsModal({
 
         {/* ── Contenido / Lista de Hábitos Archivados ── */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-3">
-          {isLoading ? (
+          {isLoading && (
             <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-400">
               <Loader2 className="w-8 h-8 animate-spin text-[#572de4]" />
               <p className="text-xs font-semibold">Cargando hábitos archivados...</p>
             </div>
-          ) : habitos.length === 0 ? (
+          )}
+          {!isLoading && habitos.length === 0 && (
             <div className="py-14 px-4 text-center rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
               <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-3">
                 <Archive className="w-7 h-7" />
@@ -250,7 +247,8 @@ export function ArchivedHabitsModal({
                 Cuando desees pausar un hábito sin perder su historial de estadísticas, archívalo desde su ventana de detalle y se guardará aquí.
               </p>
             </div>
-          ) : (
+          )}
+          {!isLoading && habitos.length > 0 && (
             habitos.map((habito) => {
               const id = habito.idHabito || habito.idhabito;
               const nombre = habito.nombre;

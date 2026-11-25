@@ -4,28 +4,24 @@ import React, { useState } from "react";
 import {
   ShieldAlert,
   Flag,
-  Sparkles,
   Clock,
   CheckCircle2,
-  AlertTriangle,
   Trash2,
   Check,
   Ban,
   MessageSquare,
-  HelpCircle,
-  Eye,
-  SlidersHorizontal,
-  ChevronRight,
-  UserX,
-  FileText,
-  RotateCw,
-  X,
 } from "lucide-react";
 import {
   deleteForumAction,
   deleteForumCommentAction,
   updateUserStatusAction,
 } from "@/actions/admin.actions";
+
+function getActionHistoryColorClass(tipo: "delete" | "suspend" | "dismiss"): string {
+  if (tipo === "delete") return "text-rose-600 dark:text-rose-400";
+  if (tipo === "suspend") return "text-amber-600 dark:text-amber-400";
+  return "text-emerald-600 dark:text-emerald-400";
+}
 
 interface IncidentReport {
   id: string;
@@ -203,7 +199,7 @@ export function AdminModerationInteractive({
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold text-[11px]">
               <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
-              Cola Prioritaria
+              <span>Cola Prioritaria</span>
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
@@ -527,8 +523,8 @@ export function AdminModerationInteractive({
                 { title: "Sin Publicidad ni Enlaces Falsos", desc: "No se permite venta de productos no certificados." },
                 { title: "Verificación de Salud", desc: "Consejos médicos solo por profesionales acreditados." },
                 { title: "Privacidad de Datos", desc: "Prohibido compartir teléfonos, direcciones o historiales clínicos." },
-              ].map((rule, i) => (
-                <div key={i} className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+              ].map((rule) => (
+                <div key={rule.title} className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-[#572de4] shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold text-slate-900 dark:text-white block">{rule.title}</span>
@@ -552,13 +548,7 @@ export function AdminModerationInteractive({
                     className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800"
                   >
                     <span
-                      className={`font-semibold block ${
-                        act.tipo === "delete"
-                          ? "text-rose-600 dark:text-rose-400"
-                          : act.tipo === "suspend"
-                          ? "text-amber-600 dark:text-amber-400"
-                          : "text-emerald-600 dark:text-emerald-400"
-                      }`}
+                      className={`font-semibold block ${getActionHistoryColorClass(act.tipo)}`}
                     >
                       {act.titulo}
                     </span>
