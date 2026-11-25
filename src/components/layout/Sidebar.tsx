@@ -49,13 +49,36 @@ function getSidebarNavLinks(user: User) {
     rawRole === 'TRAINER';
 
   if (isAdmin) {
-    links.push({ name: 'Administrador', href: '/admin', icon: Shield });
-    links.push({ name: 'Entrenador', href: '/entrenador', icon: Dumbbell });
+    links.push(
+      { name: 'Administrador', href: '/admin', icon: Shield },
+      { name: 'Entrenador', href: '/entrenador', icon: Dumbbell },
+    );
   } else if (isTrainer) {
     links.push({ name: 'Entrenador', href: '/entrenador', icon: Dumbbell });
   }
 
   return links;
+}
+
+function renderDarkModeToggleContent(isCollapsed: boolean, isDarkMode: boolean) {
+  if (isCollapsed) {
+    return isDarkMode ? (
+      <Moon className="w-5 h-5 text-indigo-400" />
+    ) : (
+      <Sun className="w-5 h-5 text-amber-500" />
+    );
+  }
+  return (
+    <>
+      <span className="sr-only">Toggle Dark Mode</span>
+      <span
+        className={`
+          inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform
+          ${isDarkMode ? 'translate-x-5' : 'translate-x-0'}
+        `}
+      />
+    </>
+  );
 }
 
 function getUserDisplayInfo(user: User) {
@@ -73,10 +96,8 @@ export function Sidebar({ user }: SidebarProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isNewHabitModalOpen, setIsNewHabitModalOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     // Dark mode sync
     const checkDark = () => {
       setIsDarkMode(document.documentElement.classList.contains('dark'));
@@ -270,23 +291,7 @@ export function Sidebar({ user }: SidebarProps) {
               title={isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
               type="button"
             >
-              {isCollapsed ? (
-                isDarkMode ? (
-                  <Moon className="w-5 h-5 text-indigo-400" />
-                ) : (
-                  <Sun className="w-5 h-5 text-amber-500" />
-                )
-              ) : (
-                <>
-                  <span className="sr-only">Toggle Dark Mode</span>
-                  <span
-                    className={`
-                      inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform
-                      ${isDarkMode ? 'translate-x-5' : 'translate-x-0'}
-                    `}
-                  />
-                </>
-              )}
+              {renderDarkModeToggleContent(isCollapsed, isDarkMode)}
             </button>
           </div>
 

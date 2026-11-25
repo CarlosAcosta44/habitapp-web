@@ -81,3 +81,4 @@ cd /home/kairos/Proyectos/habitapp-api && npm run lint && npx tsc --noEmit
 cd /home/kairos/Proyectos/habitapp-web && npm run lint && npx --no-install tsc --noEmit
 cd /home/kairos/Proyectos/habitapp-mobile && /home/kairos/development/flutter/bin/flutter analyze
 ```
+

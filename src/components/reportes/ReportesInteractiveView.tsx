@@ -42,7 +42,7 @@ export function ReportesInteractiveView({
 }: Readonly<ReportesInteractiveViewProps>) {
   const router = useRouter();
   const [isNewHabitModalOpen, setIsNewHabitModalOpen] = useState(false);
-  const [hoveredDay, setHoveredDay] = useState<number | null>(null);
+  const [, setHoveredDay] = useState<number | null>(null);
 
   // Valores calculados con fallback elegante si el usuario es nuevo
   const cumplimiento = stats?.cumplimiento_global ?? stats?.tasa_diaria ?? 84;

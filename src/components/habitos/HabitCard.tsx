@@ -18,7 +18,15 @@ interface HabitCardProps {
   rachaActual: number;
 }
 
-export function HabitCard({ habito, rachaActual }: HabitCardProps) {
+function renderHabitCategoryIcon(nombreCategoria: string) {
+  if (nombreCategoria.includes("agua")) return <Droplets className="h-5 w-5" />;
+  if (nombreCategoria.includes("ejercicio")) return <Dumbbell className="h-5 w-5" />;
+  if (nombreCategoria.includes("sue")) return <MoonStar className="h-5 w-5" />;
+  if (nombreCategoria.includes("plant")) return <Leaf className="h-5 w-5" />;
+  return <Sparkles className="h-5 w-5" />;
+}
+
+export function HabitCard({ habito, rachaActual }: Readonly<HabitCardProps>) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const completado = habito.registroHoy?.completado ?? false;
@@ -27,12 +35,6 @@ export function HabitCard({ habito, rachaActual }: HabitCardProps) {
   
   const hoy        = new Date().toISOString().split("T")[0];
   const nombreCategoria = habito.categoria.nombre.toLowerCase();
-  const categoryIcon =
-    nombreCategoria.includes("agua") ? Droplets :
-    nombreCategoria.includes("ejercicio") ? Dumbbell :
-    nombreCategoria.includes("sue") ? MoonStar :
-    nombreCategoria.includes("plant") ? Leaf :
-    Sparkles;
 
   // Barra de progreso fraccional
   const progressPercent = Math.min(100, Math.round((progresoActual / metaDiaria) * 100));
@@ -61,10 +63,7 @@ export function HabitCard({ habito, rachaActual }: HabitCardProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 dark:bg-indigo-900/70 text-indigo-600 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800">
-            {(() => {
-              const Icon = categoryIcon;
-              return <Icon className="h-5 w-5" />;
-            })()}
+            {renderHabitCategoryIcon(nombreCategoria)}
           </div>
           <div className="min-w-0">
             <p

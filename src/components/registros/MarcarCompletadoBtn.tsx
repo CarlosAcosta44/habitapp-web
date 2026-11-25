@@ -10,10 +10,15 @@
 
 import { useTransition } from "react";
 import { 
-  marcarCompletadoAction, 
   desmarcarCompletadoAction,
   avanzarProgresoAction
 } from "@/actions/registro.actions";
+
+function getCompletionButtonSymbol(isPending: boolean, completado: boolean): string {
+  if (isPending) return "⏳";
+  if (completado) return "✓";
+  return "";
+}
 
 interface MarcarCompletadoBtnProps {
   idHabito:    string;
@@ -29,7 +34,7 @@ export function MarcarCompletadoBtn({
   progresoActual,
   metaDiaria,
   fecha,
-}: MarcarCompletadoBtnProps) {
+}: Readonly<MarcarCompletadoBtnProps>) {
   const [isPending, startTransition] = useTransition();
 
   function handleToggle(e: React.MouseEvent) {
@@ -74,7 +79,7 @@ export function MarcarCompletadoBtn({
         ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
       `}
     >
-      {isPending  ? "⏳" : completado ? "✓" : ""}
+      {getCompletionButtonSymbol(isPending, completado)}
     </button>
   );
 }

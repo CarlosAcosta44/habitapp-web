@@ -13,9 +13,6 @@ import {
   MessageCircle,
   Reply,
   Send,
-  ChevronDown,
-  ChevronUp,
-  Smile,
   CheckCircle2,
   Loader2,
   Trash2,
@@ -78,12 +75,22 @@ interface ForoDetalleProps {
   isAdmin?: boolean;
 }
 
+function resolveAuthorFullName(entity: any, fallback: string): string {
+  if (entity?.usuarios) {
+    return `${entity.usuarios.nombre || ''} ${entity.usuarios.apellido || ''}`.trim() || fallback;
+  }
+  if (entity?.autor?.nombre) {
+    return `${entity.autor.nombre || ''} ${entity.autor.apellido || ''}`.trim() || fallback;
+  }
+  return fallback;
+}
+
 export function ForoDetalleInteractiveView({
   foro,
   initialComentarios = [],
   currentUser,
   isAdmin = false,
-}: ForoDetalleProps) {
+}: Readonly<ForoDetalleProps>) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const replyInputRef = useRef<HTMLTextAreaElement>(null);
@@ -358,21 +365,13 @@ export function ForoDetalleInteractiveView({
     return `${f}${l}` || 'HB';
   };
 
-  const autorNombre = foro?.usuarios
-    ? `${foro.usuarios.nombre || ''} ${foro.usuarios.apellido || ''}`.trim()
-    : foro?.autor?.nombre
-    ? `${foro.autor.nombre || ''} ${foro.autor.apellido || ''}`.trim()
-    : 'Miembro de la Comunidad';
+  const autorNombre = resolveAuthorFullName(foro, 'Miembro de la Comunidad');
 
   const renderSubRespuesta = (sub: any) => {
     const sId = sub.idcomentario || sub.idComentario || sub.id || '';
     const sIsLiked = likedComments[sId] || false;
     const sLikes = commentLikes[sId] ?? sub.likes_count ?? 3;
-    const subAutorNombre = sub.usuarios
-      ? `${sub.usuarios.nombre || ''} ${sub.usuarios.apellido || ''}`.trim()
-      : sub.autor?.nombre
-      ? `${sub.autor.nombre} ${sub.autor.apellido || ''}`.trim()
-      : 'Miembro';
+    const subAutorNombre = resolveAuthorFullName(sub, 'Miembro');
     const subAvatar = sub.usuarios?.fotoperfil || sub.autor?.avatarUrl;
     const subImg = sub.imagen_url || sub.imagenUrl;
     const canManageSub = Boolean(isAdmin || (currentUser?.id && (sub.idusuario === currentUser.id || sub.usuarios?.idusuario === currentUser.id)));

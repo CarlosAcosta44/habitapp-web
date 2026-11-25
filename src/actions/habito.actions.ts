@@ -155,7 +155,6 @@ export async function updateHabitoAction(
 ): Promise<ActionState> {
   const userResult = await requireUser();
   if (!userResult.success) return { success: false, message: userResult.error };
-  const user = userResult.data;
 
   const id = formData.get("id") as string;
   if (!id) return { success: false, message: "ID del hábito requerido" };
@@ -226,7 +225,6 @@ export async function completarHabitoAction(
 ): Promise<ActionState> {
   const userResult = await requireUser();
   if (!userResult.success) return { success: false, message: userResult.error };
-  const user = userResult.data;
 
   const id = formData.get("id") as string;
   if (!id) return { success: false, message: "ID del hábito requerido" };

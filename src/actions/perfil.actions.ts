@@ -66,7 +66,7 @@ export async function updateAvatarAction(
   formData: FormData
 ): Promise<PerfilActionState> {
   try {
-    const user = await requireUser();
+    await requireUser();
     const file = formData.get("avatar") as File | null;
     
     if (!file || file.size === 0) {
@@ -93,6 +93,7 @@ export async function updateAvatarAction(
 
     return { success: true, message: "¡Avatar actualizado correctamente! ✅", data: result.data };
   } catch (error) {
+    console.warn("Error inesperado al subir avatar:", error);
     return { success: false, message: "Error inesperado al subir la imagen." };
   }
 }

@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import {
   X,
   MessageSquarePlus,
-  Sparkles,
   Loader2,
   AlertCircle,
   Tag,
@@ -33,7 +32,7 @@ const CATEGORIAS = [
   { id: 'Estrés', label: '#Estrés' },
 ];
 
-export function CreateForoModal({ isOpen, onClose }: CreateForoModalProps) {
+export function CreateForoModal({ isOpen, onClose }: Readonly<CreateForoModalProps>) {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -124,19 +123,17 @@ export function CreateForoModal({ isOpen, onClose }: CreateForoModalProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose();
-      }}
-      role="presentation"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
     >
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label="Cerrar modal"
+        onClick={onClose}
+        className="fixed inset-0 w-full h-full bg-slate-950/60 backdrop-blur-sm cursor-default"
+      />
       <div
-        className="relative w-full max-w-2xl bg-white dark:bg-[#111827] rounded-3xl shadow-[0_20px_50px_rgba(87,45,228,0.2)] border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
-        role="dialog"
-        aria-modal="true"
+        className="relative z-10 w-full max-w-2xl bg-white dark:bg-[#111827] rounded-3xl shadow-[0_20px_50px_rgba(87,45,228,0.2)] border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
       >
         {/* Encabezado */}
         <div className="relative px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">

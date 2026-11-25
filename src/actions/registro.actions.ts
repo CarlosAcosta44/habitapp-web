@@ -36,7 +36,6 @@ export async function marcarCompletadoAction(
 ): Promise<ActionState> {
   const userResult = await requireUser();
   if (!userResult.success) return { success: false, message: userResult.error };
-  const user = userResult.data;
 
   const rawData = {
     idHabito:    formData.get("idHabito"),
@@ -75,7 +74,6 @@ export async function desmarcarCompletadoAction(
 ): Promise<ActionState> {
   const userResult = await requireUser();
   if (!userResult.success) return { success: false, message: userResult.error };
-  const user = userResult.data;
 
   const idHabito = formData.get("idHabito") as string;
   if (!idHabito) return { success: false, message: "ID del hábito requerido" };
@@ -97,7 +95,6 @@ export async function avanzarProgresoAction(
 ): Promise<ActionState> {
   const userResult = await requireUser();
   if (!userResult.success) return { success: false, message: userResult.error };
-  const user = userResult.data;
 
   const rawData = {
     idHabito:       formData.get("idHabito"),

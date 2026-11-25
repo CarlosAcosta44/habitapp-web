@@ -24,7 +24,6 @@ export async function addFriendAction(
 ): Promise<ActionState> {
   const userResult = await requireUser();
   if (!userResult.success) return { success: false, message: userResult.error };
-  const user = userResult.data;
 
   const validation = AddFriendSchema.safeParse({
     targetUserId: formData.get("targetUserId"),

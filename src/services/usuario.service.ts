@@ -29,6 +29,38 @@ export class UsuarioService {
     return usuarioRepository.patch<UserProfileDto>("users/me", dto);
   }
 
+  private resolveNextObjective(puntos: number) {
+    if (puntos < 100) {
+      return { nombre: "Aspirante", desc: "Consigue tus primeros 100 puntos", meta: 100, actual: puntos };
+    }
+    if (puntos < 500) {
+      return { nombre: "Aplicado", desc: "Tu meta ahora son 500 puntos", meta: 500, actual: puntos };
+    }
+    if (puntos < 1500) {
+      return { nombre: "Constante", desc: "Alcanzar 1500 puntos es el reto", meta: 1500, actual: puntos };
+    }
+    return { nombre: "Mente de Acero", desc: "Llega a la increíble suma de 5000 puntos", meta: 5000, actual: puntos };
+  }
+
+  private computeGlobalStreak(registrosReales: any[], hoyDate: Date): number {
+    const todosLosDias = Array.from(
+      new Set(registrosReales.filter((r: any) => r.completado).map((r: any) => r.fecha))
+    ).sort((a, b) => (b as string).localeCompare(a as string));
+
+    let rachaGlobal = 0;
+    for (let i = 0; i < todosLosDias.length; i++) {
+      const d = new Date(hoyDate);
+      d.setDate(hoyDate.getDate() - i);
+      const expected = d.toISOString().split("T")[0];
+      if (todosLosDias[i] === expected) {
+        rachaGlobal++;
+      } else {
+        break;
+      }
+    }
+    return rachaGlobal;
+  }
+
   /**
    * Obtiene y consolida toda la información necesaria para el dashboard de perfil.
    * Llama en paralelo a: /users/me/profile, /records/historial,
@@ -80,22 +112,7 @@ export class UsuarioService {
       const eficienciaMensual =
         diasEnElMes > 0 ? Math.round((diasActivosMensuales / diasEnElMes) * 100) : 0;
 
-      // Racha global
-      const todosLosDias = Array.from(
-        new Set(registrosReales.filter((r: any) => r.completado).map((r: any) => r.fecha))
-      ).sort((a, b) => (b as string).localeCompare(a as string));
-
-      let rachaGlobal = 0;
-      for (let i = 0; i < todosLosDias.length; i++) {
-        const d = new Date(hoyDate);
-        d.setDate(hoyDate.getDate() - i);
-        const expected = d.toISOString().split("T")[0];
-        if (todosLosDias[i] === expected) {
-          rachaGlobal++;
-        } else {
-          break;
-        }
-      }
+      const rachaGlobal = this.computeGlobalStreak(registrosReales, hoyDate);
 
       // Actividad reciente
       const actividad = historialPuntos.map((hp: any, idx: number) => ({
@@ -125,18 +142,7 @@ export class UsuarioService {
       }
 
       const logroDestacado = logros.length > 0 ? logros[0] : null;
-
-      // Próximo objetivo
-      let proximoObjetivo = { nombre: "Inicia tu camino", desc: "Consigue tus primeros puntos.", meta: 100, actual: puntos };
-      if (puntos < 100) {
-        proximoObjetivo = { nombre: "Aspirante", desc: "Consigue tus primeros 100 puntos", meta: 100, actual: puntos };
-      } else if (puntos < 500) {
-        proximoObjetivo = { nombre: "Aplicado", desc: "Tu meta ahora son 500 puntos", meta: 500, actual: puntos };
-      } else if (puntos < 1500) {
-        proximoObjetivo = { nombre: "Constante", desc: "Alcanzar 1500 puntos es el reto", meta: 1500, actual: puntos };
-      } else {
-        proximoObjetivo = { nombre: "Mente de Acero", desc: "Llega a la increíble suma de 5000 puntos", meta: 5000, actual: puntos };
-      }
+      const proximoObjetivo = this.resolveNextObjective(puntos);
       const porcentajeObj = Math.min(100, Math.round((proximoObjetivo.actual / proximoObjetivo.meta) * 100));
 
       return ok({

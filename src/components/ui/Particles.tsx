@@ -20,6 +20,33 @@ interface ParticlesProps {
   interactionRadius?: number
 }
 
+const RGBA_REGEX = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/
+
+function drawParticleConnections(
+  ctx: CanvasRenderingContext2D,
+  particles: Particle[],
+  startIndex: number,
+  lineColor: string
+) {
+  const p = particles[startIndex]
+  for (let j = startIndex + 1; j < particles.length; j++) {
+    const p2 = particles[j]
+    const distance = Math.hypot(p.x - p2.x, p.y - p2.y)
+    if (distance < 100) {
+      ctx.beginPath()
+      ctx.moveTo(p.x, p.y)
+      ctx.lineTo(p2.x, p2.y)
+      const opacity = 1 - distance / 100
+      const colorMatch = RGBA_REGEX.exec(lineColor)
+      ctx.strokeStyle = colorMatch
+        ? `rgba(${colorMatch[1]}, ${colorMatch[2]}, ${colorMatch[3]}, ${opacity * 0.5})`
+        : lineColor
+      ctx.lineWidth = 1
+      ctx.stroke()
+    }
+  }
+}
+
 export function Particles({
   className = '',
   particleCount = 80,
@@ -27,7 +54,7 @@ export function Particles({
   lineColor = 'rgba(139, 92, 246, 0.2)', // violet-500
   particleSize = 2,
   interactionRadius = 150,
-}: ParticlesProps) {
+}: Readonly<ParticlesProps>) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isMounted, setIsMounted] = useState(false)
   const mouseRef = useRef({ x: 0, y: 0, active: false })
@@ -90,7 +117,7 @@ export function Particles({
         if (active) {
           const dx = mouseX - p.x
           const dy = mouseY - p.y
-          const distance = Math.sqrt(dx * dx + dy * dy)
+          const distance = Math.hypot(dx, dy)
           if (distance < interactionRadius) {
             const force = (interactionRadius - distance) / interactionRadius
             p.x -= (dx / distance) * force * 2
@@ -105,28 +132,7 @@ export function Particles({
         ctx.fill()
 
         // Dibujar conexiones
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j]
-          const dx = p.x - p2.x
-          const dy = p.y - p2.y
-          const distance = Math.sqrt(dx * dx + dy * dy)
-
-          if (distance < 100) {
-            ctx.beginPath()
-            ctx.moveTo(p.x, p.y)
-            ctx.lineTo(p2.x, p2.y)
-            const opacity = 1 - distance / 100
-            // Aplicar opacidad al color de línea
-            const colorMatch = lineColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/)
-            if (colorMatch) {
-               ctx.strokeStyle = `rgba(${colorMatch[1]}, ${colorMatch[2]}, ${colorMatch[3]}, ${opacity * 0.5})`
-            } else {
-               ctx.strokeStyle = lineColor
-            }
-            ctx.lineWidth = 1
-            ctx.stroke()
-          }
-        }
+        drawParticleConnections(ctx, particles, i, lineColor)
       }
 
       animationFrameId = requestAnimationFrame(animate)

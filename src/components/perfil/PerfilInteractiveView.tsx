@@ -9,14 +9,18 @@ import {
   Trophy,
   TrendingUp,
   ArrowRight,
-  Sun,
-  Droplet,
   Sparkles,
   UserPlus,
   Check,
   Search,
 } from "lucide-react";
 import { AddFriendForm } from "./AddFriendForm";
+
+function getFriendSubtitle(a: any): string {
+  if (a.puntostotales) return `${Number(a.puntostotales).toLocaleString()} pts`;
+  if (a.racha) return `${a.racha} días en racha`;
+  return "Compañero de hábitos";
+}
 
 function getFriendColor(idx: number): string {
   const remainder = idx % 3;
@@ -91,7 +95,7 @@ export function PerfilInteractiveView({ data }: Readonly<PerfilInteractiveViewPr
   const amigosDisplay = amigosList.map((a: any, idx: number) => ({
     id: a.idusuario || a.idamigo || a.id || `amigo-${idx}`,
     nombre: `${a.nombre || "Amigo"} ${a.apellido || ""}`.trim(),
-    subtitulo: a.puntostotales ? `${Number(a.puntostotales).toLocaleString()} pts` : a.racha ? `${a.racha} días en racha` : "Compañero de hábitos",
+    subtitulo: getFriendSubtitle(a),
     isRacha: Boolean(a.racha),
     color: getFriendColor(idx),
     initials: `${a.nombre?.charAt(0) || "A"}${a.apellido?.charAt(0) || ""}`.toUpperCase(),
