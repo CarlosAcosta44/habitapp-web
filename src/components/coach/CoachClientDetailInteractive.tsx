@@ -64,6 +64,43 @@ function getHeatmapSquareColor(level: number): string {
   return "bg-slate-100 dark:bg-slate-800";
 }
 
+function filterClientHabits(
+  allHabits: HabitSummaryItem[],
+  habitFilter: "todos" | "asignados" | "personales"
+): HabitSummaryItem[] {
+  if (habitFilter === "asignados") {
+    return allHabits.filter((h) => (h.tipo || "").toLowerCase().includes("asignado"));
+  }
+  if (habitFilter === "personales") {
+    return allHabits.filter((h) => !(h.tipo || "").toLowerCase().includes("asignado"));
+  }
+  return allHabits;
+}
+
+function buildHeatmapWeeks(recordsByDate?: Record<string, unknown>) {
+  const weeks: Array<Array<{ dateStr: string; level: number; dayName: string }>> = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const records = recordsByDate || {};
+  const dayNames = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+  for (let w = 9; w >= 0; w--) {
+    const daysInWeek: Array<{ dateStr: string; level: number; dayName: string }> = [];
+    for (let d = 0; d < 7; d++) {
+      const offset = w * 7 + (6 - d);
+      const dayDate = new Date(today.getTime() - offset * 24 * 60 * 60 * 1000);
+      const dateKey = dayDate.toISOString().split("T")[0];
+      daysInWeek.push({
+        dateStr: dateKey,
+        level: computeDayCompletionLevel(records[dateKey]),
+        dayName: dayNames[d],
+      });
+    }
+    weeks.push(daysInWeek);
+  }
+  return weeks;
+}
+
 export function CoachClientDetailInteractive({
   clientId,
   clientData,
@@ -107,53 +144,21 @@ export function CoachClientDetailInteractive({
     .toUpperCase();
 
   // Habits list - 100% real records, zero mock fallback
-  const allHabits: HabitSummaryItem[] = useMemo(() => {
-    if (clientData.activeHabits && clientData.activeHabits.length > 0) {
-      return clientData.activeHabits;
-    }
-    return [];
-  }, [clientData.activeHabits]);
+  const allHabits: HabitSummaryItem[] = useMemo(
+    () => (clientData.activeHabits?.length ? clientData.activeHabits : []),
+    [clientData.activeHabits]
+  );
 
-  const filteredHabits = useMemo(() => {
-    if (habitFilter === "asignados") {
-      return allHabits.filter((h) => (h.tipo || "").toLowerCase().includes("asignado"));
-    }
-    if (habitFilter === "personales") {
-      return allHabits.filter((h) => !(h.tipo || "").toLowerCase().includes("asignado"));
-    }
-    return allHabits;
-  }, [allHabits, habitFilter]);
+  const filteredHabits = useMemo(
+    () => filterClientHabits(allHabits, habitFilter),
+    [allHabits, habitFilter]
+  );
 
   // Generate 70-day heatmap squares (10 weeks x 7 days) strictly from real records
-  const heatmapWeeks = useMemo(() => {
-    const weeks: Array<Array<{ dateStr: string; level: number; dayName: string }>> = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const records = clientData.recordsByDate || {};
-
-    // 10 weeks ending this week Sunday
-    // Total 70 days
-    for (let w = 9; w >= 0; w--) {
-      const daysInWeek: Array<{ dateStr: string; level: number; dayName: string }> = [];
-      for (let d = 0; d < 7; d++) {
-        const offset = w * 7 + (6 - d);
-        const dayDate = new Date(today.getTime() - offset * 24 * 60 * 60 * 1000);
-        const dateKey = dayDate.toISOString().split("T")[0];
-        const dayRecord = records[dateKey];
-        const completionLevel = computeDayCompletionLevel(dayRecord);
-
-        const dayNames = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-        daysInWeek.push({
-          dateStr: dateKey,
-          level: completionLevel,
-          dayName: dayNames[d],
-        });
-      }
-      weeks.push(daysInWeek);
-    }
-    return weeks;
-  }, [clientData.recordsByDate]);
+  const heatmapWeeks = useMemo(
+    () => buildHeatmapWeeks(clientData.recordsByDate),
+    [clientData.recordsByDate]
+  );
 
   const completedTodayCount = allHabits.filter((h) => h.completadoHoy).length;
   const perfectDaysCount = heatmapWeeks.flat().filter((d) => d.level === 3).length;

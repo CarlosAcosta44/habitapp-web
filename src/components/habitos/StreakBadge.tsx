@@ -9,7 +9,7 @@ interface StreakBadgeProps {
   size?:  "sm" | "md" | "lg";
 }
 
-export function StreakBadge({ streak, size = "md" }: StreakBadgeProps) {
+export function StreakBadge({ streak, size = "md" }: Readonly<StreakBadgeProps>) {
   if (streak === 0) return null;
 
   const sizes = {

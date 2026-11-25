@@ -16,7 +16,7 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function ForoDetallePage({ params }: PageProps) {
+export default async function ForoDetallePage({ params }: Readonly<PageProps>) {
   const { id: foroId } = await params;
 
   await requireUser();

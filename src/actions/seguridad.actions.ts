@@ -99,7 +99,7 @@ export async function updateEmailAction(
     return { formErrors: parsed.error.flatten().fieldErrors };
   }
 
-  // TODO: Implementar cambio de correo en NestJS
+  // Pendiente de migración de cambio de correo en NestJS
   return { error: "El cambio de correo electrónico está en migración hacia el nuevo sistema Custom Auth." };
 }
 
@@ -122,6 +122,6 @@ export async function updatePasswordAction(
     return { formErrors: parsed.error.flatten().fieldErrors };
   }
 
-  // TODO: Implementar cambio de contraseña autenticado en NestJS
+  // Pendiente de migración de cambio de contraseña autenticado en NestJS
   return { error: "El cambio de contraseña está en migración hacia el nuevo sistema Custom Auth." };
 }

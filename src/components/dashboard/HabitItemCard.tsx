@@ -34,27 +34,70 @@ interface HabitItemCardProps {
   readonly onDelete?: (idHabito: string) => void;
 }
 
-function getCategoryVisuals(catName: string) {
+function getCategoryVisuals(catName: string): { iconElement: React.ReactNode; iconBg: string } {
   const catLower = catName.toLowerCase();
   if (catLower.includes('agua') || catLower.includes('hidrat')) {
-    return { Icon: Droplets, iconBg: 'bg-blue-100 dark:bg-blue-950/70 text-blue-600 dark:text-blue-300' };
+    return {
+      iconElement: <Droplets className="w-6 h-6" />,
+      iconBg: 'bg-blue-100 dark:bg-blue-950/70 text-blue-600 dark:text-blue-300',
+    };
   }
   if (catLower.includes('ejercicio') || catLower.includes('deporte') || catLower.includes('fitness')) {
-    return { Icon: Dumbbell, iconBg: 'bg-purple-100 dark:bg-purple-950/70 text-purple-600 dark:text-purple-300' };
+    return {
+      iconElement: <Dumbbell className="w-6 h-6" />,
+      iconBg: 'bg-purple-100 dark:bg-purple-950/70 text-purple-600 dark:text-purple-300',
+    };
   }
   if (catLower.includes('aliment') || catLower.includes('nutri') || catLower.includes('comida')) {
-    return { Icon: Utensils, iconBg: 'bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-300' };
+    return {
+      iconElement: <Utensils className="w-6 h-6" />,
+      iconBg: 'bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-300',
+    };
   }
   if (catLower.includes('mente') || catLower.includes('medita') || catLower.includes('paz')) {
-    return { Icon: Heart, iconBg: 'bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-300' };
+    return {
+      iconElement: <Heart className="w-6 h-6" />,
+      iconBg: 'bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-300',
+    };
   }
   if (catLower.includes('lectura') || catLower.includes('estudio') || catLower.includes('libro')) {
-    return { Icon: BookOpen, iconBg: 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-300' };
+    return {
+      iconElement: <BookOpen className="w-6 h-6" />,
+      iconBg: 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-300',
+    };
   }
   if (catLower.includes('sueño') || catLower.includes('descanso') || catLower.includes('dormir')) {
-    return { Icon: Moon, iconBg: 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-300' };
+    return {
+      iconElement: <Moon className="w-6 h-6" />,
+      iconBg: 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-300',
+    };
   }
-  return { Icon: Sparkles, iconBg: 'bg-[#e6deff] dark:bg-indigo-950/70 text-[#572de4] dark:text-indigo-300' };
+  return {
+    iconElement: <Sparkles className="w-6 h-6" />,
+    iconBg: 'bg-[#e6deff] dark:bg-indigo-950/70 text-[#572de4] dark:text-indigo-300',
+  };
+}
+
+function renderPastCompletionBadge(isPast: boolean, isCompleted: boolean) {
+  if (!isPast) return null;
+  const badgeStyle = isCompleted
+    ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+    : 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50';
+  return (
+    <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${badgeStyle}`}>
+      {isCompleted ? (
+        <>
+          <Check className="w-3 h-3 stroke-[3]" />
+          <span>Completado</span>
+        </>
+      ) : (
+        <>
+          <X className="w-3 h-3 stroke-[3]" />
+          <span>No completado</span>
+        </>
+      )}
+    </span>
+  );
 }
 
 interface HabitStatusActionProps {
@@ -157,14 +200,13 @@ export function HabitItemCard({
     habito.categorias_habitos?.nombre || 
     'General';
 
-  const { Icon: CategoryIcon, iconBg } = getCategoryVisuals(categoriaNombre);
+  const { iconElement, iconBg } = getCategoryVisuals(categoriaNombre);
 
   // Estado local para cuando estamos en Hoy
-  const [completadoHoy, setCompletadoHoy] = useState(
-    habito.registroHoy?.completado ?? false
-  );
+  const initialComp = habito.registroHoy?.completado ?? false;
+  const [completadoHoy, setCompletadoHoy] = useState(initialComp);
   const [progresoHoy, setProgresoHoy] = useState(
-    habito.registroHoy?.progresoActual ?? (habito.registroHoy?.completado ? metaDiaria : 0)
+    habito.registroHoy?.progresoActual ?? (initialComp ? metaDiaria : 0)
   );
 
   useEffect(() => {
@@ -175,13 +217,7 @@ export function HabitItemCard({
   }, [habito.registroHoy?.completado, habito.registroHoy?.progresoActual, metaDiaria]);
 
   const isCompleted = isToday ? completadoHoy : isCompletedOnSelectedDate;
-  
-  let progresoActual = 0;
-  if (isToday) {
-    progresoActual = progresoHoy;
-  } else if (isCompleted) {
-    progresoActual = metaDiaria;
-  }
+  const progresoActual = isToday ? progresoHoy : (isCompleted ? metaDiaria : 0);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -192,18 +228,13 @@ export function HabitItemCard({
     setCompletadoHoy(nextState);
     setProgresoHoy(nextProg);
 
-    if (onToggleComplete) {
-      onToggleComplete(idHabito, nextState);
-    }
-    if (onProgressUpdate) {
-      onProgressUpdate(idHabito, nextProg, nextState);
-    }
+    onToggleComplete?.(idHabito, nextState);
+    onProgressUpdate?.(idHabito, nextProg, nextState);
 
     startTransition(async () => {
-      const todayDateStr = getLocalDateString(new Date());
       const formData = new FormData();
       formData.set('idHabito', idHabito);
-      formData.set('fecha', todayDateStr);
+      formData.set('fecha', getLocalDateString(new Date()));
 
       if (nextState) {
         formData.set('progresoActual', nextProg.toString());
@@ -232,7 +263,7 @@ export function HabitItemCard({
           <div
             className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform ${iconBg}`}
           >
-            <CategoryIcon className="w-6 h-6" />
+            {iconElement}
           </div>
 
           {/* Información del Hábito */}
@@ -260,27 +291,7 @@ export function HabitItemCard({
               </span>
 
               {/* Badge indicativo si no es hoy */}
-              {isPast && (
-                <span
-                  className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-                    isCompleted
-                      ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                      : 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50'
-                  }`}
-                >
-                  {isCompleted ? (
-                    <>
-                      <Check className="w-3 h-3 stroke-[3]" />
-                      <span>Completado</span>
-                    </>
-                  ) : (
-                    <>
-                      <X className="w-3 h-3 stroke-[3]" />
-                      <span>No completado</span>
-                    </>
-                  )}
-                </span>
-              )}
+              {renderPastCompletionBadge(isPast, isCompleted)}
               {isFuture && (
                 <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
                   Programado

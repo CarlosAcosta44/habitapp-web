@@ -7,7 +7,7 @@ interface AmigosTabProps {
   sugerenciasAmigos: SugerenciaAmigo[];
 }
 
-export function AmigosTab({ amigos, sugerenciasAmigos }: AmigosTabProps) {
+export function AmigosTab({ amigos, sugerenciasAmigos }: Readonly<AmigosTabProps>) {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">

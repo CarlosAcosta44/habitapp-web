@@ -14,7 +14,7 @@ interface AddFriendFormProps {
   suggestions: SuggestedFriend[];
 }
 
-export function AddFriendForm({ suggestions }: AddFriendFormProps) {
+export function AddFriendForm({ suggestions }: Readonly<AddFriendFormProps>) {
   const [state, formAction, isPending] = useActionState<ActionState | null, FormData>(
     addFriendAction,
     null

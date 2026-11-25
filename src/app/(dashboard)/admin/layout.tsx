@@ -12,9 +12,9 @@ export const metadata = {
 
 export default async function AdminLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const user = await requireUserStrict();
   const roleUpper = (user.nombrerol || "").toUpperCase();
   const isAdmin = roleUpper === "ADMINISTRADOR" || roleUpper === "ADMIN";

@@ -51,8 +51,8 @@ export default function SoportePage() {
             { q: "¿Cómo funcionan las rachas?", a: "Las rachas se mantienen completando tus hábitos antes de la medianoche cada día." },
             { q: "¿Puedo ser entrenador?", a: "Sí, puedes solicitar una cuenta de entrenador en la sección de postulaciones." },
             { q: "¿Mis datos son privados?", a: "Absolutamente. Usamos cifrado de extremo a extremo para tu seguridad." }
-          ].map((faq, i) => (
-            <div key={i} className="border-b border-slate-100 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
+          ].map((faq) => (
+            <div key={faq.q} className="border-b border-slate-100 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
               <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">{faq.q}</h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 italic leading-relaxed">{faq.a}</p>
             </div>

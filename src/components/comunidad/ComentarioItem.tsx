@@ -24,7 +24,7 @@ export function ComentarioItem({
   foroId,
   esRespuesta = false,
   isAdmin = false,
-}: ComentarioItemProps) {
+}: Readonly<ComentarioItemProps>) {
   const [mostrarRespuesta, setMostrarRespuesta] = useState(false);
   const [isPending, startTransition]            = useTransition();
 
@@ -67,12 +67,12 @@ export function ComentarioItem({
         {/* Reacciones + Responder */}
         <div className="flex items-center gap-3 pt-1">
           {(["Me gusta", "Me motiva", "Util"] as const).map((tipo) => {
-            const emoji = tipo === "Me gusta" ? "👍" : tipo === "Me motiva" ? "💪" : "💡";
-            const count = tipo === "Me gusta"
-              ? comentario.reacciones.meGusta
-              : tipo === "Me motiva"
-                ? comentario.reacciones.meMotiva
-                : comentario.reacciones.util;
+            const reactionMeta = {
+              "Me gusta": { emoji: "👍", count: comentario.reacciones.meGusta },
+              "Me motiva": { emoji: "💪", count: comentario.reacciones.meMotiva },
+              "Util": { emoji: "💡", count: comentario.reacciones.util },
+            }[tipo];
+            const { emoji, count } = reactionMeta;
 
             return (
               <button

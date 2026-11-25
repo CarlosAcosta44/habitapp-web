@@ -13,7 +13,7 @@ interface PerfilTabsProps {
   tabs: string[];
 }
 
-export function PerfilTabs({ children, tabs }: PerfilTabsProps) {
+export function PerfilTabs({ children, tabs }: Readonly<PerfilTabsProps>) {
   const [activeTab, setActiveTab] = useState(0);
 
   return (

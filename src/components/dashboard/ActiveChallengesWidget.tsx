@@ -7,7 +7,7 @@ interface ActiveChallengesWidgetProps {
   retos: Reto[];
 }
 
-export function ActiveChallengesWidget({ retos }: ActiveChallengesWidgetProps) {
+export function ActiveChallengesWidget({ retos }: Readonly<ActiveChallengesWidgetProps>) {
   // Mostramos hasta 3 retos activos
   const displayRetos = retos.slice(0, 3);
 

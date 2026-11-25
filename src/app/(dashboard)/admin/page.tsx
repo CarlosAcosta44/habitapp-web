@@ -17,11 +17,12 @@ export default async function AdminDashboardPage() {
 
   const usersData = usersResult.success && usersResult.data ? usersResult.data : null;
 
-  const rawUsers: any[] = usersData
-    ? Array.isArray(usersData)
-      ? usersData
-      : (usersData.data ?? [])
-    : [];
+  let rawUsers: any[] = [];
+  if (Array.isArray(usersData)) {
+    rawUsers = usersData;
+  } else if (usersData) {
+    rawUsers = usersData.data ?? [];
+  }
 
   const totalUsers =
     usersData && !Array.isArray(usersData) && usersData.meta

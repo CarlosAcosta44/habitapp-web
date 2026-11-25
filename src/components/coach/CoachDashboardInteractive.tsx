@@ -44,6 +44,121 @@ interface CoachDashboardInteractiveProps {
   readonly initialRoutines: CoachRoutine[];
 }
 
+function filterCoachClients(clients: CoachClient[], searchQuery: string): CoachClient[] {
+  if (!searchQuery.trim()) return clients;
+  const q = searchQuery.toLowerCase();
+  return clients.filter((c) => {
+    const name = (c.client?.full_name || `${c.client?.nombre || ''} ${c.client?.apellido || ''}`).toLowerCase();
+    const email = (c.client?.email || c.client?.correo || '').toLowerCase();
+    return name.includes(q) || email.includes(q);
+  });
+}
+
+function computeAvgCompliance(clients: CoachClient[]): number {
+  if (clients.length === 0) return 0;
+  const total = clients.reduce((acc, c) => acc + (c.client?.cumplimiento || 0), 0);
+  return Math.round(total / clients.length);
+}
+
+function buildLinkedClientItem(userToLink: any): CoachClient {
+  return {
+    assigned_at: new Date().toISOString(),
+    client: {
+      id: userToLink.id,
+      idusuario: userToLink.id,
+      nombre: userToLink.nombre,
+      apellido: userToLink.apellido,
+      full_name: userToLink.full_name,
+      email: userToLink.email,
+      fotoperfil: userToLink.fotoperfil,
+      total_points: userToLink.puntostotales || 0,
+      nombrerol: userToLink.nombrerol || "Usuario",
+      racha_actual: 0,
+      cumplimiento: 0,
+      completados_hoy: 0,
+      total_habitos: 0,
+    },
+  };
+}
+
+function buildRoutinePayload(
+  routineTitle: string,
+  routineDescription: string,
+  routineTipo: string,
+  routineNivel: string,
+  routineDuracion: number,
+  routineHabits: string[],
+  newHabitInput: string
+) {
+  const pendingHabit = newHabitInput.trim();
+  const finalHabitsList =
+    pendingHabit && !routineHabits.includes(pendingHabit)
+      ? [...routineHabits, pendingHabit]
+      : routineHabits;
+
+  return {
+    name: routineTitle.trim(),
+    description: routineDescription.trim(),
+    tipo: routineTipo,
+    nivel: routineNivel,
+    duracion: Number(routineDuracion) || 21,
+    habits:
+      finalHabitsList.length > 0
+        ? finalHabitsList.map((h) => ({ habit_name: h }))
+        : [{ habit_name: routineTitle.trim() }],
+  };
+}
+
+function renderAvailableUsersList(
+  isLoadingAvailable: boolean,
+  availableUsers: any[],
+  isLinkingUser: string | null,
+  onLinkClient: (u: any) => void
+) {
+  if (isLoadingAvailable) {
+    return (
+      <div className="py-12 text-center text-slate-400 flex flex-col items-center gap-2">
+        <RotateCw className="w-6 h-6 animate-spin text-[#572de4]" />
+        <span className="text-xs">Cargando usuarios disponibles...</span>
+      </div>
+    );
+  }
+  if (availableUsers.length === 0) {
+    return (
+      <p className="text-xs text-slate-500 p-8 text-center bg-slate-50 dark:bg-slate-900 rounded-2xl">
+        No hay usuarios disponibles sin asignar en este momento.
+      </p>
+    );
+  }
+  return availableUsers.map((u) => (
+    <div
+      key={u.id}
+      className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-[#572de4] flex items-center justify-center font-bold text-sm shrink-0">
+          {u.nombre?.[0] || "U"}
+        </div>
+        <div className="min-w-0">
+          <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">
+            {u.full_name || u.nombre}
+          </span>
+          <span className="text-[11px] text-slate-400 truncate block">{u.email}</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        disabled={isLinkingUser === u.id}
+        onClick={() => onLinkClient(u)}
+        className="px-3.5 py-1.5 rounded-xl bg-[#572de4] hover:bg-[#4823c9] text-white text-xs font-bold transition-all disabled:opacity-50 shrink-0"
+      >
+        {isLinkingUser === u.id ? "Vinculando..." : "Vincular"}
+      </button>
+    </div>
+  ));
+}
+
 export function CoachDashboardInteractive({
   initialClients,
   initialRoutines,
@@ -91,32 +206,25 @@ export function CoachDashboardInteractive({
   };
 
   // Filtered clients
-  const filteredClients = useMemo(() => {
-    if (!searchQuery.trim()) return clients;
-    const q = searchQuery.toLowerCase();
-    return clients.filter((c) => {
-      const name = (c.client?.full_name || `${c.client?.nombre || ''} ${c.client?.apellido || ''}`).toLowerCase();
-      const email = (c.client?.email || c.client?.correo || '').toLowerCase();
-      return name.includes(q) || email.includes(q);
-    });
-  }, [clients, searchQuery]);
+  const filteredClients = useMemo(
+    () => filterCoachClients(clients, searchQuery),
+    [clients, searchQuery]
+  );
 
   // Derived KPI metrics (100% computed from real data)
   const activeClientsCount = clients.length;
   const createdRoutinesCount = routines.length;
-  const avgCompliance = useMemo(() => {
-    if (clients.length === 0) return 0;
-    const total = clients.reduce((acc, c) => acc + (c.client?.cumplimiento || 0), 0);
-    return Math.round(total / clients.length);
-  }, [clients]);
+  const avgCompliance = useMemo(() => computeAvgCompliance(clients), [clients]);
 
-  const inStreakCount = useMemo(() => {
-    return clients.filter((c) => (c.client?.racha_actual || 0) > 0).length;
-  }, [clients]);
+  const inStreakCount = useMemo(
+    () => clients.filter((c) => (c.client?.racha_actual || 0) > 0).length,
+    [clients]
+  );
 
-  const needsFocusCount = useMemo(() => {
-    return clients.filter((c) => (c.client?.racha_actual || 0) === 0).length;
-  }, [clients]);
+  const needsFocusCount = useMemo(
+    () => clients.filter((c) => (c.client?.racha_actual || 0) === 0).length,
+    [clients]
+  );
 
   // Handlers
   const handleOpenLinkModal = async () => {
@@ -133,25 +241,7 @@ export function CoachDashboardInteractive({
     setIsLinkingUser(userToLink.id);
     const res = await linkClientAction(userToLink.id);
     if (res.success) {
-      const newClientItem: CoachClient = {
-        assigned_at: new Date().toISOString(),
-        client: {
-          id: userToLink.id,
-          idusuario: userToLink.id,
-          nombre: userToLink.nombre,
-          apellido: userToLink.apellido,
-          full_name: userToLink.full_name,
-          email: userToLink.email,
-          fotoperfil: userToLink.fotoperfil,
-          total_points: userToLink.puntostotales || 0,
-          nombrerol: userToLink.nombrerol || "Usuario",
-          racha_actual: 0,
-          cumplimiento: 0,
-          completados_hoy: 0,
-          total_habitos: 0,
-        },
-      };
-      setClients([newClientItem, ...clients]);
+      setClients([buildLinkedClientItem(userToLink), ...clients]);
       setAvailableUsers(availableUsers.filter((u) => u.id !== userToLink.id));
       showToast(`¡${userToLink.full_name || userToLink.nombre} vinculado como pupilo!`);
     } else {
@@ -266,44 +356,36 @@ export function CoachDashboardInteractive({
     if (!routineTitle.trim()) return;
     setIsSubmittingRoutine(true);
 
-    const pendingHabit = newHabitInput.trim();
-    const finalHabitsList =
-      pendingHabit && !routineHabits.includes(pendingHabit)
-        ? [...routineHabits, pendingHabit]
-        : routineHabits;
-
-    const payload = {
-      name: routineTitle.trim(),
-      description: routineDescription.trim(),
-      tipo: routineTipo,
-      nivel: routineNivel,
-      duracion: Number(routineDuracion) || 21,
-      habits:
-        finalHabitsList.length > 0
-          ? finalHabitsList.map((h) => ({ habit_name: h }))
-          : [{ habit_name: routineTitle.trim() }],
-    };
+    const payload = buildRoutinePayload(
+      routineTitle,
+      routineDescription,
+      routineTipo,
+      routineNivel,
+      routineDuracion,
+      routineHabits,
+      newHabitInput
+    );
 
     try {
-      if (editingRoutine) {
-        const res = await updateRoutineAction(editingRoutine.id, payload);
-        if (res.success && res.data) {
-          const updated = res.data;
-          setRoutines(routines.map((r) => (r.id === editingRoutine.id ? updated : r)));
-          showToast(`Plantilla "${routineTitle}" actualizada exitosamente`);
-          setIsRoutineModalOpen(false);
-        } else {
-          alert(res.error || "Error al actualizar la rutina.");
-        }
+      const res = editingRoutine
+        ? await updateRoutineAction(editingRoutine.id, payload)
+        : await createRoutineAction(payload);
+
+      if (res.success && res.data) {
+        const saved = res.data;
+        setRoutines(
+          editingRoutine
+            ? routines.map((r) => (r.id === editingRoutine.id ? saved : r))
+            : [saved, ...routines]
+        );
+        showToast(
+          editingRoutine
+            ? `Plantilla "${routineTitle}" actualizada exitosamente`
+            : `¡Plantilla "${routineTitle}" creada exitosamente!`
+        );
+        setIsRoutineModalOpen(false);
       } else {
-        const res = await createRoutineAction(payload);
-        if (res.success && res.data) {
-          setRoutines([res.data, ...routines]);
-          showToast(`¡Plantilla "${routineTitle}" creada exitosamente!`);
-          setIsRoutineModalOpen(false);
-        } else {
-          alert(res.error || "Error al crear la rutina.");
-        }
+        alert(res.error || "Error al guardar la rutina.");
       }
     } finally {
       setIsSubmittingRoutine(false);
@@ -556,8 +638,7 @@ export function CoachDashboardInteractive({
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
         {/* LEFT COLUMN: Tab Content (Mis Clientes / Rutinas) */}
         <div className="xl:col-span-8 flex flex-col gap-4">
-          {activeTab === "clientes" ? (
-            filteredClients.length === 0 ? (
+          {activeTab === "clientes" && filteredClients.length === 0 && (
               <div className="p-12 text-center rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center">
                 <div className="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-950/40 text-[#572de4] flex items-center justify-center mb-4">
                   <Users className="w-8 h-8" />
@@ -583,7 +664,8 @@ export function CoachDashboardInteractive({
                   </button>
                 )}
               </div>
-            ) : (
+          )}
+          {activeTab === "clientes" && filteredClients.length > 0 && (
               filteredClients.map((clientItem, idx) => {
                 const c = clientItem.client;
                 const clientId = c?.id || c?.idusuario || `client-${idx}`;
@@ -709,8 +791,8 @@ export function CoachDashboardInteractive({
                   </article>
                 );
               })
-            )
-          ) : (
+          )}
+          {activeTab === "rutinas" && (
             /* Rutinas Full Tab */
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30">
@@ -919,48 +1001,9 @@ export function CoachDashboardInteractive({
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-              {isLoadingAvailable ? (
-                <div className="py-12 text-center text-slate-400 flex flex-col items-center gap-2">
-                  <RotateCw className="w-6 h-6 animate-spin text-[#572de4]" />
-                  <span className="text-xs">Cargando usuarios disponibles...</span>
-                </div>
-              ) : availableUsers.length === 0 ? (
-                <p className="text-xs text-slate-500 p-8 text-center bg-slate-50 dark:bg-slate-900 rounded-2xl">
-                  No hay usuarios disponibles sin asignar en este momento.
-                </p>
-              ) : (
-                availableUsers.map((u) => (
-                  <div
-                    key={u.id}
-                    className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-[#572de4] flex items-center justify-center font-bold text-sm shrink-0">
-                        {u.nombre?.[0] || 'U'}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">
-                          {u.full_name || u.nombre}
-                        </span>
-                        <span className="text-[11px] text-slate-400 truncate block">
-                          {u.email}
-                        </span>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      disabled={isLinkingUser === u.id}
-                      onClick={() => {
-                        void handleLinkClient(u);
-                      }}
-                      className="px-3.5 py-1.5 rounded-xl bg-[#572de4] hover:bg-[#4823c9] text-white text-xs font-bold transition-all disabled:opacity-50 shrink-0"
-                    >
-                      {isLinkingUser === u.id ? "Vinculando..." : "Vincular"}
-                    </button>
-                  </div>
-                ))
-              )}
+              {renderAvailableUsersList(isLoadingAvailable, availableUsers, isLinkingUser, (u) => {
+                void handleLinkClient(u);
+              })}
             </div>
 
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-end">

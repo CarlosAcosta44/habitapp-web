@@ -63,10 +63,163 @@ interface ComunidadInteractiveViewProps {
 
 type TabType = 'todo' | 'foros' | 'habitos' | 'articulos' | 'especialistas' | 'retos';
 
+const VALID_COMMUNITY_TABS: TabType[] = ['todo', 'foros', 'habitos', 'articulos', 'especialistas', 'retos'];
+
+function resolveCommunityTab(param: string | null): TabType {
+  return param && VALID_COMMUNITY_TABS.includes(param as TabType) ? (param as TabType) : 'todo';
+}
+
 function formatClonesCount(count?: number | null): string {
   if (!count || count <= 0) return 'Nuevo';
   if (count === 1) return '1 persona hace esto';
   return `${count} hacen esto`;
+}
+
+function getSpecialtyTagLabel(especialidad?: string): string {
+  if (especialidad === 'Nutrición') return 'Planes alimenticios';
+  if (especialidad === 'Crossfit') return 'Resistencia & WOD';
+  return 'Técnica & Progresión';
+}
+
+function formatTimeAgo(dateStr?: string): string {
+  if (!dateStr) return 'Reciente';
+  const date = new Date(dateStr);
+  const diffMin = Math.floor((Date.now() - date.getTime()) / 60000);
+  const diffHours = Math.floor(diffMin / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMin < 2) return 'Ahora mismo';
+  if (diffMin < 60) return `hace ${diffMin} min`;
+  if (diffHours < 24) return `hace ${diffHours} h`;
+  if (diffDays === 1) return 'Ayer';
+  return `hace ${diffDays} días`;
+}
+
+function sanitizeToastMessage(msg: string): string {
+  if (msg.includes('invalid input syntax') || msg.includes('JWT') || msg.includes('Token')) {
+    return 'Ocurrió un error al procesar la solicitud. Por favor intenta de nuevo.';
+  }
+  return msg;
+}
+
+function checkIsTrainerLinked(esp: Record<string, any>, linkedTrainerIds: string[]): boolean {
+  const tId = esp.identrenador || esp.idusuario || esp.id;
+  const uId = esp.idusuario || esp.id;
+  return Boolean((tId && linkedTrainerIds.includes(tId)) || (uId && linkedTrainerIds.includes(uId)));
+}
+
+function filterHabitosComunidad(list: any[], searchQuery: string): any[] {
+  if (!searchQuery.trim()) return list;
+  const q = searchQuery.toLowerCase();
+  return list.filter(
+    (h) =>
+      h.nombre?.toLowerCase().includes(q) ||
+      h.descripcion?.toLowerCase().includes(q) ||
+      h.categoria_nombre?.toLowerCase().includes(q)
+  );
+}
+
+function filterAndSortForos(
+  initialForos: any[],
+  selectedTag: string,
+  sortBy: 'recientes' | 'populares' | 'sin_responder',
+  searchQuery: string
+): any[] {
+  let list = [...initialForos];
+
+  if (selectedTag !== 'Todos') {
+    const cleanTag = selectedTag.replace('#', '').toLowerCase();
+    list = list.filter((f) => f.categoria?.toLowerCase().includes(cleanTag));
+  }
+
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(
+      (f) =>
+        f.titulo?.toLowerCase().includes(q) ||
+        f.descripcion?.toLowerCase().includes(q) ||
+        f.categoria?.toLowerCase().includes(q)
+    );
+  }
+
+  if (sortBy === 'populares') {
+    list.sort((a, b) => (b.likes_count || 0) + (b.comments_count || 0) - ((a.likes_count || 0) + (a.comments_count || 0)));
+  } else if (sortBy === 'sin_responder') {
+    list = list.filter((f) => (f.comments_count || 0) === 0);
+  } else {
+    list.sort((a, b) => new Date(b.fechacreacion || 0).getTime() - new Date(a.fechacreacion || 0).getTime());
+  }
+
+  return list;
+}
+
+function filterArticulos(initialArticulos: any[], searchQuery: string): any[] {
+  if (!searchQuery.trim()) return initialArticulos;
+  const q = searchQuery.toLowerCase();
+  return initialArticulos.filter(
+    (a) =>
+      a.titulo?.toLowerCase().includes(q) ||
+      a.contenido?.toLowerCase().includes(q) ||
+      a.categoria?.toLowerCase().includes(q)
+  );
+}
+
+function filterEspecialistas(initialEspecialistas: any[], selectedEspCategory: string, searchQuery: string): any[] {
+  let list = initialEspecialistas;
+  if (selectedEspCategory !== 'Todos') {
+    const q = selectedEspCategory.toLowerCase();
+    list = list.filter((e) => e.especialidad?.toLowerCase().includes(q));
+  }
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(
+      (e) =>
+        e.nombre?.toLowerCase().includes(q) ||
+        e.apellido?.toLowerCase().includes(q) ||
+        e.especialidad?.toLowerCase().includes(q)
+    );
+  }
+  return list;
+}
+
+function filterRetosList(list: Reto[], searchQuery: string): Reto[] {
+  if (!searchQuery.trim()) return list;
+  const q = searchQuery.toLowerCase();
+  return list.filter(
+    (r) =>
+      r.titulo?.toLowerCase().includes(q) ||
+      r.descripcion?.toLowerCase().includes(q)
+  );
+}
+
+function applyRetoJoinOptimistic(prev: any, targetId: string, userId?: string) {
+  if (!prev || (prev.idreto !== targetId && prev.id !== targetId)) return prev;
+  return {
+    ...prev,
+    participantes_count: (prev.participantes_count || 0) + 1,
+    usuarios_participando: [...(prev.usuarios_participando || []), userId],
+    inscrito: true,
+  };
+}
+
+function applyRetoLeaveOptimistic(prev: any, targetId: string, userId?: string) {
+  if (!prev || (prev.idreto !== targetId && prev.id !== targetId)) return prev;
+  return {
+    ...prev,
+    participantes_count: Math.max(0, (prev.participantes_count || 1) - 1),
+    usuarios_participando: (prev.usuarios_participando || []).filter((uId: string) => uId !== userId),
+    inscrito: false,
+  };
+}
+
+function applyRetoCheckinOptimistic(prev: any, targetId: string, res: any) {
+  if (!prev || (prev.idreto !== targetId && prev.id !== targetId)) return prev;
+  return {
+    ...prev,
+    progreso: res.progreso ?? Math.min(100, (prev.progreso || 0) + 15),
+    dias_progreso: res.dias_progreso ?? ((prev.dias_progreso || 0) + 1),
+    completado: res.completed || prev.completado,
+  };
 }
 
 export function ComunidadInteractiveView({
@@ -86,18 +239,10 @@ export function ComunidadInteractiveView({
   const [isPending, startTransition] = useTransition();
 
   // Tab activo sincronizado con query param ?tab=
-  const initialTabParam = searchParams.get('tab') as TabType;
-  const [activeTab, setActiveTab] = useState<TabType>(
-    initialTabParam && ['todo', 'foros', 'habitos', 'articulos', 'especialistas', 'retos'].includes(initialTabParam)
-      ? initialTabParam
-      : 'todo'
-  );
+  const [activeTab, setActiveTab] = useState<TabType>(() => resolveCommunityTab(searchParams.get('tab')));
 
   useEffect(() => {
-    const tab = searchParams.get('tab') as TabType;
-    if (tab && ['todo', 'foros', 'habitos', 'articulos', 'especialistas', 'retos'].includes(tab)) {
-      setActiveTab(tab);
-    }
+    setActiveTab(resolveCommunityTab(searchParams.get('tab')));
   }, [searchParams]);
 
   // Buscador y atajo ⌘K
@@ -137,17 +282,12 @@ export function ComunidadInteractiveView({
   const [linkedTrainerIds, setLinkedTrainerIds] = useState<string[]>(initialLinkedTrainerIds);
   const [linkingTrainerId, setLinkingTrainerId] = useState<string | null>(null);
 
-  const isTrainerLinked = (esp: Record<string, any>) => {
-    const tId = esp.identrenador || esp.idusuario || esp.id;
-    const uId = esp.idusuario || esp.id;
-    return Boolean((tId && linkedTrainerIds.includes(tId)) || (uId && linkedTrainerIds.includes(uId)));
-  };
+  const isTrainerLinked = (esp: Record<string, any>) => checkIsTrainerLinked(esp, linkedTrainerIds);
 
   const getTrainerActionLabel = (esp: Record<string, any>): string => {
     const targetId = esp.identrenador || esp.idusuario || esp.id;
     if (linkingTrainerId === targetId) return 'Procesando...';
-    if (isTrainerLinked(esp)) return 'Tu Coach ✓';
-    return 'Vincular Coach';
+    return isTrainerLinked(esp) ? 'Tu Coach ✓' : 'Vincular Coach';
   };
 
   const handleToggleTrainerLink = async (esp: Record<string, any>) => {
@@ -163,25 +303,24 @@ export function ComunidadInteractiveView({
 
     setLinkingTrainerId(targetId);
     try {
+      const res = currentlyLinked
+        ? await unlinkMyTrainerAction(targetId)
+        : await linkMyTrainerAction(targetId);
+
+      if (!res.success) {
+        showToast(res.error || 'No se pudo actualizar el vínculo con el entrenador.', 'error');
+        return;
+      }
+
       if (currentlyLinked) {
-        const res = await unlinkMyTrainerAction(targetId);
-        if (res.success) {
-          setLinkedTrainerIds((prev) =>
-            prev.filter((id) => id !== esp.identrenador && id !== esp.idusuario && id !== targetId)
-          );
-          showToast(`Te has desvinculado de ${nombreCompleto}.`);
-        } else {
-          showToast(res.error || 'No se pudo desvincular del entrenador.', 'error');
-        }
+        setLinkedTrainerIds((prev) =>
+          prev.filter((id) => id !== esp.identrenador && id !== esp.idusuario && id !== targetId)
+        );
+        showToast(`Te has desvinculado de ${nombreCompleto}.`);
       } else {
-        const res = await linkMyTrainerAction(targetId);
-        if (res.success) {
-          const idsToAdd = [targetId, esp.identrenador, esp.idusuario].filter(Boolean);
-          setLinkedTrainerIds((prev) => Array.from(new Set([...prev, ...idsToAdd])));
-          showToast(`¡Te has vinculado con ${nombreCompleto} como tu entrenador! Ahora podrá asignarte rutinas y seguimiento.`);
-        } else {
-          showToast(res.error || 'No se pudo vincular al entrenador.', 'error');
-        }
+        const idsToAdd = [targetId, esp.identrenador, esp.idusuario].filter(Boolean);
+        setLinkedTrainerIds((prev) => Array.from(new Set([...prev, ...idsToAdd])));
+        showToast(`¡Te has vinculado con ${nombreCompleto} como tu entrenador! Ahora podrá asignarte rutinas y seguimiento.`);
       }
     } finally {
       setLinkingTrainerId(null);
@@ -208,104 +347,39 @@ export function ComunidadInteractiveView({
 
   // Mostrar toast auto-ocultable
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
-    let displayMsg = msg;
-    if (msg.includes('invalid input syntax') || msg.includes('JWT') || msg.includes('Token')) {
-      displayMsg = 'Ocurrió un error al procesar la solicitud. Por favor intenta de nuevo.';
-    }
-    setToast({ message: displayMsg, type });
+    setToast({ message: sanitizeToastMessage(msg), type });
     setTimeout(() => setToast(null), 4000);
   };
 
   // ── Filtrado de Hábitos Comunitarios ──
-  const habitosFiltrados = useMemo(() => {
-    let list = initialHabitosComunidad;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (h) =>
-          h.nombre?.toLowerCase().includes(q) ||
-          h.descripcion?.toLowerCase().includes(q) ||
-          h.categoria_nombre?.toLowerCase().includes(q)
-      );
-    }
-    return list;
-  }, [initialHabitosComunidad, searchQuery]);
+  const habitosFiltrados = useMemo(
+    () => filterHabitosComunidad(initialHabitosComunidad, searchQuery),
+    [initialHabitosComunidad, searchQuery]
+  );
 
   // ── Filtrado y Orden de Foros ──
-  const forosFiltrados = useMemo(() => {
-    let list = [...initialForos];
-
-    if (selectedTag !== 'Todos') {
-      const cleanTag = selectedTag.replace('#', '').toLowerCase();
-      list = list.filter((f) =>
-        f.categoria?.toLowerCase().includes(cleanTag)
-      );
-    }
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (f) =>
-          f.titulo?.toLowerCase().includes(q) ||
-          f.descripcion?.toLowerCase().includes(q) ||
-          f.categoria?.toLowerCase().includes(q)
-      );
-    }
-
-    if (sortBy === 'populares') {
-      list.sort((a, b) => (b.likes_count || 0) + (b.comments_count || 0) - ((a.likes_count || 0) + (a.comments_count || 0)));
-    } else if (sortBy === 'sin_responder') {
-      list = list.filter((f) => (f.comments_count || 0) === 0);
-    } else {
-      // Recientes
-      list.sort((a, b) => new Date(b.fechacreacion || 0).getTime() - new Date(a.fechacreacion || 0).getTime());
-    }
-
-    return list;
-  }, [initialForos, selectedTag, sortBy, searchQuery]);
+  const forosFiltrados = useMemo(
+    () => filterAndSortForos(initialForos, selectedTag, sortBy, searchQuery),
+    [initialForos, selectedTag, sortBy, searchQuery]
+  );
 
   // ── Filtrado de Artículos ──
-  const articulosFiltrados = useMemo(() => {
-    let list = initialArticulos;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (a) =>
-          a.titulo?.toLowerCase().includes(q) ||
-          a.contenido?.toLowerCase().includes(q) ||
-          a.categoria?.toLowerCase().includes(q)
-      );
-    }
-    return list;
-  }, [initialArticulos, searchQuery]);
+  const articulosFiltrados = useMemo(
+    () => filterArticulos(initialArticulos, searchQuery),
+    [initialArticulos, searchQuery]
+  );
 
   // ── Filtrado de Especialistas ──
-  const especialistasFiltrados = useMemo(() => {
-    let list = initialEspecialistas;
-    if (selectedEspCategory !== 'Todos') {
-      const q = selectedEspCategory.toLowerCase();
-      list = list.filter((e) => e.especialidad?.toLowerCase().includes(q));
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (e) =>
-          e.nombre?.toLowerCase().includes(q) ||
-          e.apellido?.toLowerCase().includes(q) ||
-          e.especialidad?.toLowerCase().includes(q)
-      );
-    }
-    return list;
-  }, [initialEspecialistas, selectedEspCategory, searchQuery]);
+  const especialistasFiltrados = useMemo(
+    () => filterEspecialistas(initialEspecialistas, selectedEspCategory, searchQuery),
+    [initialEspecialistas, selectedEspCategory, searchQuery]
+  );
 
   // ── Retos en los que participa el usuario actual ──
-  const misRetos = useMemo(() => {
-    return initialRetos.filter(
-      (r) =>
-        (userId && r.usuarios_participando?.includes(userId)) ||
-        r.inscrito === true
-    );
-  }, [initialRetos, userId]);
+  const misRetos = useMemo(
+    () => initialRetos.filter((r) => (userId && r.usuarios_participando?.includes(userId)) || r.inscrito === true),
+    [initialRetos, userId]
+  );
 
   // ── Retos activos vigentes (cuya fecha de fin no ha expirado) ──
   const retosVigentesCount = useMemo(() => {
@@ -314,18 +388,10 @@ export function ComunidadInteractiveView({
   }, [initialRetos]);
 
   // ── Filtrado de Retos ──
-  const retosFiltrados = useMemo(() => {
-    let list = retoFilterTab === 'participando' ? misRetos : initialRetos;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (r) =>
-          r.titulo?.toLowerCase().includes(q) ||
-          r.descripcion?.toLowerCase().includes(q)
-      );
-    }
-    return list;
-  }, [initialRetos, misRetos, retoFilterTab, searchQuery]);
+  const retosFiltrados = useMemo(
+    () => filterRetosList(retoFilterTab === 'participando' ? misRetos : initialRetos, searchQuery),
+    [initialRetos, misRetos, retoFilterTab, searchQuery]
+  );
 
   // ── Acción: Eliminar Foro ──
   const handleDeleteForo = (foroId: string, e: React.MouseEvent) => {
@@ -335,12 +401,8 @@ export function ComunidadInteractiveView({
     setDeletingForoId(foroId);
     startTransition(async () => {
       const res = await deleteForoAction(foroId);
-      if (res.success) {
-        showToast('Foro eliminado con éxito ✨');
-        router.refresh();
-      } else {
-        showToast(res.message || 'Error al eliminar el foro', 'error');
-      }
+      showToast(res.success ? 'Foro eliminado con éxito ✨' : (res.message || 'Error al eliminar el foro'), res.success ? 'success' : 'error');
+      if (res.success) router.refresh();
       setDeletingForoId(null);
       setOpenForoMenuId(null);
     });
@@ -354,12 +416,11 @@ export function ComunidadInteractiveView({
 
     startTransition(async () => {
       const res = await clonarHabitoAction(id);
-      if (res.success) {
-        showToast(`¡"${nombre}" ha sido añadido a tus hábitos diarios! 🎯`);
-        router.refresh();
-      } else {
-        showToast(res.message || 'Error al clonar hábito', 'error');
-      }
+      showToast(
+        res.success ? `¡"${nombre}" ha sido añadido a tus hábitos diarios! 🎯` : (res.message || 'Error al clonar hábito'),
+        res.success ? 'success' : 'error'
+      );
+      if (res.success) router.refresh();
       setCloningId(null);
     });
   };
@@ -373,18 +434,7 @@ export function ComunidadInteractiveView({
       const res = await unirseRetoAction(id);
       if (res.success) {
         showToast(`¡Te uniste a "${reto.titulo}"! 🏆`);
-        if (selectedRetoModal && (selectedRetoModal.idreto === id || selectedRetoModal.id === id)) {
-          setSelectedRetoModal((prev: any) =>
-            prev
-              ? {
-                  ...prev,
-                  participantes_count: (prev.participantes_count || 0) + 1,
-                  usuarios_participando: [...(prev.usuarios_participando || []), userId],
-                  inscrito: true,
-                }
-              : null
-          );
-        }
+        setSelectedRetoModal((prev: any) => applyRetoJoinOptimistic(prev, id, userId));
         router.refresh();
       } else {
         showToast(res.message || 'Error al unirse al reto', 'error');
@@ -402,18 +452,7 @@ export function ComunidadInteractiveView({
       const res = await salirRetoAction(id);
       if (res.success) {
         showToast(`Has salido de "${reto.titulo}"`);
-        if (selectedRetoModal && (selectedRetoModal.idreto === id || selectedRetoModal.id === id)) {
-          setSelectedRetoModal((prev: any) =>
-            prev
-              ? {
-                  ...prev,
-                  participantes_count: Math.max(0, (prev.participantes_count || 1) - 1),
-                  usuarios_participando: (prev.usuarios_participando || []).filter((uId: string) => uId !== userId),
-                  inscrito: false,
-                }
-              : null
-          );
-        }
+        setSelectedRetoModal((prev: any) => applyRetoLeaveOptimistic(prev, id, userId));
         router.refresh();
       } else {
         showToast(res.message || 'Error al salir del reto', 'error');
@@ -431,18 +470,7 @@ export function ComunidadInteractiveView({
       const res = await checkinRetoAction(id);
       if (res.success) {
         showToast(res.message || '¡Avance registrado! 🎯');
-        if (selectedRetoModal && (selectedRetoModal.idreto === id || selectedRetoModal.id === id)) {
-          setSelectedRetoModal((prev: any) =>
-            prev
-              ? {
-                  ...prev,
-                  progreso: res.progreso ?? Math.min(100, (prev.progreso || 0) + 15),
-                  dias_progreso: res.dias_progreso ?? ((prev.dias_progreso || 0) + 1),
-                  completado: res.completed || prev.completado,
-                }
-              : null
-          );
-        }
+        setSelectedRetoModal((prev: any) => applyRetoCheckinOptimistic(prev, id, res));
         router.refresh();
       } else {
         showToast(res.message || 'Error al registrar avance', 'error');
@@ -458,28 +486,9 @@ export function ComunidadInteractiveView({
 
     startTransition(async () => {
       const res = await reaccionarAction('foro', id, 'like');
-      if (res.success) {
-        router.refresh();
-      }
+      if (res.success) router.refresh();
       setReactingForoId(null);
     });
-  };
-
-  // Formato relativo de tiempo
-  const formatTimeAgo = (dateStr?: string) => {
-    if (!dateStr) return 'Reciente';
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMin = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMin / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMin < 2) return 'Ahora mismo';
-    if (diffMin < 60) return `hace ${diffMin} min`;
-    if (diffHours < 24) return `hace ${diffHours} h`;
-    if (diffDays === 1) return 'Ayer';
-    return `hace ${diffDays} días`;
   };
 
   return (
@@ -691,7 +700,7 @@ export function ComunidadInteractiveView({
         </section>
       )}
 
-      {/* ── Multi-Column Grid Layout (2 columnas en Todo, ancho completo en pestañas específicas) ── */}
+      {/* ── Multi-Column Grid Layout (2 columnas en vista general, ancho completo en pestañas específicas) ── */}
       <div className={activeTab === 'todo' ? "grid grid-cols-1 xl:grid-cols-12 gap-7 items-start" : "w-full"}>
         {/* ═══════════ COLUMNA PRINCIPAL ═══════════ */}
         <div className={activeTab === 'todo' ? "xl:col-span-8 flex flex-col gap-8" : "w-full flex flex-col gap-8"}>
@@ -825,7 +834,7 @@ export function ComunidadInteractiveView({
                 )}
               </div>
 
-              {/* Filtros de Hashtags y Orden (solo visible en pestaña foros o todo) */}
+              {/* Filtros de Hashtags y Orden (solo visible en pestaña foros o vista general) */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                   {['Todos', '#Ansiedad', '#Mindfulness', '#Autoestima', '#Sueño', '#Crecimiento personal'].map(
@@ -1285,7 +1294,7 @@ export function ComunidadInteractiveView({
 
                           <div className="flex flex-wrap gap-1.5">
                             <span className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 text-xs font-medium border border-slate-200/60 dark:border-slate-800">
-                              {esp.especialidad === 'Nutrición' ? 'Planes alimenticios' : esp.especialidad === 'Crossfit' ? 'Resistencia & WOD' : 'Técnica & Progresión'}
+                              {getSpecialtyTagLabel(esp.especialidad)}
                             </span>
                             <span className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 text-xs font-medium border border-slate-200/60 dark:border-slate-800">
                               Seguimiento continuo
@@ -1406,20 +1415,13 @@ export function ComunidadInteractiveView({
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {misRetos.map((mr) => (
-                      <div
+                      <button
+                        type="button"
                         key={mr.idreto}
-                        role="button"
-                        tabIndex={0}
                         onClick={() => setSelectedRetoModal(mr)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            setSelectedRetoModal(mr);
-                          }
-                        }}
-                        className="p-3.5 rounded-2xl bg-white dark:bg-[#111827] border border-indigo-100/80 dark:border-indigo-900/50 shadow-sm cursor-pointer hover:border-[#572de4] transition-all flex flex-col gap-2"
+                        className="text-left w-full p-3.5 rounded-2xl bg-white dark:bg-[#111827] border border-indigo-100/80 dark:border-indigo-900/50 shadow-sm cursor-pointer hover:border-[#572de4] transition-all flex flex-col gap-2"
                       >
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center justify-between gap-2 w-full">
                           <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
                             {mr.titulo}
                           </span>
@@ -1428,11 +1430,11 @@ export function ComunidadInteractiveView({
                         <span className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
                           {mr.descripcion}
                         </span>
-                        <div className="flex items-center justify-between text-[11px] font-bold text-[#572de4] dark:text-indigo-300 pt-1 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center justify-between w-full text-[11px] font-bold text-[#572de4] dark:text-indigo-300 pt-1 border-t border-slate-100 dark:border-slate-800">
                           <span>+{mr.puntos_recompensa || 50} pts</span>
                           <span className="text-emerald-600 dark:text-emerald-400">Participando ✓</span>
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -1503,7 +1505,7 @@ export function ComunidadInteractiveView({
           )}
         </div>
 
-        {/* ═══════════ SIDEBAR LATERAL (4 Cols) - Solo visible en pestaña 'Todo' ═══════════ */}
+        {/* ═══════════ SIDEBAR LATERAL (4 Cols) - Solo visible en vista general ═══════════ */}
         {activeTab === 'todo' && (
         <aside className="xl:col-span-4 flex flex-col gap-6">
           {/* ── WIDGET 1: ESPECIALISTAS VERIFICADOS ── */}
@@ -1640,44 +1642,41 @@ export function ComunidadInteractiveView({
               return (
                 <div
                   key={id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setSelectedRetoModal(reto)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setSelectedRetoModal(reto);
-                    }
-                  }}
-                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col gap-3.5 cursor-pointer hover:border-[#572de4]/40 transition-all"
+                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col gap-3.5 hover:border-[#572de4]/40 transition-all"
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="px-2.5 py-0.5 rounded-md bg-[#572de4]/10 dark:bg-indigo-950 text-[#572de4] dark:text-indigo-300 text-[11px] font-bold">
-                        +{puntos} pts de recompensa
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRetoModal(reto)}
+                    className="text-left w-full flex flex-col gap-3.5 cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between w-full">
+                      <div>
+                        <span className="px-2.5 py-0.5 rounded-md bg-[#572de4]/10 dark:bg-indigo-950 text-[#572de4] dark:text-indigo-300 text-[11px] font-bold">
+                          +{puntos} pts de recompensa
+                        </span>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-2">
+                          {reto.titulo}
+                        </h4>
+                      </div>
+                      <div className="w-9 h-9 rounded-2xl bg-[#572de4]/10 dark:bg-indigo-950 text-[#572de4] dark:text-indigo-300 flex items-center justify-center">
+                        <Trophy className="w-4 h-4" />
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                      {reto.descripcion}
+                    </p>
+
+                    <div className="flex items-center justify-between w-full text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5 text-slate-400" />
+                        {participantesCount} participante{participantesCount === 1 ? '' : 's'}
                       </span>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-2">
-                        {reto.titulo}
-                      </h4>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                        {reto.fechafin ? `Hasta: ${reto.fechafin}` : 'Activo'}
+                      </span>
                     </div>
-                    <div className="w-9 h-9 rounded-2xl bg-[#572de4]/10 dark:bg-indigo-950 text-[#572de4] dark:text-indigo-300 flex items-center justify-center">
-                      <Trophy className="w-4 h-4" />
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    {reto.descripcion}
-                  </p>
-
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5 text-slate-400" />
-                      {participantesCount} participante{participantesCount === 1 ? '' : 's'}
-                    </span>
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">
-                      {reto.fechafin ? `Hasta: ${reto.fechafin}` : 'Activo'}
-                    </span>
-                  </div>
+                  </button>
 
                   {isEnrolled ? (
                     <div className="w-full py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
@@ -1759,20 +1758,18 @@ export function ComunidadInteractiveView({
 
       {/* ── Modal de Perfil de Especialista ── */}
       {selectedSpecialist && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setSelectedSpecialist(null);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setSelectedSpecialist(null);
-          }}
-          role="presentation"
-        >
-          <div
-            className="w-full max-w-md bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95"
-            role="dialog"
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label="Cerrar modal de especialista"
+            onClick={() => setSelectedSpecialist(null)}
+            className="fixed inset-0 w-full h-full bg-slate-950/60 backdrop-blur-sm cursor-default"
+          />
+          <dialog
+            open
             aria-modal="true"
+            className="relative z-10 w-full max-w-md bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 m-0"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[#572de4] uppercase tracking-wider">
@@ -1824,7 +1821,7 @@ export function ComunidadInteractiveView({
                 ? 'Desvincular de mi supervisión'
                 : 'Vincular como mi Entrenador'}
             </button>
-          </div>
+          </dialog>
         </div>
       )}
       {/* ── Modal Interactivo de Detalle de Reto ── */}

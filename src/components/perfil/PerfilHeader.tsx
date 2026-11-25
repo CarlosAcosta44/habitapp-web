@@ -12,7 +12,7 @@ interface PerfilHeaderProps {
   rachaGlobal: number;
 }
 
-export function PerfilHeader({ perfil, rachaGlobal }: PerfilHeaderProps) {
+export function PerfilHeader({ perfil, rachaGlobal }: Readonly<PerfilHeaderProps>) {
   const nombre = perfil?.nombre ?? "Usuario";
   const apellido = perfil?.apellido ?? "";
   const puntos = perfil?.puntos ?? 0;

@@ -12,12 +12,12 @@ async function getCurrentUser(): Promise<User> {
 
   const finalRole = user.nombrerol || 'Usuario'
   const roleUpper = finalRole.toUpperCase()
-  const normalizedRole =
-    roleUpper === 'ADMINISTRADOR' || roleUpper === 'ADMIN'
-      ? 'admin'
-      : roleUpper === 'ENTRENADOR' || roleUpper === 'TRAINER'
-      ? 'entrenador'
-      : 'user'
+  let normalizedRole = 'user'
+  if (roleUpper === 'ADMINISTRADOR' || roleUpper === 'ADMIN') {
+    normalizedRole = 'admin'
+  } else if (roleUpper === 'ENTRENADOR' || roleUpper === 'TRAINER') {
+    normalizedRole = 'entrenador'
+  }
 
   const domainUser: User = {
     id: user.id,
@@ -38,9 +38,9 @@ async function getCurrentUser(): Promise<User> {
 
 export default async function DashboardLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
   const user = await getCurrentUser()
 
   const avatarUrl = user.fotoperfil ?? user.avatar_url

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, BookOpen, Activity, Plus, Edit, Trash2, CheckCircle, X } from "lucide-react";
+import { Users, BookOpen, Plus, Edit, Trash2, CheckCircle, X } from "lucide-react";
 import { 
   createRoutineAction, 
   updateRoutineAction, 
@@ -10,7 +10,7 @@ import {
   getCoachClientProgressAction
 } from "@/actions/coach.actions";
 
-export function CoachDashboardClient({ initialClients, initialRoutines }: { initialClients: any[], initialRoutines: any[] }) {
+export function CoachDashboardClient({ initialClients, initialRoutines }: Readonly<{ initialClients: any[], initialRoutines: any[] }>) {
   const [activeTab, setActiveTab] = useState<"clients" | "routines">("clients");
   const [routines, setRoutines] = useState(initialRoutines);
   
