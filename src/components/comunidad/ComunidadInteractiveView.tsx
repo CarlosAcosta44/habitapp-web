@@ -63,10 +63,10 @@ interface ComunidadInteractiveViewProps {
 
 type TabType = 'todo' | 'foros' | 'habitos' | 'articulos' | 'especialistas' | 'retos';
 
-const VALID_COMMUNITY_TABS: TabType[] = ['todo', 'foros', 'habitos', 'articulos', 'especialistas', 'retos'];
+const VALID_COMMUNITY_TABS = new Set<TabType>(['todo', 'foros', 'habitos', 'articulos', 'especialistas', 'retos']);
 
 function resolveCommunityTab(param: string | null): TabType {
-  return param && VALID_COMMUNITY_TABS.includes(param as TabType) ? (param as TabType) : 'todo';
+  return param && VALID_COMMUNITY_TABS.has(param as TabType) ? (param as TabType) : 'todo';
 }
 
 function formatClonesCount(count?: number | null): string {

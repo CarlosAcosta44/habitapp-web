@@ -217,7 +217,8 @@ export function HabitItemCard({
   }, [habito.registroHoy?.completado, habito.registroHoy?.progresoActual, metaDiaria]);
 
   const isCompleted = isToday ? completadoHoy : isCompletedOnSelectedDate;
-  const progresoActual = isToday ? progresoHoy : (isCompleted ? metaDiaria : 0);
+  const fallbackProgreso = isCompleted ? metaDiaria : 0;
+  const progresoActual = isToday ? progresoHoy : fallbackProgreso;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
