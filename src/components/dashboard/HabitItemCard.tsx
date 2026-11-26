@@ -109,6 +109,56 @@ interface HabitStatusActionProps {
   readonly onToggle: (e: React.MouseEvent) => void;
 }
 
+function renderTodayStatusButton(
+  isCompleted: boolean,
+  isPending: boolean,
+  onToggle: (e: React.MouseEvent) => void
+) {
+  const todayBtnClass = isCompleted
+    ? 'bg-[#572de4] text-white shadow-[0_4px_14px_rgba(87,45,228,0.35)] scale-105 hover:scale-100'
+    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#572de4] hover:bg-slate-200 dark:hover:bg-slate-700 ring-1 ring-slate-200/80 dark:ring-slate-700';
+  const checkOpacityClass = isCompleted ? 'opacity-100' : 'opacity-60';
+  const btnTitle = isCompleted ? 'Marcar como pendiente' : 'Marcar como completado';
+
+  return (
+    <button
+      onClick={onToggle}
+      disabled={isPending}
+      title={btnTitle}
+      type="button"
+      className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ${todayBtnClass}`}
+    >
+      {isPending ? (
+        <Loader2 className="w-5 h-5 animate-spin" />
+      ) : (
+        <Check className={`w-5 h-5 stroke-[2.5] ${checkOpacityClass}`} />
+      )}
+    </button>
+  );
+}
+
+function renderPastStatusIndicator(isCompleted: boolean, selectedDate: string) {
+  const pastCircleClass = isCompleted
+    ? 'bg-emerald-500 text-white shadow-sm'
+    : 'bg-rose-50 dark:bg-rose-950/40 text-rose-500 dark:text-rose-400 ring-1 ring-rose-200 dark:ring-rose-800/60';
+  const pastTitle = isCompleted
+    ? `Completado el ${selectedDate} (Histórico)`
+    : `No completado el ${selectedDate} (Histórico)`;
+
+  return (
+    <div
+      className={`w-11 h-11 rounded-full flex items-center justify-center cursor-not-allowed ${pastCircleClass}`}
+      title={pastTitle}
+    >
+      {isCompleted ? (
+        <Check className="w-5 h-5 stroke-[2.5]" />
+      ) : (
+        <X className="w-5 h-5 stroke-[2.5]" />
+      )}
+    </div>
+  );
+}
+
 function HabitStatusAction({
   isToday,
   isPast,
@@ -118,48 +168,10 @@ function HabitStatusAction({
   onToggle,
 }: HabitStatusActionProps) {
   if (isToday) {
-    const todayBtnClass = isCompleted
-      ? 'bg-[#572de4] text-white shadow-[0_4px_14px_rgba(87,45,228,0.35)] scale-105 hover:scale-100'
-      : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-[#572de4] hover:bg-slate-200 dark:hover:bg-slate-700 ring-1 ring-slate-200/80 dark:ring-slate-700';
-
-    return (
-      <button
-        onClick={onToggle}
-        disabled={isPending}
-        title={isCompleted ? 'Marcar como pendiente' : 'Marcar como completado'}
-        type="button"
-        className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ${todayBtnClass}`}
-      >
-        {isPending ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
-        ) : (
-          <Check className={`w-5 h-5 stroke-[2.5] ${isCompleted ? 'opacity-100' : 'opacity-60'}`} />
-        )}
-      </button>
-    );
+    return renderTodayStatusButton(isCompleted, isPending, onToggle);
   }
-
   if (isPast) {
-    const pastCircleClass = isCompleted
-      ? 'bg-emerald-500 text-white shadow-sm'
-      : 'bg-rose-50 dark:bg-rose-950/40 text-rose-500 dark:text-rose-400 ring-1 ring-rose-200 dark:ring-rose-800/60';
-
-    return (
-      <div
-        className={`w-11 h-11 rounded-full flex items-center justify-center cursor-not-allowed ${pastCircleClass}`}
-        title={
-          isCompleted
-            ? `Completado el ${selectedDate} (Histórico)`
-            : `No completado el ${selectedDate} (Histórico)`
-        }
-      >
-        {isCompleted ? (
-          <Check className="w-5 h-5 stroke-[2.5]" />
-        ) : (
-          <X className="w-5 h-5 stroke-[2.5]" />
-        )}
-      </div>
-    );
+    return renderPastStatusIndicator(isCompleted, selectedDate);
   }
 
   return (
