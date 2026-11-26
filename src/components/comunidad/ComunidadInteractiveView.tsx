@@ -737,6 +737,653 @@ function CommunitySidebarView({
   );
 }
 
+interface CommunityRetosDirectoryViewProps {
+  readonly retosVigentesCount: number;
+  readonly setIsCreateRetoOpen: (open: boolean) => void;
+  readonly retoFilterTab: 'todos' | 'participando';
+  readonly setRetoFilterTab: (tab: 'todos' | 'participando') => void;
+  readonly initialRetosCount: number;
+  readonly misRetos: Reto[];
+  readonly retosFiltrados: Reto[];
+  readonly userId?: string;
+  readonly joiningRetoId: string | null;
+  readonly leavingRetoId: string | null;
+  readonly checkingInRetoId: string | null;
+  readonly isPending: boolean;
+  readonly setSelectedRetoModal: (reto: Reto) => void;
+  readonly handleJoinReto: (reto: Reto) => void;
+  readonly handleLeaveReto: (reto: Reto) => void;
+  readonly handleCheckinReto: (reto: Reto) => void;
+}
+
+function CommunityRetosDirectoryView({
+  retosVigentesCount,
+  setIsCreateRetoOpen,
+  retoFilterTab,
+  setRetoFilterTab,
+  initialRetosCount,
+  misRetos,
+  retosFiltrados,
+  userId,
+  joiningRetoId,
+  leavingRetoId,
+  checkingInRetoId,
+  isPending,
+  setSelectedRetoModal,
+  handleJoinReto,
+  handleLeaveReto,
+  handleCheckinReto,
+}: CommunityRetosDirectoryViewProps) {
+  return (
+    <div className="flex flex-col gap-7">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Retos y Desafíos Comunitarios
+          </h2>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-sm text-xs font-semibold">
+            <Award className="w-4 h-4 text-[#572de4]" />
+            <span>{retosVigentesCount} {retosVigentesCount === 1 ? 'reto activo' : 'retos activos'}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsCreateRetoOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#572de4] hover:bg-[#461ebd] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Crear reto</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800">
+        <button
+          type="button"
+          onClick={() => setRetoFilterTab('todos')}
+          className={`pb-3 text-xs sm:text-sm font-bold transition-all relative ${
+            retoFilterTab === 'todos'
+              ? 'text-[#572de4] dark:text-indigo-400 border-b-2 border-[#572de4]'
+              : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          Todos los desafíos ({initialRetosCount})
+        </button>
+        <button
+          type="button"
+          onClick={() => setRetoFilterTab('participando')}
+          className={`pb-3 text-xs sm:text-sm font-bold transition-all relative flex items-center gap-1.5 ${
+            retoFilterTab === 'participando'
+              ? 'text-[#572de4] dark:text-indigo-400 border-b-2 border-[#572de4]'
+              : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          <Trophy className="w-4 h-4" />
+          <span>En los que participas ({misRetos.length})</span>
+        </button>
+      </div>
+
+      {retoFilterTab === 'todos' && misRetos.length > 0 && (
+        <div className="p-5 rounded-3xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#572de4] dark:text-indigo-300 uppercase tracking-wider">
+              <Trophy className="w-4 h-4" />
+              <span>Tus Retos en Curso ({misRetos.length})</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setRetoFilterTab('participando')}
+              className="text-xs font-bold text-[#572de4] dark:text-indigo-400 hover:underline"
+            >
+              Filtrar solo mis retos →
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {misRetos.map((mr) => (
+              <button
+                type="button"
+                key={mr.idreto}
+                onClick={() => setSelectedRetoModal(mr)}
+                className="text-left w-full p-3.5 rounded-2xl bg-white dark:bg-[#111827] border border-indigo-100/80 dark:border-indigo-900/50 shadow-sm cursor-pointer hover:border-[#572de4] transition-all flex flex-col gap-2"
+              >
+                <div className="flex items-center justify-between gap-2 w-full">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                    {mr.titulo}
+                  </span>
+                  <span className="text-sm">{mr.insignia_recompensa || '🏆'}</span>
+                </div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                  {mr.descripcion}
+                </span>
+                <div className="flex items-center justify-between w-full text-[11px] font-bold text-[#572de4] dark:text-indigo-300 pt-1 border-t border-slate-100 dark:border-slate-800">
+                  <span>+{mr.puntos_recompensa || 50} pts</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">Participando ✓</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <section className="relative overflow-hidden rounded-3xl p-7 bg-gradient-to-r from-[#572de4] via-indigo-600 to-violet-700 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="relative z-10 flex items-start gap-4 max-w-2xl">
+          <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shrink-0 shadow-inner">
+            <Award className="w-7 h-7 text-white" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[11px] text-white/80 font-bold uppercase tracking-widest">
+              Comunidad &amp; Superación
+            </span>
+            <h3 className="text-xl font-bold text-white tracking-tight">
+              ¿Listo para elevar tus hábitos al siguiente nivel?
+            </h3>
+            <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
+              Únete a los desafíos colectivos, compite saludablemente, acumula puntos de recompensa y desbloquea insignias exclusivas.
+            </p>
+          </div>
+        </div>
+        <div className="absolute -right-12 -top-12 w-64 h-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+        <div className="absolute right-1/3 -bottom-16 w-48 h-48 rounded-full bg-violet-400/20 blur-xl pointer-events-none" />
+      </section>
+
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">
+          {retoFilterTab === 'participando' ? 'Retos en los que estás participando' : 'Explorar todos los retos'}
+        </h3>
+        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          {retosFiltrados.length} {retosFiltrados.length === 1 ? 'reto disponible' : 'retos disponibles'}
+        </span>
+      </div>
+
+      {retosFiltrados.length === 0 ? (
+        <div className="text-center py-12 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]">
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+            No se encontraron retos disponibles
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {retosFiltrados.map((reto) => {
+            const id = reto.idreto || reto.idReto || reto.id || '';
+            return (
+              <RetoCard
+                key={id}
+                reto={reto}
+                userId={userId}
+                isJoining={joiningRetoId === id}
+                isLeaving={leavingRetoId === id}
+                isCheckingIn={checkingInRetoId === id}
+                isPending={isPending}
+                onSelect={(r) => setSelectedRetoModal(r)}
+                onJoin={handleJoinReto}
+                onLeave={handleLeaveReto}
+                onCheckIn={handleCheckinReto}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface SpecialistProfileModalViewProps {
+  readonly selectedSpecialist: Record<string, any> | null;
+  readonly onClose: () => void;
+  readonly isLinked: boolean;
+  readonly isLinking: boolean;
+  readonly onToggleLink: () => void;
+}
+
+function SpecialistProfileModalView({
+  selectedSpecialist,
+  onClose,
+  isLinked,
+  isLinking,
+  onToggleLink,
+}: SpecialistProfileModalViewProps) {
+  if (!selectedSpecialist) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in">
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label="Cerrar modal de especialista"
+        onClick={onClose}
+        className="fixed inset-0 w-full h-full bg-slate-950/60 backdrop-blur-sm cursor-default"
+      />
+      <dialog
+        open
+        aria-modal="true"
+        className="relative z-10 w-full max-w-md bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 m-0"
+      >
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-[#572de4] uppercase tracking-wider">
+            Perfil de Especialista
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3.5">
+          <div className="w-14 h-14 rounded-full bg-[#572de4] text-white flex items-center justify-center font-bold text-lg">
+            {selectedSpecialist.nombre?.[0] || 'E'}
+          </div>
+          <div className="flex flex-col">
+            <h4 className="font-bold text-base text-slate-900 dark:text-white">
+              {selectedSpecialist.nombre} {selectedSpecialist.apellido || ''}
+            </h4>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              {selectedSpecialist.especialidad || 'Especialista en Hábitos & Salud Emocional'}
+            </span>
+            <span className="text-xs text-emerald-600 font-bold mt-1">● Disponible para sesiones online</span>
+          </div>
+        </div>
+
+        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+          Entrenador certificado ({selectedSpecialist.experiencia ?? 3} años de experiencia) dedicado al acompañamiento en {selectedSpecialist.especialidad || 'hábitos saludables'}, asignación de rutinas personalizadas y seguimiento continuo de tus metas diarias.
+        </p>
+
+        <button
+          type="button"
+          disabled={isLinking}
+          onClick={onToggleLink}
+          className={`w-full py-3 rounded-2xl font-bold text-xs shadow-md transition-all disabled:opacity-50 ${
+            isLinked
+              ? 'bg-rose-600 hover:bg-rose-700 text-white'
+              : 'bg-[#572de4] hover:bg-[#461ebd] text-white'
+          }`}
+        >
+          {isLinked
+            ? 'Desvincular de mi supervisión'
+            : 'Vincular como mi Entrenador'}
+        </button>
+      </dialog>
+    </div>
+  );
+}
+
+interface CommunityHabitosSectionViewProps {
+  readonly activeTab: TabType;
+  readonly setActiveTab: (tab: TabType) => void;
+  readonly setIsShareHabitOpen: (open: boolean) => void;
+  readonly habitosFiltrados: any[];
+  readonly cloningId: string | null;
+  readonly isPending: boolean;
+  readonly handleCloneHabit: (habito: any) => void;
+}
+
+function CommunityHabitosSectionView({
+  activeTab,
+  setActiveTab,
+  setIsShareHabitOpen,
+  habitosFiltrados,
+  cloningId,
+  isPending,
+  handleCloneHabit,
+}: CommunityHabitosSectionViewProps) {
+  const limit = activeTab === 'habitos' ? 30 : 3;
+
+  return (
+    <section className="flex flex-col gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-[#572de4] dark:text-indigo-400" />
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+              Hábitos de la comunidad
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Inspirados por otros miembros para cuidar la salud emocional día a día.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsShareHabitOpen(true)}
+            className="px-3.5 py-1.5 rounded-full bg-[#572de4]/10 dark:bg-indigo-950/80 hover:bg-[#572de4]/20 text-[#572de4] dark:text-indigo-300 text-xs font-bold transition-colors flex items-center gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Compartir hábito</span>
+          </button>
+          {activeTab === 'todo' && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('habitos')}
+              className="text-xs font-bold text-[#572de4] dark:text-indigo-400 hover:underline flex items-center gap-1"
+            >
+              <span>Ver todos</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {habitosFiltrados.length === 0 ? (
+        <div className="text-center py-10 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]">
+          <p className="text-xs text-slate-400">No se encontraron hábitos en esta búsqueda.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {habitosFiltrados.slice(0, limit).map((habito) => {
+            const id = habito.idhabito || habito.id;
+            const isCloningThis = cloningId === id;
+
+            return (
+              <div
+                key={id}
+                className="flex flex-col justify-between p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all"
+              >
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="w-9 h-9 rounded-xl bg-[#572de4]/10 dark:bg-indigo-950/70 text-[#572de4] dark:text-indigo-400 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">
+                      {habito.categoria_nombre || 'General'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-snug">
+                      {habito.nombre}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed line-clamp-2">
+                      {habito.descripcion || 'Hábito saludable para tu bienestar diario.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[11px]">
+                    <Users className="w-3.5 h-3.5 text-[#572de4]" />
+                    <span>{formatClonesCount(habito.clones_count)}</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleCloneHabit(habito)}
+                    disabled={isCloningThis || isPending}
+                    className="px-3.5 py-1.5 rounded-full bg-[#572de4] hover:bg-[#461ebd] text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1 active:scale-95 disabled:opacity-50"
+                  >
+                    {isCloningThis ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Plus className="w-3.5 h-3.5" />
+                    )}
+                    <span>Añadir</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
+interface CommunityArticulosSectionViewProps {
+  readonly activeTab: TabType;
+  readonly setActiveTab: (tab: TabType) => void;
+  readonly articulosFiltrados: any[];
+  readonly setSelectedArticuloModal: (art: Articulo) => void;
+}
+
+function CommunityArticulosSectionView({
+  activeTab,
+  setActiveTab,
+  articulosFiltrados,
+  setSelectedArticuloModal,
+}: CommunityArticulosSectionViewProps) {
+  const limit = activeTab === 'articulos' ? 20 : 4;
+
+  return (
+    <section className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-[#572de4] dark:text-indigo-400" />
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+              Artículos y Guías Clínicas
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Contenido respaldado por evidencia científica y revisado por profesionales.
+          </p>
+        </div>
+
+        {activeTab === 'todo' && (
+          <button
+            type="button"
+            onClick={() => setActiveTab('articulos')}
+            className="text-xs font-bold text-[#572de4] dark:text-indigo-400 hover:underline flex items-center gap-1"
+          >
+            <span>Ver biblioteca</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+
+      {articulosFiltrados.length === 0 ? (
+        <div className="text-center py-10 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]">
+          <p className="text-xs text-slate-400">No se encontraron artículos.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {articulosFiltrados.slice(0, limit).map((art) => {
+            const id = art.idarticulo || art.idArticulo || art.id;
+
+            return (
+              <button
+                type="button"
+                key={id}
+                onClick={() => setSelectedArticuloModal(art)}
+                className="text-left w-full p-5 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col justify-between cursor-pointer group hover:border-[#572de4]/40"
+              >
+                <div className="flex flex-col gap-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#572de4]/10 text-[#572de4] dark:bg-indigo-950/80 dark:text-indigo-300 text-[11px] font-semibold">
+                      {art.categoria || 'Salud Mental'}
+                    </span>
+                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      5 min lectura
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-snug group-hover:text-[#572de4] transition-colors">
+                      {art.titulo}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed line-clamp-3">
+                      {art.contenido}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950 flex items-center justify-center text-[#572de4] dark:text-indigo-400 text-[11px] font-bold">
+                      EV
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-slate-900 dark:text-white leading-tight">
+                        Dra. Elena Vidal
+                      </span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Psiquiatra Colegiada
+                      </span>
+                    </div>
+                  </div>
+
+                  <span className="text-xs font-bold text-[#572de4] dark:text-indigo-400 group-hover:underline flex items-center gap-1">
+                    <span>Leer artículo</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
+interface CommunityForosSectionViewProps {
+  readonly activeTab: TabType;
+  readonly setActiveTab: (tab: TabType) => void;
+  readonly selectedTag: string;
+  readonly setSelectedTag: (tag: string) => void;
+  readonly sortBy: 'recientes' | 'populares' | 'sin_responder';
+  readonly setSortBy: (sort: 'recientes' | 'populares' | 'sin_responder') => void;
+  readonly forosFiltrados: any[];
+  readonly setIsCreateForoOpen: (open: boolean) => void;
+  readonly userId?: string;
+  readonly isAdmin: boolean;
+  readonly openForoMenuId: string | null;
+  readonly setOpenForoMenuId: (id: string | null) => void;
+  readonly setEditingForo: (foro: any) => void;
+  readonly deletingForoId: string | null;
+  readonly isPending: boolean;
+  readonly handleDeleteForo: (foroId: string, e: React.MouseEvent) => void;
+  readonly reactingForoId: string | null;
+  readonly handleLikeForo: (foro: any) => void;
+}
+
+function CommunityForosSectionView({
+  activeTab,
+  setActiveTab,
+  selectedTag,
+  setSelectedTag,
+  sortBy,
+  setSortBy,
+  forosFiltrados,
+  setIsCreateForoOpen,
+  userId,
+  isAdmin,
+  openForoMenuId,
+  setOpenForoMenuId,
+  setEditingForo,
+  deletingForoId,
+  isPending,
+  handleDeleteForo,
+  reactingForoId,
+  handleLikeForo,
+}: CommunityForosSectionViewProps) {
+  const limit = activeTab === 'foros' ? 30 : 2;
+
+  return (
+    <section className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-[#572de4] dark:text-indigo-400" />
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+              Foros y Círculos de Apoyo
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Conversaciones reales, empáticas y respetuosas guiadas por la comunidad.
+          </p>
+        </div>
+
+        {activeTab === 'todo' && (
+          <button
+            type="button"
+            onClick={() => setActiveTab('foros')}
+            className="text-xs font-bold text-[#572de4] dark:text-indigo-400 hover:underline flex items-center gap-1"
+          >
+            <span>Ver todos los foros</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          {['Todos', '#Ansiedad', '#Mindfulness', '#Autoestima', '#Sueño', '#Crecimiento personal'].map(
+            (tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setSelectedTag(tag)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  selectedTag === tag
+                    ? 'bg-[#572de4] text-white shadow-sm'
+                    : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                {tag}
+              </button>
+            )
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+          <span className="text-xs text-slate-500 dark:text-slate-400">Ordenar por:</span>
+          <select
+            value={sortBy}
+            onChange={(e: any) => setSortBy(e.target.value)}
+            className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs px-2.5 py-1.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#572de4]"
+          >
+            <option value="recientes">Más recientes</option>
+            <option value="populares">Más populares</option>
+            <option value="sin_responder">Sin responder</option>
+          </select>
+        </div>
+      </div>
+
+      {forosFiltrados.length === 0 ? (
+        <div className="text-center py-12 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] flex flex-col items-center justify-center">
+          <MessageSquare className="w-8 h-8 text-slate-400 mb-2" />
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+            No hay conversaciones disponibles en esta categoría
+          </p>
+          <button
+            type="button"
+            onClick={() => setIsCreateForoOpen(true)}
+            className="mt-3 px-4 py-2 rounded-xl bg-[#572de4] text-white text-xs font-bold"
+          >
+            Sé el primero en iniciar una conversación
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {forosFiltrados.slice(0, limit).map((foro) => {
+            const id = foro.idforo || foro.idForo;
+            return (
+              <CommunityForoCard
+                key={id}
+                foro={foro}
+                userId={userId}
+                isAdmin={isAdmin}
+                openForoMenuId={openForoMenuId}
+                setOpenForoMenuId={setOpenForoMenuId}
+                setEditingForo={setEditingForo}
+                deletingForoId={deletingForoId}
+                isPending={isPending}
+                handleDeleteForo={handleDeleteForo}
+                reactingForoId={reactingForoId}
+                handleLikeForo={handleLikeForo}
+              />
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function ComunidadInteractiveView({
   initialForos = [],
   initialHabitosComunidad = [],
@@ -1221,301 +1868,49 @@ export function ComunidadInteractiveView({
         <div className={activeTab === 'todo' ? "xl:col-span-8 flex flex-col gap-8" : "w-full flex flex-col gap-8"}>
           {/* ── BLOCK 1: HÁBITOS DE LA COMUNIDAD ── */}
           {(activeTab === 'todo' || activeTab === 'habitos') && (
-            <section className="flex flex-col gap-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-[#572de4] dark:text-indigo-400" />
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                      Hábitos de la comunidad
-                    </h2>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Inspirados por otros miembros para cuidar la salud emocional día a día.
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setIsShareHabitOpen(true)}
-                    className="px-3.5 py-1.5 rounded-full bg-[#572de4]/10 dark:bg-indigo-950/80 hover:bg-[#572de4]/20 text-[#572de4] dark:text-indigo-300 text-xs font-bold transition-colors flex items-center gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Compartir hábito</span>
-                  </button>
-                  {activeTab === 'todo' && (
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('habitos')}
-                      className="text-xs font-bold text-[#572de4] dark:text-indigo-400 hover:underline flex items-center gap-1"
-                    >
-                      <span>Ver todos</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {habitosFiltrados.length === 0 ? (
-                <div className="text-center py-10 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]">
-                  <p className="text-xs text-slate-400">No se encontraron hábitos en esta búsqueda.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {habitosFiltrados.slice(0, activeTab === 'habitos' ? 30 : 3).map((habito) => {
-                    const id = habito.idhabito || habito.id;
-                    const isCloningThis = cloningId === id;
-
-                    return (
-                      <div
-                        key={id}
-                        className="flex flex-col justify-between p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all"
-                      >
-                        <div className="flex flex-col gap-3">
-                          <div className="flex items-center justify-between">
-                            <div className="w-9 h-9 rounded-xl bg-[#572de4]/10 dark:bg-indigo-950/70 text-[#572de4] dark:text-indigo-400 flex items-center justify-center">
-                              <Sparkles className="w-4 h-4" />
-                            </div>
-                            <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">
-                              {habito.categoria_nombre || 'General'}
-                            </span>
-                          </div>
-
-                          <div>
-                            <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-snug">
-                              {habito.nombre}
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed line-clamp-2">
-                              {habito.descripcion || 'Hábito saludable para tu bienestar diario.'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[11px]">
-                            <Users className="w-3.5 h-3.5 text-[#572de4]" />
-                            <span>
-                              {formatClonesCount(habito.clones_count)}
-                            </span>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => handleCloneHabit(habito)}
-                            disabled={isCloningThis || isPending}
-                            className="px-3.5 py-1.5 rounded-full bg-[#572de4] hover:bg-[#461ebd] text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1 active:scale-95 disabled:opacity-50"
-                          >
-                            {isCloningThis ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <Plus className="w-3.5 h-3.5" />
-                            )}
-                            <span>Añadir</span>
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
+            <CommunityHabitosSectionView
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              setIsShareHabitOpen={setIsShareHabitOpen}
+              habitosFiltrados={habitosFiltrados}
+              cloningId={cloningId}
+              isPending={isPending}
+              handleCloneHabit={handleCloneHabit}
+            />
           )}
 
           {/* ── BLOCK 2: FOROS Y CÍRCULOS DE APOYO ── */}
           {(activeTab === 'todo' || activeTab === 'foros') && (
-            <section className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-[#572de4] dark:text-indigo-400" />
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                      Foros y Círculos de Apoyo
-                    </h2>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Conversaciones reales, empáticas y respetuosas guiadas por la comunidad.
-                  </p>
-                </div>
-
-                {activeTab === 'todo' && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('foros')}
-                    className="text-xs font-bold text-[#572de4] dark:text-indigo-400 hover:underline flex items-center gap-1"
-                  >
-                    <span>Ver todos los foros</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-
-              {/* Filtros de Hashtags y Orden (solo visible en pestaña foros o vista general) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                  {['Todos', '#Ansiedad', '#Mindfulness', '#Autoestima', '#Sueño', '#Crecimiento personal'].map(
-                    (tag) => (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => setSelectedTag(tag)}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                          selectedTag === tag
-                            ? 'bg-[#572de4] text-white shadow-sm'
-                            : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                        }`}
-                      >
-                        {tag}
-                      </button>
-                    )
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Ordenar por:</span>
-                  <select
-                    value={sortBy}
-                    onChange={(e: any) => setSortBy(e.target.value)}
-                    className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs px-2.5 py-1.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#572de4]"
-                  >
-                    <option value="recientes">Más recientes</option>
-                    <option value="populares">Más populares</option>
-                    <option value="sin_responder">Sin responder</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Lista de Foros */}
-              {forosFiltrados.length === 0 ? (
-                <div className="text-center py-12 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] flex flex-col items-center justify-center">
-                  <MessageSquare className="w-8 h-8 text-slate-400 mb-2" />
-                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                    No hay conversaciones disponibles en esta categoría
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setIsCreateForoOpen(true)}
-                    className="mt-3 px-4 py-2 rounded-xl bg-[#572de4] text-white text-xs font-bold"
-                  >
-                    Sé el primero en iniciar una conversación
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {forosFiltrados.slice(0, activeTab === 'foros' ? 30 : 2).map((foro) => {
-                    const id = foro.idforo || foro.idForo;
-                    return (
-                      <CommunityForoCard
-                        key={id}
-                        foro={foro}
-                        userId={userId}
-                        isAdmin={isAdmin}
-                        openForoMenuId={openForoMenuId}
-                        setOpenForoMenuId={setOpenForoMenuId}
-                        setEditingForo={setEditingForo}
-                        deletingForoId={deletingForoId}
-                        isPending={isPending}
-                        handleDeleteForo={handleDeleteForo}
-                        reactingForoId={reactingForoId}
-                        handleLikeForo={handleLikeForo}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </section>
+            <CommunityForosSectionView
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              selectedTag={selectedTag}
+              setSelectedTag={setSelectedTag}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              forosFiltrados={forosFiltrados}
+              setIsCreateForoOpen={setIsCreateForoOpen}
+              userId={userId}
+              isAdmin={isAdmin}
+              openForoMenuId={openForoMenuId}
+              setOpenForoMenuId={setOpenForoMenuId}
+              setEditingForo={setEditingForo}
+              deletingForoId={deletingForoId}
+              isPending={isPending}
+              handleDeleteForo={handleDeleteForo}
+              reactingForoId={reactingForoId}
+              handleLikeForo={handleLikeForo}
+            />
           )}
 
           {/* ── BLOCK 3: ARTÍCULOS Y GUÍAS CLÍNICAS ── */}
           {(activeTab === 'todo' || activeTab === 'articulos') && (
-            <section className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-[#572de4] dark:text-indigo-400" />
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                      Artículos y Guías Clínicas
-                    </h2>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Contenido respaldado por evidencia científica y revisado por profesionales.
-                  </p>
-                </div>
-
-                {activeTab === 'todo' && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('articulos')}
-                    className="text-xs font-bold text-[#572de4] dark:text-indigo-400 hover:underline flex items-center gap-1"
-                  >
-                    <span>Ver biblioteca</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-
-              {articulosFiltrados.length === 0 ? (
-                <div className="text-center py-10 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]">
-                  <p className="text-xs text-slate-400">No se encontraron artículos.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {articulosFiltrados.slice(0, activeTab === 'articulos' ? 20 : 4).map((art) => {
-                    const id = art.idarticulo || art.idArticulo || art.id;
-
-                    return (
-                      <button
-                        type="button"
-                        key={id}
-                        onClick={() => setSelectedArticuloModal(art)}
-                        className="text-left w-full p-5 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col justify-between cursor-pointer group hover:border-[#572de4]/40"
-                      >
-                        <div className="flex flex-col gap-2.5">
-                          <div className="flex items-center justify-between">
-                            <span className="px-2.5 py-0.5 rounded-full bg-[#572de4]/10 text-[#572de4] dark:bg-indigo-950/80 dark:text-indigo-300 text-[11px] font-semibold">
-                              {art.categoria || 'Salud Mental'}
-                            </span>
-                            <span className="text-xs text-slate-400 flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5" />
-                              5 min lectura
-                            </span>
-                          </div>
-
-                          <div>
-                            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-snug group-hover:text-[#572de4] transition-colors">
-                              {art.titulo}
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed line-clamp-3">
-                              {art.contenido}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950 flex items-center justify-center text-[#572de4] dark:text-indigo-400 text-[11px] font-bold">
-                              EV
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-xs font-semibold text-slate-900 dark:text-white leading-tight">
-                                Dra. Elena Vidal
-                              </span>
-                              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                                Psiquiatra Colegiada
-                              </span>
-                            </div>
-                          </div>
-
-                          <span className="text-xs font-bold text-[#572de4] dark:text-indigo-400 group-hover:underline flex items-center gap-1">
-                            <span>Leer artículo</span>
-                            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
+            <CommunityArticulosSectionView
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              articulosFiltrados={articulosFiltrados}
+              setSelectedArticuloModal={setSelectedArticuloModal}
+            />
           )}
 
           {/* ── BLOCK 4: DIRECTORIO COMPLETO DE ESPECIALISTAS ── */}
@@ -1650,162 +2045,24 @@ export function ComunidadInteractiveView({
 
           {/* ── BLOCK 5: DIRECTORIO COMPLETO DE RETOS Y DESAFÍOS ── */}
           {activeTab === 'retos' && (
-            <div className="flex flex-col gap-7">
-              {/* Header de Retos */}
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                    Retos y Desafíos Comunitarios
-                  </h2>
-                </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-sm text-xs font-semibold">
-                    <Award className="w-4 h-4 text-[#572de4]" />
-                    <span>{retosVigentesCount} {retosVigentesCount === 1 ? 'reto activo' : 'retos activos'}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsCreateRetoOpen(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#572de4] hover:bg-[#461ebd] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-95"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Crear reto</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Selector de Pestañas de Retos: Todos vs Participando */}
-              <div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setRetoFilterTab('todos')}
-                  className={`pb-3 text-xs sm:text-sm font-bold transition-all relative ${
-                    retoFilterTab === 'todos'
-                      ? 'text-[#572de4] dark:text-indigo-400 border-b-2 border-[#572de4]'
-                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                  }`}
-                >
-                  Todos los desafíos ({initialRetos.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRetoFilterTab('participando')}
-                  className={`pb-3 text-xs sm:text-sm font-bold transition-all relative flex items-center gap-1.5 ${
-                    retoFilterTab === 'participando'
-                      ? 'text-[#572de4] dark:text-indigo-400 border-b-2 border-[#572de4]'
-                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <Trophy className="w-4 h-4" />
-                  <span>En los que participas ({misRetos.length})</span>
-                </button>
-              </div>
-
-              {/* Fila Destacada: Retos en Curso del Usuario */}
-              {retoFilterTab === 'todos' && misRetos.length > 0 && (
-                <div className="p-5 rounded-3xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#572de4] dark:text-indigo-300 uppercase tracking-wider">
-                      <Trophy className="w-4 h-4" />
-                      <span>Tus Retos en Curso ({misRetos.length})</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setRetoFilterTab('participando')}
-                      className="text-xs font-bold text-[#572de4] dark:text-indigo-400 hover:underline"
-                    >
-                      Filtrar solo mis retos →
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {misRetos.map((mr) => (
-                      <button
-                        type="button"
-                        key={mr.idreto}
-                        onClick={() => setSelectedRetoModal(mr)}
-                        className="text-left w-full p-3.5 rounded-2xl bg-white dark:bg-[#111827] border border-indigo-100/80 dark:border-indigo-900/50 shadow-sm cursor-pointer hover:border-[#572de4] transition-all flex flex-col gap-2"
-                      >
-                        <div className="flex items-center justify-between gap-2 w-full">
-                          <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {mr.titulo}
-                          </span>
-                          <span className="text-sm">{mr.insignia_recompensa || '🏆'}</span>
-                        </div>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
-                          {mr.descripcion}
-                        </span>
-                        <div className="flex items-center justify-between w-full text-[11px] font-bold text-[#572de4] dark:text-indigo-300 pt-1 border-t border-slate-100 dark:border-slate-800">
-                          <span>+{mr.puntos_recompensa || 50} pts</span>
-                          <span className="text-emerald-600 dark:text-emerald-400">Participando ✓</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Banner Destacado Retos */}
-              <section className="relative overflow-hidden rounded-3xl p-7 bg-gradient-to-r from-[#572de4] via-indigo-600 to-violet-700 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="relative z-10 flex items-start gap-4 max-w-2xl">
-                  <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shrink-0 shadow-inner">
-                    <Award className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[11px] text-white/80 font-bold uppercase tracking-widest">
-                      Comunidad &amp; Superación
-                    </span>
-                    <h3 className="text-xl font-bold text-white tracking-tight">
-                      ¿Listo para elevar tus hábitos al siguiente nivel?
-                    </h3>
-                    <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
-                      Únete a los desafíos colectivos, compite saludablemente, acumula puntos de recompensa y desbloquea insignias exclusivas.
-                    </p>
-                  </div>
-                </div>
-                <div className="absolute -right-12 -top-12 w-64 h-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-                <div className="absolute right-1/3 -bottom-16 w-48 h-48 rounded-full bg-violet-400/20 blur-xl pointer-events-none" />
-              </section>
-
-              {/* Encabezado de Lista de Retos */}
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  {retoFilterTab === 'participando' ? 'Retos en los que estás participando' : 'Explorar todos los retos'}
-                </h3>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  {retosFiltrados.length} {retosFiltrados.length === 1 ? 'reto disponible' : 'retos disponibles'}
-                </span>
-              </div>
-
-              {/* Cuadrícula de Retos */}
-              {retosFiltrados.length === 0 ? (
-                <div className="text-center py-12 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]">
-                  <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                    No se encontraron retos disponibles
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {retosFiltrados.map((reto) => {
-                    const id = reto.idreto || reto.idReto || reto.id || '';
-                    return (
-                      <RetoCard
-                        key={id}
-                        reto={reto}
-                        userId={userId}
-                        isJoining={joiningRetoId === id}
-                        isLeaving={leavingRetoId === id}
-                        isCheckingIn={checkingInRetoId === id}
-                        isPending={isPending}
-                        onSelect={(r) => setSelectedRetoModal(r)}
-                        onJoin={handleJoinReto}
-                        onLeave={handleLeaveReto}
-                        onCheckIn={handleCheckinReto}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <CommunityRetosDirectoryView
+              retosVigentesCount={retosVigentesCount}
+              setIsCreateRetoOpen={setIsCreateRetoOpen}
+              retoFilterTab={retoFilterTab}
+              setRetoFilterTab={setRetoFilterTab}
+              initialRetosCount={initialRetos.length}
+              misRetos={misRetos}
+              retosFiltrados={retosFiltrados}
+              userId={userId}
+              joiningRetoId={joiningRetoId}
+              leavingRetoId={leavingRetoId}
+              checkingInRetoId={checkingInRetoId}
+              isPending={isPending}
+              setSelectedRetoModal={setSelectedRetoModal}
+              handleJoinReto={handleJoinReto}
+              handleLeaveReto={handleLeaveReto}
+              handleCheckinReto={handleCheckinReto}
+            />
           )}
         </div>
 
@@ -1876,73 +2133,22 @@ export function ComunidadInteractiveView({
       />
 
       {/* ── Modal de Perfil de Especialista ── */}
-      {selectedSpecialist && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <button
-            type="button"
-            tabIndex={-1}
-            aria-label="Cerrar modal de especialista"
-            onClick={() => setSelectedSpecialist(null)}
-            className="fixed inset-0 w-full h-full bg-slate-950/60 backdrop-blur-sm cursor-default"
-          />
-          <dialog
-            open
-            aria-modal="true"
-            className="relative z-10 w-full max-w-md bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 m-0"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#572de4] uppercase tracking-wider">
-                Perfil de Especialista
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedSpecialist(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center"
-              >
-                ✕
-              </button>
-            </div>
+      <SpecialistProfileModalView
+        selectedSpecialist={selectedSpecialist}
+        onClose={() => setSelectedSpecialist(null)}
+        isLinked={Boolean(selectedSpecialist && isTrainerLinked(selectedSpecialist))}
+        isLinking={Boolean(
+          selectedSpecialist &&
+          linkingTrainerId === (selectedSpecialist.identrenador || selectedSpecialist.idusuario || selectedSpecialist.id)
+        )}
+        onToggleLink={() => {
+          if (!selectedSpecialist) return;
+          void handleToggleTrainerLink(selectedSpecialist).then(() => {
+            setSelectedSpecialist(null);
+          });
+        }}
+      />
 
-            <div className="flex items-center gap-3.5">
-              <div className="w-14 h-14 rounded-full bg-[#572de4] text-white flex items-center justify-center font-bold text-lg">
-                {selectedSpecialist.nombre?.[0] || 'E'}
-              </div>
-              <div className="flex flex-col">
-                <h4 className="font-bold text-base text-slate-900 dark:text-white">
-                  {selectedSpecialist.nombre} {selectedSpecialist.apellido || ''}
-                </h4>
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  {selectedSpecialist.especialidad || 'Especialista en Hábitos & Salud Emocional'}
-                </span>
-                <span className="text-xs text-emerald-600 font-bold mt-1">● Disponible para sesiones online</span>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Entrenador certificado ({selectedSpecialist.experiencia ?? 3} años de experiencia) dedicado al acompañamiento en {selectedSpecialist.especialidad || 'hábitos saludables'}, asignación de rutinas personalizadas y seguimiento continuo de tus metas diarias.
-            </p>
-
-            <button
-              type="button"
-              disabled={linkingTrainerId === (selectedSpecialist.identrenador || selectedSpecialist.idusuario || selectedSpecialist.id)}
-              onClick={() => {
-                void handleToggleTrainerLink(selectedSpecialist).then(() => {
-                  setSelectedSpecialist(null);
-                });
-              }}
-              className={`w-full py-3 rounded-2xl font-bold text-xs shadow-md transition-all disabled:opacity-50 ${
-                isTrainerLinked(selectedSpecialist)
-                  ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                  : 'bg-[#572de4] hover:bg-[#461ebd] text-white'
-              }`}
-            >
-              {isTrainerLinked(selectedSpecialist)
-                ? 'Desvincular de mi supervisión'
-                : 'Vincular como mi Entrenador'}
-            </button>
-          </dialog>
-        </div>
-      )}
       {/* ── Modal Interactivo de Detalle de Reto ── */}
       <RetoDetailModal
         reto={selectedRetoModal}
