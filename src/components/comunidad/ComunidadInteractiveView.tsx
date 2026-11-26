@@ -222,6 +222,521 @@ function applyRetoCheckinOptimistic(prev: any, targetId: string, res: any) {
   };
 }
 
+function getPersonInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+interface CommunityForoCardProps {
+  readonly foro: any;
+  readonly userId?: string;
+  readonly isAdmin: boolean;
+  readonly openForoMenuId: string | null;
+  readonly setOpenForoMenuId: (id: string | null) => void;
+  readonly setEditingForo: (foro: any) => void;
+  readonly deletingForoId: string | null;
+  readonly isPending: boolean;
+  readonly handleDeleteForo: (foroId: string, e: React.MouseEvent) => void;
+  readonly reactingForoId: string | null;
+  readonly handleLikeForo: (foro: any) => void;
+}
+
+function CommunityForoCard({
+  foro,
+  userId,
+  isAdmin,
+  openForoMenuId,
+  setOpenForoMenuId,
+  setEditingForo,
+  deletingForoId,
+  isPending,
+  handleDeleteForo,
+  reactingForoId,
+  handleLikeForo,
+}: CommunityForoCardProps) {
+  const id = foro.idforo || foro.idForo;
+  const authorName = foro.usuarios
+    ? `${foro.usuarios.nombre || ''} ${foro.usuarios.apellido || ''}`.trim() || 'Miembro HabitApp'
+    : 'Miembro HabitApp';
+  const initials = getPersonInitials(authorName);
+  const canManage = Boolean(userId && (foro.idusuario === userId || isAdmin));
+
+  return (
+    <article
+      className="p-5 md:p-6 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col gap-4"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#572de4]/10 dark:bg-indigo-950/80 flex items-center justify-center text-xs font-bold text-[#572de4] dark:text-indigo-300">
+            {initials}
+          </div>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-900 dark:text-white">
+                {authorName}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+              <span className="text-[11px] text-slate-400">
+                {formatTimeAgo(foro.fechacreacion)}
+              </span>
+            </div>
+            <span className="text-xs font-semibold text-[#572de4] dark:text-indigo-400">
+              #{foro.categoria || 'General'}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {(foro.likes_count || 0) > 10 && (
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800 text-[11px] font-semibold">
+              <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
+              Destacado
+            </span>
+          )}
+
+          {canManage && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenForoMenuId(openForoMenuId === id ? null : id);
+                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="Opciones del foro"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+
+              {openForoMenuId === id && (
+                <div
+                  className="absolute right-0 top-9 z-20 w-40 bg-white dark:bg-[#151c2c] rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-800 py-1.5 animate-in fade-in zoom-in-95 duration-150"
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenForoMenuId(null);
+                      setEditingForo(foro);
+                    }}
+                    className="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Editar foro</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={deletingForoId === id || isPending}
+                    onClick={(e) => handleDeleteForo(id, e)}
+                    className="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors text-left disabled:opacity-50 border-t border-slate-100 dark:border-slate-800/60"
+                  >
+                    {deletingForoId === id ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-3.5 h-3.5" />
+                    )}
+                    <span>Eliminar foro</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <Link href={`/comunidad/foros/${id}`}>
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white hover:text-[#572de4] dark:hover:text-indigo-300 transition-colors cursor-pointer leading-snug">
+            {foro.titulo}
+          </h3>
+        </Link>
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed line-clamp-3">
+          {foro.descripcion}
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-5">
+          <Link
+            href={`/comunidad/foros/${id}`}
+            className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-[#572de4] text-xs font-medium transition-colors"
+          >
+            <MessageCircle className="w-4 h-4 text-[#572de4]" />
+            <span>{foro.comments_count || 0} respuestas</span>
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => handleLikeForo(foro)}
+            disabled={reactingForoId === id || isPending}
+            className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-rose-500 text-xs font-medium transition-colors"
+          >
+            <Heart
+              className={`w-4 h-4 ${
+                foro.liked_by_me ? 'fill-rose-500 text-rose-500' : 'text-rose-500'
+              }`}
+            />
+            <span>{foro.likes_count || 0} apoyos</span>
+          </button>
+        </div>
+
+        <Link
+          href={`/comunidad/foros/${id}`}
+          className="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-[#572de4]/10 hover:text-[#572de4] text-slate-700 dark:text-slate-300 text-xs font-semibold transition-all flex items-center gap-1.5"
+        >
+          <span>Participar</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+interface CommunitySpecialistDirectoryCardProps {
+  readonly esp: any;
+  readonly isLinked: boolean;
+  readonly isLinking: boolean;
+  readonly actionLabel: string;
+  readonly onSelect: (esp: any) => void;
+  readonly onToggleLink: (esp: any) => void;
+}
+
+function CommunitySpecialistDirectoryCard({
+  esp,
+  isLinked,
+  isLinking,
+  actionLabel,
+  onSelect,
+  onToggleLink,
+}: CommunitySpecialistDirectoryCardProps) {
+  const nombreCompleto = `${esp.nombre || ''} ${esp.apellido || ''}`.trim() || 'Especialista HabitApp';
+  const initials = getPersonInitials(nombreCompleto);
+
+  return (
+    <article
+      className="bg-white dark:bg-[#111827] rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-4"
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start justify-between">
+          <div className="relative">
+            {esp.fotoperfil ? (
+              <img
+                src={esp.fotoperfil}
+                alt={nombreCompleto}
+                className="w-16 h-16 rounded-2xl object-cover ring-2 ring-slate-100 dark:ring-slate-800"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#572de4] to-indigo-500 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                {initials}
+              </div>
+            )}
+            <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 ring-2 ring-white dark:ring-[#111827] rounded-full" title="En línea hoy" />
+          </div>
+
+          <div className="flex flex-col items-end">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200/60 dark:border-amber-900/50 px-2 py-0.5 rounded-full">
+              <Star className="w-3.5 h-3.5 fill-current" />
+              4.9 <span className="text-slate-400 font-normal">(68)</span>
+            </span>
+            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">En línea hoy</span>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center gap-1.5">
+            <h3 className="font-bold text-slate-900 dark:text-white text-base">
+              {nombreCompleto}
+            </h3>
+            <ShieldCheck className="w-4 h-4 text-[#572de4] dark:text-indigo-400 shrink-0" />
+          </div>
+          <p className="text-xs text-[#572de4] dark:text-indigo-400 font-semibold mt-0.5">
+            Especialista en {esp.especialidad || 'Hábitos Saludables'}
+          </p>
+          <span className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 inline-block">
+            Certificado HabitApp • Acompañamiento online
+          </span>
+        </div>
+
+        <div className="flex flex-wrap gap-1.5">
+          <span className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 text-xs font-medium border border-slate-200/60 dark:border-slate-800">
+            {getSpecialtyTagLabel(esp.especialidad)}
+          </span>
+          <span className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 text-xs font-medium border border-slate-200/60 dark:border-slate-800">
+            Seguimiento continuo
+          </span>
+        </div>
+      </div>
+
+      <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Experiencia certificada
+          </span>
+          <span className="text-xs font-bold text-slate-900 dark:text-white">
+            {esp.experiencia ?? 3} años • {isLinked ? 'Vinculado ✓' : 'Disponible'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => onSelect(esp)}
+            className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-center"
+          >
+            Ver perfil
+          </button>
+          <button
+            type="button"
+            disabled={isLinking}
+            onClick={() => onToggleLink(esp)}
+            className={`px-3 py-2 rounded-xl font-semibold text-xs transition-all shadow-sm text-center disabled:opacity-50 ${
+              isLinked
+                ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-rose-50 hover:text-rose-600'
+                : 'bg-[#572de4] hover:bg-[#461ebd] text-white'
+            }`}
+          >
+            {actionLabel}
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+interface CommunitySidebarViewProps {
+  readonly especialistasFiltrados: any[];
+  readonly retosFiltrados: Reto[];
+  readonly isTrainerLinked: (esp: any) => boolean;
+  readonly linkingTrainerId: string | null;
+  readonly setSelectedSpecialist: (esp: any) => void;
+  readonly handleToggleTrainerLink: (esp: any) => Promise<void>;
+  readonly setActiveTab: (tab: TabType) => void;
+  readonly joiningRetoId: string | null;
+  readonly userId?: string;
+  readonly isPending: boolean;
+  readonly setSelectedRetoModal: (reto: Reto) => void;
+  readonly handleJoinReto: (reto: Reto) => void;
+}
+
+function CommunitySidebarView({
+  especialistasFiltrados,
+  retosFiltrados,
+  isTrainerLinked,
+  linkingTrainerId,
+  setSelectedSpecialist,
+  handleToggleTrainerLink,
+  setActiveTab,
+  joiningRetoId,
+  userId,
+  isPending,
+  setSelectedRetoModal,
+  handleJoinReto,
+}: CommunitySidebarViewProps) {
+  return (
+    <aside className="xl:col-span-4 flex flex-col gap-6">
+      {/* ── WIDGET 1: ESPECIALISTAS VERIFICADOS ── */}
+      <section className="flex flex-col gap-4 p-5 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-[#572de4] dark:text-indigo-400" />
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              Especialistas Verificados
+            </h3>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+            Terapeutas colegiados con sesiones online confidenciales y personalizadas.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3.5">
+          {especialistasFiltrados.slice(0, 3).map((esp, i) => {
+            const id = esp.idusuario || esp.idEntrenador || i;
+            const nombreCompleto = `${esp.nombre || ''} ${esp.apellido || ''}`.trim() || 'Especialista HabitApp';
+            const initials = getPersonInitials(nombreCompleto);
+            const linked = isTrainerLinked(esp);
+            const targetId = esp.identrenador || esp.idusuario || esp.id;
+
+            return (
+              <div
+                key={id}
+                className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col gap-3"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="w-11 h-11 rounded-full bg-[#572de4] text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                        {initials}
+                      </div>
+                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#111827]" />
+                    </div>
+
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                        {nombreCompleto}
+                      </span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        {esp.especialidad || 'Psicología Clínica & TCC'}
+                      </span>
+                      <div className="flex items-center gap-1 text-amber-500 mt-0.5">
+                        <Star className="w-3.5 h-3.5 fill-current" />
+                        <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                          4.9
+                        </span>
+                        <span className="text-[11px] text-slate-400">(68 reseñas)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
+                  <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {linked ? 'Tu Entrenador' : 'Disponible'}
+                  </span>
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {esp.experiencia ?? 3} años exp.
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSpecialist(esp)}
+                    className="py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-all text-center"
+                  >
+                    Ver perfil
+                  </button>
+                  <button
+                    type="button"
+                    disabled={linkingTrainerId === targetId}
+                    onClick={() => {
+                      void handleToggleTrainerLink(esp);
+                    }}
+                    className={`py-2 rounded-xl text-xs font-bold shadow-sm transition-all text-center disabled:opacity-50 ${
+                      linked
+                        ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                        : 'bg-[#572de4] text-white hover:bg-[#461ebd]'
+                    }`}
+                  >
+                    {linked ? 'Vinculado ✓' : 'Vincular'}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('especialistas')}
+          className="text-xs font-bold text-[#572de4] dark:text-indigo-400 text-center hover:underline pt-1"
+        >
+          Ver todos los especialistas disponibles →
+        </button>
+      </section>
+
+      {/* ── WIDGET 2: RETOS COMUNITARIOS ACTIVOS ── */}
+      <section className="flex flex-col gap-4 p-5 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-[#572de4] dark:text-indigo-400" />
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              Retos Comunitarios Activos
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('retos')}
+            className="text-xs font-bold text-[#572de4] dark:text-indigo-400 hover:underline"
+          >
+            Ver todos →
+          </button>
+        </div>
+
+        {retosFiltrados.slice(0, 2).map((reto) => {
+          const id = reto.idreto || reto.idReto || reto.id || '';
+          const isJoiningThis = joiningRetoId === id;
+          const puntos = reto.puntos_recompensa ?? 0;
+          const isEnrolled = Boolean(
+            (userId && reto.usuarios_participando?.includes(userId)) ||
+            reto.inscrito === true
+          );
+          const participantesCount = reto.participantes_count ?? (reto.usuarios_participando?.length ?? 0);
+
+          return (
+            <div
+              key={id}
+              className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col gap-3.5 hover:border-[#572de4]/40 transition-all"
+            >
+              <button
+                type="button"
+                onClick={() => setSelectedRetoModal(reto)}
+                className="text-left w-full flex flex-col gap-3.5 cursor-pointer"
+              >
+                <div className="flex items-start justify-between w-full">
+                  <div>
+                    <span className="px-2.5 py-0.5 rounded-md bg-[#572de4]/10 dark:bg-indigo-950 text-[#572de4] dark:text-indigo-300 text-[11px] font-bold">
+                      +{puntos} pts de recompensa
+                    </span>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-2">
+                      {reto.titulo}
+                    </h4>
+                  </div>
+                  <div className="w-9 h-9 rounded-2xl bg-[#572de4]/10 dark:bg-indigo-950 text-[#572de4] dark:text-indigo-300 flex items-center justify-center">
+                    <Trophy className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {reto.descripcion}
+                </p>
+
+                <div className="flex items-center justify-between w-full text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
+                  <span className="flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5 text-slate-400" />
+                    {participantesCount} participante{participantesCount === 1 ? '' : 's'}
+                  </span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    {reto.fechafin ? `Hasta: ${reto.fechafin}` : 'Activo'}
+                  </span>
+                </div>
+              </button>
+
+              {isEnrolled ? (
+                <div className="w-full py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>En curso</span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleJoinReto(reto);
+                  }}
+                  disabled={isJoiningThis || isPending}
+                  className="w-full py-2.5 rounded-xl bg-[#572de4] hover:bg-[#461ebd] text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                >
+                  {isJoiningThis ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Flag className="w-3.5 h-3.5" />
+                  )}
+                  <span>Unirme al Reto</span>
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </section>
+    </aside>
+  );
+}
+
 export function ComunidadInteractiveView({
   initialForos = [],
   initialHabitosComunidad = [],
@@ -888,146 +1403,21 @@ export function ComunidadInteractiveView({
                 <div className="flex flex-col gap-4">
                   {forosFiltrados.slice(0, activeTab === 'foros' ? 30 : 2).map((foro) => {
                     const id = foro.idforo || foro.idForo;
-                    const authorName = foro.usuarios
-                      ? `${foro.usuarios.nombre || ''} ${foro.usuarios.apellido || ''}`.trim() || 'Miembro HabitApp'
-                      : 'Miembro HabitApp';
-                    const initials = authorName
-                      .split(' ')
-                      .map((n: string) => n[0])
-                      .join('')
-                      .slice(0, 2)
-                      .toUpperCase();
-
                     return (
-                      <article
+                      <CommunityForoCard
                         key={id}
-                        className="p-5 md:p-6 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col gap-4"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[#572de4]/10 dark:bg-indigo-950/80 flex items-center justify-center text-xs font-bold text-[#572de4] dark:text-indigo-300">
-                              {initials}
-                            </div>
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-slate-900 dark:text-white">
-                                  {authorName}
-                                </span>
-                                <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-                                <span className="text-[11px] text-slate-400">
-                                  {formatTimeAgo(foro.fechacreacion)}
-                                </span>
-                              </div>
-                              <span className="text-xs font-semibold text-[#572de4] dark:text-indigo-400">
-                                #{foro.categoria || 'General'}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            {(foro.likes_count || 0) > 10 && (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800 text-[11px] font-semibold">
-                                <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
-                                Destacado
-                              </span>
-                            )}
-
-                            {Boolean(userId && (foro.idusuario === userId || isAdmin)) && (
-                              <div className="relative">
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setOpenForoMenuId(openForoMenuId === id ? null : id);
-                                  }}
-                                  className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                                  title="Opciones del foro"
-                                >
-                                  <MoreVertical className="w-4 h-4" />
-                                </button>
-
-                                {openForoMenuId === id && (
-                                  <div
-                                    className="absolute right-0 top-9 z-20 w-40 bg-white dark:bg-[#151c2c] rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-800 py-1.5 animate-in fade-in zoom-in-95 duration-150"
-                                  >
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOpenForoMenuId(null);
-                                        setEditingForo(foro);
-                                      }}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left"
-                                    >
-                                      <Edit3 className="w-3.5 h-3.5" />
-                                      <span>Editar foro</span>
-                                    </button>
-
-                                    <button
-                                      type="button"
-                                      disabled={deletingForoId === id || isPending}
-                                      onClick={(e) => handleDeleteForo(id, e)}
-                                      className="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors text-left disabled:opacity-50 border-t border-slate-100 dark:border-slate-800/60"
-                                    >
-                                      {deletingForoId === id ? (
-                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                      ) : (
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                      )}
-                                      <span>Eliminar foro</span>
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div>
-                          <Link href={`/comunidad/foros/${id}`}>
-                            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white hover:text-[#572de4] dark:hover:text-indigo-300 transition-colors cursor-pointer leading-snug">
-                              {foro.titulo}
-                            </h3>
-                          </Link>
-                          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed line-clamp-3">
-                            {foro.descripcion}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
-                          <div className="flex items-center gap-5">
-                            <Link
-                              href={`/comunidad/foros/${id}`}
-                              className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-[#572de4] text-xs font-medium transition-colors"
-                            >
-                              <MessageCircle className="w-4 h-4 text-[#572de4]" />
-                              <span>{foro.comments_count || 0} respuestas</span>
-                            </Link>
-
-                            <button
-                              type="button"
-                              onClick={() => handleLikeForo(foro)}
-                              disabled={reactingForoId === id || isPending}
-                              className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-rose-500 text-xs font-medium transition-colors"
-                            >
-                              <Heart
-                                className={`w-4 h-4 ${
-                                  foro.liked_by_me ? 'fill-rose-500 text-rose-500' : 'text-rose-500'
-                                }`}
-                              />
-                              <span>{foro.likes_count || 0} apoyos</span>
-                            </button>
-                          </div>
-
-                          <Link
-                            href={`/comunidad/foros/${id}`}
-                            className="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-[#572de4]/10 hover:text-[#572de4] text-slate-700 dark:text-slate-300 text-xs font-semibold transition-all flex items-center gap-1.5"
-                          >
-                            <span>Participar</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </Link>
-                        </div>
-                      </article>
+                        foro={foro}
+                        userId={userId}
+                        isAdmin={isAdmin}
+                        openForoMenuId={openForoMenuId}
+                        setOpenForoMenuId={setOpenForoMenuId}
+                        setEditingForo={setEditingForo}
+                        deletingForoId={deletingForoId}
+                        isPending={isPending}
+                        handleDeleteForo={handleDeleteForo}
+                        reactingForoId={reactingForoId}
+                        handleLikeForo={handleLikeForo}
+                      />
                     );
                   })}
                 </div>
@@ -1238,105 +1628,19 @@ export function ComunidadInteractiveView({
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                   {especialistasFiltrados.map((esp) => {
                     const id = esp.idusuario || esp.idEntrenador;
-                    const nombreCompleto = `${esp.nombre || ''} ${esp.apellido || ''}`.trim() || 'Especialista HabitApp';
-                    const initials = nombreCompleto
-                      .split(' ')
-                      .map((n: string) => n[0])
-                      .join('')
-                      .slice(0, 2)
-                      .toUpperCase();
-
+                    const targetId = esp.identrenador || esp.idusuario || esp.id;
                     return (
-                      <article
+                      <CommunitySpecialistDirectoryCard
                         key={id}
-                        className="bg-white dark:bg-[#111827] rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-4"
-                      >
-                        <div className="flex flex-col gap-4">
-                          <div className="flex items-start justify-between">
-                            <div className="relative">
-                              {esp.fotoperfil ? (
-                                <img
-                                  src={esp.fotoperfil}
-                                  alt={nombreCompleto}
-                                  className="w-16 h-16 rounded-2xl object-cover ring-2 ring-slate-100 dark:ring-slate-800"
-                                />
-                              ) : (
-                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#572de4] to-indigo-500 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                                  {initials}
-                                </div>
-                              )}
-                              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 ring-2 ring-white dark:ring-[#111827] rounded-full" title="En línea hoy" />
-                            </div>
-
-                            <div className="flex flex-col items-end">
-                              <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200/60 dark:border-amber-900/50 px-2 py-0.5 rounded-full">
-                                <Star className="w-3.5 h-3.5 fill-current" />
-                                4.9 <span className="text-slate-400 font-normal">(68)</span>
-                              </span>
-                              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">En línea hoy</span>
-                            </div>
-                          </div>
-
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                                {nombreCompleto}
-                              </h3>
-                              <ShieldCheck className="w-4 h-4 text-[#572de4] dark:text-indigo-400 shrink-0" />
-                            </div>
-                            <p className="text-xs text-[#572de4] dark:text-indigo-400 font-semibold mt-0.5">
-                              Especialista en {esp.especialidad || 'Hábitos Saludables'}
-                            </p>
-                            <span className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 inline-block">
-                              Certificado HabitApp • Acompañamiento online
-                            </span>
-                          </div>
-
-                          <div className="flex flex-wrap gap-1.5">
-                            <span className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 text-xs font-medium border border-slate-200/60 dark:border-slate-800">
-                              {getSpecialtyTagLabel(esp.especialidad)}
-                            </span>
-                            <span className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 text-xs font-medium border border-slate-200/60 dark:border-slate-800">
-                              Seguimiento continuo
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-slate-500 dark:text-slate-400">
-                              Experiencia certificada
-                            </span>
-                            <span className="text-xs font-bold text-slate-900 dark:text-white">
-                              {esp.experiencia ?? 3} años • {isTrainerLinked(esp) ? 'Vinculado ✓' : 'Disponible'}
-                            </span>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedSpecialist(esp)}
-                              className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-center"
-                            >
-                              Ver perfil
-                            </button>
-                            <button
-                              type="button"
-                              disabled={linkingTrainerId === (esp.identrenador || esp.idusuario || esp.id)}
-                              onClick={() => {
-                                void handleToggleTrainerLink(esp);
-                              }}
-                              className={`px-3 py-2 rounded-xl font-semibold text-xs transition-all shadow-sm text-center disabled:opacity-50 ${
-                                isTrainerLinked(esp)
-                                  ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-rose-50 hover:text-rose-600'
-                                  : 'bg-[#572de4] hover:bg-[#461ebd] text-white'
-                              }`}
-                            >
-                              {getTrainerActionLabel(esp)}
-                            </button>
-                          </div>
-                        </div>
-                      </article>
+                        esp={esp}
+                        isLinked={isTrainerLinked(esp)}
+                        isLinking={linkingTrainerId === targetId}
+                        actionLabel={getTrainerActionLabel(esp)}
+                        onSelect={setSelectedSpecialist}
+                        onToggleLink={(e) => {
+                          void handleToggleTrainerLink(e);
+                        }}
+                      />
                     );
                   })}
                 </div>
@@ -1507,206 +1811,21 @@ export function ComunidadInteractiveView({
 
         {/* ═══════════ SIDEBAR LATERAL (4 Cols) - Solo visible en vista general ═══════════ */}
         {activeTab === 'todo' && (
-        <aside className="xl:col-span-4 flex flex-col gap-6">
-          {/* ── WIDGET 1: ESPECIALISTAS VERIFICADOS ── */}
-          <section className="flex flex-col gap-4 p-5 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-[#572de4] dark:text-indigo-400" />
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Especialistas Verificados
-                </h3>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Terapeutas colegiados con sesiones online confidenciales y personalizadas.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-3.5">
-              {especialistasFiltrados.slice(0, 3).map((esp, i) => {
-                const id = esp.idusuario || esp.idEntrenador || i;
-                const nombreCompleto = `${esp.nombre || ''} ${esp.apellido || ''}`.trim() || 'Especialista HabitApp';
-                const initials = nombreCompleto
-                  .split(' ')
-                  .map((n: string) => n[0])
-                  .join('')
-                  .slice(0, 2)
-                  .toUpperCase();
-
-                return (
-                  <div
-                    key={id}
-                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col gap-3"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="relative">
-                          <div className="w-11 h-11 rounded-full bg-[#572de4] text-white flex items-center justify-center text-xs font-bold shadow-sm">
-                            {initials}
-                          </div>
-                          <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#111827]" />
-                        </div>
-
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {nombreCompleto}
-                          </span>
-                          <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                            {esp.especialidad || 'Psicología Clínica & TCC'}
-                          </span>
-                          <div className="flex items-center gap-1 text-amber-500 mt-0.5">
-                            <Star className="w-3.5 h-3.5 fill-current" />
-                            <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                              4.9
-                            </span>
-                            <span className="text-[11px] text-slate-400">(68 reseñas)</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
-                      <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {isTrainerLinked(esp) ? 'Tu Entrenador' : 'Disponible'}
-                      </span>
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {esp.experiencia ?? 3} años exp.
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 pt-0.5">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedSpecialist(esp)}
-                        className="py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-all text-center"
-                      >
-                        Ver perfil
-                      </button>
-                      <button
-                        type="button"
-                        disabled={linkingTrainerId === (esp.identrenador || esp.idusuario || esp.id)}
-                        onClick={() => {
-                          void handleToggleTrainerLink(esp);
-                        }}
-                        className={`py-2 rounded-xl text-xs font-bold shadow-sm transition-all text-center disabled:opacity-50 ${
-                          isTrainerLinked(esp)
-                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                            : 'bg-[#572de4] text-white hover:bg-[#461ebd]'
-                        }`}
-                      >
-                        {isTrainerLinked(esp) ? 'Vinculado ✓' : 'Vincular'}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('especialistas')}
-              className="text-xs font-bold text-[#572de4] dark:text-indigo-400 text-center hover:underline pt-1"
-            >
-              Ver todos los especialistas disponibles →
-            </button>
-          </section>
-
-          {/* ── WIDGET 2: RETOS COMUNITARIOS ACTIVOS ── */}
-          <section className="flex flex-col gap-4 p-5 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-[#572de4] dark:text-indigo-400" />
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Retos Comunitarios Activos
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveTab('retos')}
-                className="text-xs font-bold text-[#572de4] dark:text-indigo-400 hover:underline"
-              >
-                Ver todos →
-              </button>
-            </div>
-
-            {retosFiltrados.slice(0, 2).map((reto) => {
-              const id = reto.idreto || reto.idReto || reto.id || '';
-              const isJoiningThis = joiningRetoId === id;
-              const puntos = reto.puntos_recompensa ?? 0;
-              const isEnrolled = Boolean(
-                (userId && reto.usuarios_participando?.includes(userId)) ||
-                reto.inscrito === true
-              );
-              const participantesCount = reto.participantes_count ?? (reto.usuarios_participando?.length ?? 0);
-
-              return (
-                <div
-                  key={id}
-                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col gap-3.5 hover:border-[#572de4]/40 transition-all"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRetoModal(reto)}
-                    className="text-left w-full flex flex-col gap-3.5 cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between w-full">
-                      <div>
-                        <span className="px-2.5 py-0.5 rounded-md bg-[#572de4]/10 dark:bg-indigo-950 text-[#572de4] dark:text-indigo-300 text-[11px] font-bold">
-                          +{puntos} pts de recompensa
-                        </span>
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-2">
-                          {reto.titulo}
-                        </h4>
-                      </div>
-                      <div className="w-9 h-9 rounded-2xl bg-[#572de4]/10 dark:bg-indigo-950 text-[#572de4] dark:text-indigo-300 flex items-center justify-center">
-                        <Trophy className="w-4 h-4" />
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                      {reto.descripcion}
-                    </p>
-
-                    <div className="flex items-center justify-between w-full text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5 text-slate-400" />
-                        {participantesCount} participante{participantesCount === 1 ? '' : 's'}
-                      </span>
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">
-                        {reto.fechafin ? `Hasta: ${reto.fechafin}` : 'Activo'}
-                      </span>
-                    </div>
-                  </button>
-
-                  {isEnrolled ? (
-                    <div className="w-full py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                      <span>En curso</span>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleJoinReto(reto);
-                      }}
-                      disabled={isJoiningThis || isPending}
-                      className="w-full py-2.5 rounded-xl bg-[#572de4] hover:bg-[#461ebd] text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
-                    >
-                      {isJoiningThis ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Flag className="w-3.5 h-3.5" />
-                      )}
-                      <span>Unirme al Reto</span>
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </section>
-        </aside>
-      )}
+          <CommunitySidebarView
+            especialistasFiltrados={especialistasFiltrados}
+            retosFiltrados={retosFiltrados}
+            isTrainerLinked={isTrainerLinked}
+            linkingTrainerId={linkingTrainerId}
+            setSelectedSpecialist={setSelectedSpecialist}
+            handleToggleTrainerLink={handleToggleTrainerLink}
+            setActiveTab={setActiveTab}
+            joiningRetoId={joiningRetoId}
+            userId={userId}
+            isPending={isPending}
+            setSelectedRetoModal={setSelectedRetoModal}
+            handleJoinReto={handleJoinReto}
+          />
+        )}
       </div>
 
       {/* ── Modal para Crear Foro ── */}

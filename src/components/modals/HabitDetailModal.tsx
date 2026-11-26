@@ -196,6 +196,582 @@ function shareHabitText(nombre: string, rachaActual: number) {
   }
 }
 
+interface HabitEditFormViewProps {
+  readonly editNombre: string;
+  readonly setEditNombre: (v: string) => void;
+  readonly editDescripcion: string;
+  readonly setEditDescripcion: (v: string) => void;
+  readonly editFrequencyPreset: FrequencyPreset;
+  readonly handleEditPresetChange: (p: FrequencyPreset) => void;
+  readonly editSelectedDays: number[];
+  readonly handleEditToggleDay: (d: number) => void;
+  readonly editMetaDiaria: number | string;
+  readonly setEditMetaDiaria: (v: number | string) => void;
+  readonly editUnidadMedida: string;
+  readonly setEditUnidadMedida: (v: string) => void;
+  readonly editReminders: string[];
+  readonly handleAddEditReminder: () => void;
+  readonly handleUpdateEditReminder: (idx: number, val: string) => void;
+  readonly handleRemoveEditReminder: (idx: number) => void;
+  readonly editEstado: 'Activo' | 'Inactivo';
+  readonly setEditEstado: (v: 'Activo' | 'Inactivo') => void;
+  readonly handleSaveEdit: (e: React.FormEvent) => void;
+}
+
+function HabitEditFormView({
+  editNombre,
+  setEditNombre,
+  editDescripcion,
+  setEditDescripcion,
+  editFrequencyPreset,
+  handleEditPresetChange,
+  editSelectedDays,
+  handleEditToggleDay,
+  editMetaDiaria,
+  setEditMetaDiaria,
+  editUnidadMedida,
+  setEditUnidadMedida,
+  editReminders,
+  handleAddEditReminder,
+  handleUpdateEditReminder,
+  handleRemoveEditReminder,
+  editEstado,
+  setEditEstado,
+  handleSaveEdit,
+}: HabitEditFormViewProps) {
+  return (
+    <form id="edit-habit-form" onSubmit={handleSaveEdit} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="edit-habit-nombre" className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
+          Nombre del hábito *
+        </label>
+        <input
+          id="edit-habit-nombre"
+          type="text"
+          required
+          value={editNombre}
+          onChange={(e) => setEditNombre(e.target.value)}
+          className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#572de4]"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="edit-habit-descripcion" className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
+          Propósito y motivación
+        </label>
+        <textarea
+          id="edit-habit-descripcion"
+          rows={2}
+          value={editDescripcion}
+          onChange={(e) => setEditDescripcion(e.target.value)}
+          placeholder="¿Por qué es importante para ti este hábito?"
+          className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#572de4] resize-none"
+        />
+      </div>
+
+      {/* Frecuencia y Días */}
+      <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
+            Frecuencia y Días
+          </span>
+
+          {/* Segmented Controller de Frecuencia */}
+          <div className="grid grid-cols-3 sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/60 dark:border-slate-700/40 w-full sm:w-auto">
+            {(['todos', 'laborales', 'personalizado'] as const).map((preset) => {
+              const labelMap: Record<FrequencyPreset, string> = {
+                todos: 'Todos los días',
+                laborales: 'Laborales',
+                personalizado: 'Personalizado',
+              };
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => handleEditPresetChange(preset)}
+                  className={`px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-lg text-[11px] sm:text-xs text-center transition-all truncate ${
+                    editFrequencyPreset === preset
+                      ? 'font-semibold bg-white dark:bg-slate-700 text-[#572de4] dark:text-indigo-300 shadow-sm'
+                      : 'font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  {labelMap[preset]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Días circulares [L, M, M, J, V, S, D] */}
+        <div className="flex items-center justify-between gap-1 pt-1 w-full">
+          {DIAS_SEMANA.map((dia) => {
+            const isSelected = editSelectedDays.includes(dia.num);
+            return (
+              <button
+                key={dia.num}
+                type="button"
+                onClick={() => handleEditToggleDay(dia.num)}
+                title={dia.name}
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full font-bold text-xs sm:text-sm flex items-center justify-center transition-all select-none ${
+                  isSelected
+                    ? 'bg-[#572de4] text-white shadow-[0_2px_8px_rgba(87,45,228,0.3)] scale-105'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold'
+                }`}
+              >
+                {dia.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Meta diaria y Unidad de medida */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="edit_meta_diaria" className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
+            Meta diaria
+          </label>
+          <input
+            id="edit_meta_diaria"
+            type="number"
+            min={1}
+            max={9999}
+            value={editMetaDiaria}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '') {
+                setEditMetaDiaria('');
+              } else {
+                const num = Number.parseInt(val, 10);
+                if (!Number.isNaN(num)) setEditMetaDiaria(num);
+              }
+            }}
+            onBlur={() => {
+              if (editMetaDiaria === '' || Number(editMetaDiaria) < 1) {
+                setEditMetaDiaria(1);
+              }
+            }}
+            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#572de4]"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="edit_unidad_medida" className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
+            Unidad de medida
+          </label>
+          <input
+            id="edit_unidad_medida"
+            type="text"
+            list="unidades-sugeridas-edit"
+            value={editUnidadMedida}
+            onChange={(e) => setEditUnidadMedida(e.target.value)}
+            placeholder="Unidad (ej: minutos, km...)"
+            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#572de4]"
+          />
+          <datalist id="unidades-sugeridas-edit">
+            <option value="veces" />
+            <option value="minutos" />
+            <option value="páginas" />
+            <option value="vasos" />
+            <option value="km" />
+            <option value="horas" />
+            <option value="pasos" />
+            <option value="porciones" />
+            <option value="capítulos" />
+            <option value="repeticiones" />
+            <option value="series" />
+          </datalist>
+        </div>
+      </div>
+
+      {/* Recordatorios en edición */}
+      <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Bell className="w-4 h-4 text-[#572de4] dark:text-indigo-400" />
+            <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
+              Recordatorios y Notificaciones
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddEditReminder}
+            className="text-xs font-semibold text-[#572de4] dark:text-indigo-400 hover:underline flex items-center gap-1"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Añadir</span>
+          </button>
+        </div>
+
+        {editReminders.length === 0 ? (
+          <p className="text-xs text-slate-400 dark:text-slate-500 py-1">
+            No hay recordatorios configurados. Haz clic en &quot;Añadir&quot; para agregar una hora de notificación.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-2 pt-1">
+            {editReminders.map((time, idx) => (
+              <div key={`edit-rem-${time}-${idx}`} className="flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800 text-sm">
+                  <Clock className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <input
+                    type="time"
+                    value={time}
+                    onChange={(e) => handleUpdateEditReminder(idx, e.target.value)}
+                    className="bg-transparent font-medium w-full focus:outline-none text-slate-900 dark:text-white"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveEditReminder(idx)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                  title="Eliminar recordatorio"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Estado del hábito */}
+      <div className="flex flex-col gap-1.5">
+        <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
+          Estado del hábito
+        </span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setEditEstado('Activo')}
+            className={`flex-1 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all ${
+              editEstado === 'Activo'
+                ? 'bg-[#572de4]/10 border-[#572de4] text-[#572de4] dark:text-indigo-300'
+                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+            }`}
+          >
+            Activo
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditEstado('Inactivo')}
+            className={`flex-1 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all ${
+              editEstado === 'Inactivo'
+                ? 'bg-[#572de4]/10 border-[#572de4] text-[#572de4] dark:text-indigo-300'
+                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+            }`}
+          >
+            Inactivo / Archivado
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+interface HabitDetailBodyViewProps {
+  readonly catNombre: string;
+  readonly localProgreso: number;
+  readonly metaDiaria: number;
+  readonly unidadMedida: string;
+  readonly isPending: boolean;
+  readonly handleDecrement: () => void;
+  readonly handleIncrement: () => void;
+  readonly porcentaje: number;
+  readonly rachaActual: number;
+  readonly habito: any;
+  readonly completedDates: string[];
+  readonly localCompletado: boolean;
+  readonly ultimos7Dias: ReturnType<typeof buildUltimos7Dias>;
+  readonly descripcion?: string;
+}
+
+function HabitDetailBodyView({
+  catNombre,
+  localProgreso,
+  metaDiaria,
+  unidadMedida,
+  isPending,
+  handleDecrement,
+  handleIncrement,
+  porcentaje,
+  rachaActual,
+  habito,
+  completedDates,
+  localCompletado,
+  ultimos7Dias,
+  descripcion,
+}: HabitDetailBodyViewProps) {
+  const maxRacha = Math.max(rachaActual, habito.recordRacha ?? rachaActual);
+  const hasReminders = Array.isArray(habito.recordatorios) && habito.recordatorios.length > 0;
+
+  return (
+    <>
+      {/* 1. Tarjeta interactiva de meta de hoy */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 shadow-sm flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#572de4] text-white flex items-center justify-center shadow-md">
+              {renderModalCategoryIcon(catNombre, 'w-5 h-5')}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Meta de hoy
+              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-bold text-slate-900 dark:text-white leading-tight">
+                  {localProgreso}
+                </span>
+                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                  / {metaDiaria} {unidadMedida}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Contador interactivo +/- */}
+          <div className="flex items-center gap-1.5 self-start sm:self-auto bg-white dark:bg-[#111827] p-1 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm">
+            <button
+              type="button"
+              onClick={handleDecrement}
+              disabled={isPending || localProgreso <= 0}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              title="Restar 1"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <span className="px-2 text-xs font-bold text-slate-700 dark:text-slate-300 select-none">
+              Registrar
+            </span>
+            <button
+              type="button"
+              onClick={handleIncrement}
+              disabled={isPending}
+              className="px-3 h-8 rounded-full flex items-center gap-1 bg-[#572de4] text-white hover:bg-[#461ebd] active:scale-95 shadow-sm text-xs font-bold transition-all disabled:opacity-50"
+              title="Sumar 1"
+            >
+              {isPending ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <>
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>1</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Barra de progreso */}
+        <div className="flex flex-col gap-1.5 pt-1">
+          <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+            <div
+              className="h-full bg-[#572de4] rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(87,45,228,0.4)]"
+              style={{ width: `${porcentaje}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span>
+              {localProgreso} {unidadMedida} completados
+            </span>
+            <span className="text-[#572de4] dark:text-indigo-400 font-bold">
+              Meta: {metaDiaria} ({porcentaje}%)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Cuadrícula de 4 estadísticas (Racha, Récord, Éxito, Total) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-1.5">
+          <div className="flex items-center justify-between text-amber-500">
+            <Flame className="w-4 h-4 fill-amber-500" />
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300">
+              Racha
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+              {rachaActual} {rachaActual === 1 ? 'día' : 'días'}
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              ¡Tu ritmo activo!
+            </span>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-1.5">
+          <div className="flex items-center justify-between text-indigo-500">
+            <Trophy className="w-4 h-4" />
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300">
+              Récord
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+              {maxRacha} {maxRacha === 1 ? 'día' : 'días'}
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              Máxima constancia
+            </span>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-1.5">
+          <div className="flex items-center justify-between text-emerald-500">
+            <CheckCircle2 className="w-4 h-4" />
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
+              Éxito
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+              {computeSuccessRateLabel(completedDates, localCompletado)}
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              Cumplimiento
+            </span>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-1.5">
+          <div className="flex items-center justify-between text-slate-500">
+            <CalendarCheck className="w-4 h-4" />
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+              Total
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+              {completedDates.length}
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              {completedDates.length === 1 ? 'Cumplimiento' : 'Cumplimientos'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Historial Reciente de los últimos 7 días */}
+      <div className="flex flex-col gap-2.5 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <CalendarIcon className="w-4 h-4 text-[#572de4] dark:text-indigo-400" />
+              <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                Historial Reciente
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              Últimos 7 días completados
+            </span>
+          </div>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#572de4]/10 text-[#572de4] dark:bg-indigo-950 dark:text-indigo-300">
+            {ultimos7Dias.filter((d) => d.completed).length} de 7 días
+          </span>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1.5 pt-1">
+          {ultimos7Dias.map((d) => (
+            <div
+              key={d.dateStr}
+              className={`flex flex-col items-center py-2 px-1 rounded-xl transition-all ${
+                d.isToday
+                  ? 'bg-[#572de4]/10 dark:bg-[#572de4]/20 border border-[#572de4]/40 font-bold'
+                  : 'bg-white dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-700/40'
+              }`}
+            >
+              <span
+                className={`text-[11px] ${
+                  d.isToday
+                    ? 'text-[#572de4] dark:text-indigo-300 font-bold'
+                    : 'text-slate-500 dark:text-slate-400 font-medium'
+                }`}
+              >
+                {d.dayName}
+              </span>
+              <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white my-0.5">
+                {d.dayNumber}
+              </span>
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
+                  d.completed
+                    ? 'bg-[#572de4] text-white shadow-sm'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500'
+                }`}
+              >
+                {d.completed ? (
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                ) : (
+                  <X className="w-3 h-3 opacity-60" />
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. Propósito & Motivación */}
+      <div className="relative p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex items-start gap-3">
+        <div className="w-8 h-8 rounded-xl bg-[#572de4]/10 text-[#572de4] dark:bg-indigo-950/80 dark:text-indigo-400 flex items-center justify-center shrink-0">
+          <Quote className="w-4 h-4" />
+        </div>
+        <div className="flex flex-col gap-0.5 flex-1">
+          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            PROPÓSITO &amp; MOTIVACIÓN
+          </span>
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
+            {descripcion
+              ? `“${descripcion}”`
+              : '“Mantener la constancia y disciplina diaria para alcanzar mis metas de bienestar y salud.”'}
+          </p>
+        </div>
+      </div>
+
+      {/* 5. Recordatorios */}
+      <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Bell className="w-4 h-4 text-[#572de4] dark:text-indigo-400" />
+            <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+              Recordatorios
+            </span>
+          </div>
+          <span
+            className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              hasReminders
+                ? 'bg-[#572de4]/10 text-[#572de4] dark:bg-indigo-950 dark:text-indigo-300'
+                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+            }`}
+          >
+            {formatRemindersCountBadge(habito.recordatorios)}
+          </span>
+        </div>
+        {hasReminders ? (
+          <div className="flex items-center gap-2 flex-wrap">
+            {habito.recordatorios.map((r: any, idx: number) => {
+              const timeStr = formatSingleReminderTime(r);
+              const rKey = r?.id || r?.idrecordatorio || timeStr || `rem-${idx}`;
+              return (
+                <span
+                  key={`view-rem-${rKey}-${idx}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm"
+                >
+                  <Clock className="w-3 h-3 text-[#572de4] dark:text-indigo-400" />
+                  {timeStr}
+                </span>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 dark:text-slate-500">
+            No tienes recordatorios configurados para este hábito.
+          </p>
+        )}
+      </div>
+    </>
+  );
+}
+
 export function HabitDetailModal({
   isOpen,
   onClose,
@@ -563,521 +1139,44 @@ export function HabitDetailModal({
         {/* ── Cuerpo del Modal ── */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 flex flex-col gap-5">
           {isEditing ? (
-            /* ═══════════ MODO EDICIÓN ═══════════ */
-            <form id="edit-habit-form" onSubmit={handleSaveEdit} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="edit-habit-nombre" className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
-                  Nombre del hábito *
-                </label>
-                <input
-                  id="edit-habit-nombre"
-                  type="text"
-                  required
-                  value={editNombre}
-                  onChange={(e) => setEditNombre(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#572de4]"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="edit-habit-descripcion" className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
-                  Propósito y motivación
-                </label>
-                <textarea
-                  id="edit-habit-descripcion"
-                  rows={2}
-                  value={editDescripcion}
-                  onChange={(e) => setEditDescripcion(e.target.value)}
-                  placeholder="¿Por qué es importante para ti este hábito?"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#572de4] resize-none"
-                />
-              </div>
-
-              {/* Frecuencia y Días */}
-              <div className="flex flex-col gap-2.5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
-                    Frecuencia y Días
-                  </span>
-
-                  {/* Segmented Controller de Frecuencia */}
-                  <div className="grid grid-cols-3 sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/60 dark:border-slate-700/40 w-full sm:w-auto">
-                    <button
-                      type="button"
-                      onClick={() => handleEditPresetChange('todos')}
-                      className={`px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-lg text-[11px] sm:text-xs text-center transition-all truncate ${
-                        editFrequencyPreset === 'todos'
-                          ? 'font-semibold bg-white dark:bg-slate-700 text-[#572de4] dark:text-indigo-300 shadow-sm'
-                          : 'font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      Todos los días
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleEditPresetChange('laborales')}
-                      className={`px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-lg text-[11px] sm:text-xs text-center transition-all truncate ${
-                        editFrequencyPreset === 'laborales'
-                          ? 'font-semibold bg-white dark:bg-slate-700 text-[#572de4] dark:text-indigo-300 shadow-sm'
-                          : 'font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      Laborales
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleEditPresetChange('personalizado')}
-                      className={`px-2 sm:px-2.5 py-1.5 sm:py-1 rounded-lg text-[11px] sm:text-xs text-center transition-all truncate ${
-                        editFrequencyPreset === 'personalizado'
-                          ? 'font-semibold bg-white dark:bg-slate-700 text-[#572de4] dark:text-indigo-300 shadow-sm'
-                          : 'font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      Personalizado
-                    </button>
-                  </div>
-                </div>
-
-                {/* Días circulares [L, M, M, J, V, S, D] */}
-                <div className="flex items-center justify-between gap-1 pt-1 w-full">
-                  {DIAS_SEMANA.map((dia) => {
-                    const isSelected = editSelectedDays.includes(dia.num);
-
-                    return (
-                      <button
-                        key={dia.num}
-                        type="button"
-                        onClick={() => handleEditToggleDay(dia.num)}
-                        title={dia.name}
-                        className={`
-                          w-8 h-8 sm:w-10 sm:h-10 rounded-full font-bold text-xs sm:text-sm flex items-center justify-center transition-all select-none
-                          ${
-                            isSelected
-                              ? 'bg-[#572de4] text-white shadow-[0_2px_8px_rgba(87,45,228,0.3)] scale-105'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold'
-                          }
-                        `}
-                      >
-                        {dia.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Meta diaria y Unidad de medida */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="edit_meta_diaria" className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
-                    Meta diaria
-                  </label>
-                  <input
-                    id="edit_meta_diaria"
-                    type="number"
-                    min={1}
-                    max={9999}
-                    value={editMetaDiaria}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '') {
-                        setEditMetaDiaria('');
-                      } else {
-                        const num = Number.parseInt(val, 10);
-                        if (!Number.isNaN(num)) setEditMetaDiaria(num);
-                      }
-                    }}
-                    onBlur={() => {
-                      if (editMetaDiaria === '' || Number(editMetaDiaria) < 1) {
-                        setEditMetaDiaria(1);
-                      }
-                    }}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-[#572de4]"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="edit_unidad_medida" className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
-                    Unidad de medida
-                  </label>
-                  <input
-                    id="edit_unidad_medida"
-                    type="text"
-                    list="unidades-sugeridas-edit"
-                    value={editUnidadMedida}
-                    onChange={(e) => setEditUnidadMedida(e.target.value)}
-                    placeholder="Unidad (ej: minutos, km...)"
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#572de4]"
-                  />
-                  <datalist id="unidades-sugeridas-edit">
-                    <option value="veces" />
-                    <option value="minutos" />
-                    <option value="páginas" />
-                    <option value="vasos" />
-                    <option value="km" />
-                    <option value="horas" />
-                    <option value="pasos" />
-                    <option value="porciones" />
-                    <option value="capítulos" />
-                    <option value="repeticiones" />
-                    <option value="series" />
-                  </datalist>
-                </div>
-              </div>
-
-              {/* Recordatorios en edición */}
-              <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Bell className="w-4 h-4 text-[#572de4] dark:text-indigo-400" />
-                    <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
-                      Recordatorios y Notificaciones
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAddEditReminder}
-                    className="text-xs font-semibold text-[#572de4] dark:text-indigo-400 hover:underline flex items-center gap-1"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Añadir</span>
-                  </button>
-                </div>
-
-                {editReminders.length === 0 ? (
-                  <p className="text-xs text-slate-400 dark:text-slate-500 py-1">
-                    No hay recordatorios configurados. Haz clic en "Añadir" para agregar una hora de notificación.
-                  </p>
-                ) : (
-                  <div className="flex flex-col gap-2 pt-1">
-                    {editReminders.map((time, idx) => (
-                      <div key={`edit-rem-${time}-${idx}`} className="flex items-center gap-2">
-                        <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800 text-sm">
-                          <Clock className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                          <input
-                            type="time"
-                            value={time}
-                            onChange={(e) => handleUpdateEditReminder(idx, e.target.value)}
-                            className="bg-transparent font-medium w-full focus:outline-none text-slate-900 dark:text-white"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveEditReminder(idx)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                          title="Eliminar recordatorio"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Estado del hábito */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
-                  Estado del hábito
-                </span>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setEditEstado('Activo')}
-                    className={`flex-1 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all ${
-                      editEstado === 'Activo'
-                        ? 'bg-[#572de4]/10 border-[#572de4] text-[#572de4] dark:text-indigo-300'
-                        : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    Activo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditEstado('Inactivo')}
-                    className={`flex-1 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all ${
-                      editEstado === 'Inactivo'
-                        ? 'bg-[#572de4]/10 border-[#572de4] text-[#572de4] dark:text-indigo-300'
-                        : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    Inactivo / Archivado
-                  </button>
-                </div>
-              </div>
-            </form>
+            <HabitEditFormView
+              editNombre={editNombre}
+              setEditNombre={setEditNombre}
+              editDescripcion={editDescripcion}
+              setEditDescripcion={setEditDescripcion}
+              editFrequencyPreset={editFrequencyPreset}
+              handleEditPresetChange={handleEditPresetChange}
+              editSelectedDays={editSelectedDays}
+              handleEditToggleDay={handleEditToggleDay}
+              editMetaDiaria={editMetaDiaria}
+              setEditMetaDiaria={setEditMetaDiaria}
+              editUnidadMedida={editUnidadMedida}
+              setEditUnidadMedida={setEditUnidadMedida}
+              editReminders={editReminders}
+              handleAddEditReminder={handleAddEditReminder}
+              handleUpdateEditReminder={handleUpdateEditReminder}
+              handleRemoveEditReminder={handleRemoveEditReminder}
+              editEstado={editEstado}
+              setEditEstado={setEditEstado}
+              handleSaveEdit={handleSaveEdit}
+            />
           ) : (
-            /* ═══════════ MODO VISTA Y DETALLE ═══════════ */
-            <>
-              {/* 1. Tarjeta interactiva de meta de hoy */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 shadow-sm flex flex-col gap-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-[#572de4] text-white flex items-center justify-center shadow-md">
-                      {renderModalCategoryIcon(catNombre, 'w-5 h-5')}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Meta de hoy
-                      </span>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-2xl font-bold text-slate-900 dark:text-white leading-tight">
-                          {localProgreso}
-                        </span>
-                        <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                          / {metaDiaria} {unidadMedida}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Contador interactivo +/- */}
-                  <div className="flex items-center gap-1.5 self-start sm:self-auto bg-white dark:bg-[#111827] p-1 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <button
-                      type="button"
-                      onClick={handleDecrement}
-                      disabled={isPending || localProgreso <= 0}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                      title="Restar 1"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                    <span className="px-2 text-xs font-bold text-slate-700 dark:text-slate-300 select-none">
-                      Registrar
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleIncrement}
-                      disabled={isPending}
-                      className="px-3 h-8 rounded-full flex items-center gap-1 bg-[#572de4] text-white hover:bg-[#461ebd] active:scale-95 shadow-sm text-xs font-bold transition-all disabled:opacity-50"
-                      title="Sumar 1"
-                    >
-                      {isPending ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <>
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>1</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Barra de progreso */}
-                <div className="flex flex-col gap-1.5 pt-1">
-                  <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                    <div
-                      className="h-full bg-[#572de4] rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(87,45,228,0.4)]"
-                      style={{ width: `${porcentaje}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                    <span>
-                      {localProgreso} {unidadMedida} completados
-                    </span>
-                    <span className="text-[#572de4] dark:text-indigo-400 font-bold">
-                      Meta: {metaDiaria} ({porcentaje}%)
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 2. Cuadrícula de 4 estadísticas (Racha, Récord, Éxito, Total) */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {/* Racha actual */}
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-1.5">
-                  <div className="flex items-center justify-between text-amber-500">
-                    <Flame className="w-4 h-4 fill-amber-500" />
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300">
-                      Racha
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                      {rachaActual} {rachaActual === 1 ? 'día' : 'días'}
-                    </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                      ¡Tu ritmo activo!
-                    </span>
-                  </div>
-                </div>
-
-                {/* Récord */}
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-1.5">
-                  <div className="flex items-center justify-between text-indigo-500">
-                    <Trophy className="w-4 h-4" />
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300">
-                      Récord
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                      {Math.max(rachaActual, habito.recordRacha ?? rachaActual)} {Math.max(rachaActual, habito.recordRacha ?? rachaActual) === 1 ? 'día' : 'días'}
-                    </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Máxima constancia
-                    </span>
-                  </div>
-                </div>
-
-                {/* Éxito */}
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-1.5">
-                  <div className="flex items-center justify-between text-emerald-500">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
-                      Éxito
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                      {computeSuccessRateLabel(completedDates, localCompletado)}
-                    </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Cumplimiento
-                    </span>
-                  </div>
-                </div>
-
-                {/* Total */}
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-1.5">
-                  <div className="flex items-center justify-between text-slate-500">
-                    <CalendarCheck className="w-4 h-4" />
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                      Total
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                      {completedDates.length}
-                    </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                      {completedDates.length === 1 ? 'Cumplimiento' : 'Cumplimientos'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Historial Reciente de los últimos 7 días */}
-              <div className="flex flex-col gap-2.5 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800">
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-1.5">
-                      <CalendarIcon className="w-4 h-4 text-[#572de4] dark:text-indigo-400" />
-                      <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                        Historial Reciente
-                      </span>
-                    </div>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Últimos 7 días completados
-                    </span>
-                  </div>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#572de4]/10 text-[#572de4] dark:bg-indigo-950 dark:text-indigo-300">
-                    {ultimos7Dias.filter((d) => d.completed).length} de 7 días
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-7 gap-1.5 pt-1">
-                  {ultimos7Dias.map((d) => (
-                    <div
-                      key={d.dateStr}
-                      className={`
-                        flex flex-col items-center py-2 px-1 rounded-xl transition-all
-                        ${
-                          d.isToday
-                            ? 'bg-[#572de4]/10 dark:bg-[#572de4]/20 border border-[#572de4]/40 font-bold'
-                            : 'bg-white dark:bg-slate-800/70 border border-slate-200/50 dark:border-slate-700/40'
-                        }
-                      `}
-                    >
-                      <span
-                        className={`text-[11px] ${
-                          d.isToday
-                            ? 'text-[#572de4] dark:text-indigo-300 font-bold'
-                            : 'text-slate-500 dark:text-slate-400 font-medium'
-                        }`}
-                      >
-                        {d.dayName}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white my-0.5">
-                        {d.dayNumber}
-                      </span>
-                      <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                          d.completed
-                            ? 'bg-[#572de4] text-white shadow-sm'
-                            : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500'
-                        }`}
-                      >
-                        {d.completed ? (
-                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        ) : (
-                          <X className="w-3 h-3 opacity-60" />
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 4. Propósito & Motivación */}
-              <div className="relative p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-[#572de4]/10 text-[#572de4] dark:bg-indigo-950/80 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                  <Quote className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col gap-0.5 flex-1">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    PROPÓSITO &amp; MOTIVACIÓN
-                  </span>
-                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
-                    {descripcion
-                      ? `“${descripcion}”`
-                      : '“Mantener la constancia y disciplina diaria para alcanzar mis metas de bienestar y salud.”'}
-                  </p>
-                </div>
-              </div>
-
-              {/* 5. Recordatorios */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Bell className="w-4 h-4 text-[#572de4] dark:text-indigo-400" />
-                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
-                      Recordatorios
-                    </span>
-                  </div>
-                  <span
-                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      Array.isArray(habito.recordatorios) && habito.recordatorios.length > 0
-                        ? 'bg-[#572de4]/10 text-[#572de4] dark:bg-indigo-950 dark:text-indigo-300'
-                        : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                    }`}
-                  >
-                    {formatRemindersCountBadge(habito.recordatorios)}
-                  </span>
-                </div>
-                {Array.isArray(habito.recordatorios) && habito.recordatorios.length > 0 ? (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {habito.recordatorios.map((r: any, idx: number) => {
-                      const timeStr = formatSingleReminderTime(r);
-                      const rKey = r?.id || r?.idrecordatorio || timeStr || `rem-${idx}`;
-                      return (
-                        <span
-                          key={`view-rem-${rKey}-${idx}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm"
-                        >
-                          <Clock className="w-3 h-3 text-[#572de4] dark:text-indigo-400" />
-                          {timeStr}
-                        </span>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-xs text-slate-400 dark:text-slate-500">
-                    No tienes recordatorios configurados para este hábito.
-                  </p>
-                )}
-              </div>
-            </>
+            <HabitDetailBodyView
+              catNombre={catNombre}
+              localProgreso={localProgreso}
+              metaDiaria={metaDiaria}
+              unidadMedida={unidadMedida}
+              isPending={isPending}
+              handleDecrement={handleDecrement}
+              handleIncrement={handleIncrement}
+              porcentaje={porcentaje}
+              rachaActual={rachaActual}
+              habito={habito}
+              completedDates={completedDates}
+              localCompletado={localCompletado}
+              ultimos7Dias={ultimos7Dias}
+              descripcion={descripcion}
+            />
           )}
         </div>
 

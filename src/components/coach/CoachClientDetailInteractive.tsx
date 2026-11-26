@@ -101,6 +101,80 @@ function buildHeatmapWeeks(recordsByDate?: Record<string, unknown>) {
   return weeks;
 }
 
+function deriveClientMetrics(clientData: CoachClientDetailInteractiveProps['clientData']) {
+  const displayName = clientData.nombre
+    ? `${clientData.nombre} ${clientData.apellido || ''}`.trim()
+    : "Alumno HabitApp";
+  const displayEmail = clientData.email || clientData.correo || "Sin correo registrado";
+  const points = clientData.puntos_totales || clientData.puntostotales || 0;
+  const streak = clientData.racha_actual || 0;
+  const maxStreak = clientData.racha_maxima || streak || 0;
+  const adherence = clientData.cumplimiento_global ?? 0;
+  const level = Math.max(1, Math.floor(points / 250) + 1);
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  return { displayName, displayEmail, points, streak, maxStreak, adherence, level, initials };
+}
+
+function ClientHabitRow({ habit }: { readonly habit: HabitSummaryItem }) {
+  const isAssigned = (habit.tipo || "").toLowerCase().includes("asignado");
+  return (
+    <div
+      className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800/60 border border-slate-100 dark:border-slate-800 transition-colors"
+    >
+      <div className="flex items-center gap-3.5 min-w-0">
+        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+          isAssigned
+            ? "bg-indigo-100 dark:bg-indigo-950/60 text-[#572de4]"
+            : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+        }`}>
+          {isAssigned ? <Brain className="w-5 h-5" /> : <Heart className="w-5 h-5" />}
+        </div>
+
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+              {habit.nombre}
+            </h3>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+              isAssigned
+                ? "bg-indigo-100 dark:bg-indigo-950/40 text-[#572de4]"
+                : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+            }`}>
+              {isAssigned ? "Asignado" : "Personal"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
+            <span>{habit.meta || habit.descripcion || "Plan diario"}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 shrink-0">
+        {habit.completadoHoy ? (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-[#572de4] hidden sm:inline">Completado</span>
+            <div className="w-9 h-9 rounded-2xl bg-[#572de4] flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+              <Check className="w-5 h-5" />
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-400 hidden sm:inline">Pendiente</span>
+            <div className="w-9 h-9 rounded-2xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function CoachClientDetailInteractive({
   clientId,
   clientData,
@@ -125,23 +199,8 @@ export function CoachClientDetailInteractive({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const displayName = clientData.nombre 
-    ? `${clientData.nombre} ${clientData.apellido || ''}`.trim() 
-    : "Alumno HabitApp";
-  const displayEmail = clientData.email || clientData.correo || "Sin correo registrado";
-  const points = clientData.puntos_totales || clientData.puntostotales || 0;
-  const streak = clientData.racha_actual || 0;
-  const maxStreak = clientData.racha_maxima || streak || 0;
-  const adherence = clientData.cumplimiento_global ?? 0;
-  const level = Math.max(1, Math.floor(points / 250) + 1);
-
-  // Initials for avatar
-  const initials = displayName
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  const { displayName, displayEmail, points, streak, maxStreak, adherence, level, initials } =
+    deriveClientMetrics(clientData);
 
   // Habits list - 100% real records, zero mock fallback
   const allHabits: HabitSummaryItem[] = useMemo(
@@ -532,62 +591,9 @@ export function CoachClientDetailInteractive({
                   </p>
                 </div>
               ) : (
-                filteredHabits.map((habit) => {
-                  const isAssigned = (habit.tipo || "").toLowerCase().includes("asignado");
-
-                  return (
-                    <div
-                      key={habit.id}
-                      className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800/60 border border-slate-100 dark:border-slate-800 transition-colors"
-                    >
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
-                          isAssigned 
-                            ? "bg-indigo-100 dark:bg-indigo-950/60 text-[#572de4]" 
-                            : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                        }`}>
-                          {isAssigned ? <Brain className="w-5 h-5" /> : <Heart className="w-5 h-5" />}
-                        </div>
-
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">
-                              {habit.nombre}
-                            </h3>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                              isAssigned
-                                ? "bg-indigo-100 dark:bg-indigo-950/40 text-[#572de4]"
-                                : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                            }`}>
-                              {isAssigned ? "Asignado" : "Personal"}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
-                            <span>{habit.meta || habit.descripcion || "Plan diario"}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 shrink-0">
-                        {habit.completadoHoy ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-[#572de4] hidden sm:inline">Completado</span>
-                            <div className="w-9 h-9 rounded-2xl bg-[#572de4] flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-                              <Check className="w-5 h-5" />
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold text-slate-400 hidden sm:inline">Pendiente</span>
-                            <div className="w-9 h-9 rounded-2xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-                              <Clock className="w-4 h-4" />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
+                filteredHabits.map((habit) => (
+                  <ClientHabitRow key={habit.id} habit={habit} />
+                ))
               )}
             </div>
           </div>
