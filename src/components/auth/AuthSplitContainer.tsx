@@ -18,7 +18,7 @@ export function AuthSplitContainer({
   subtitle,
   reverseImage = false,
   formMaxWidth = 'sm',
-}: AuthSplitContainerProps) {
+}: Readonly<AuthSplitContainerProps>) {
   const [userCount, setUserCount] = useState<number | null>(null);
 
   useEffect(() => {

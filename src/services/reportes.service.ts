@@ -67,8 +67,7 @@ export class ReportesService {
     return ok(data);
   }
 
-  // TODO: Estos endpoints deben ser implementados en el backend para reemplazar las
-  // antiguas consultas directas a la base de datos vía Supabase.
+  // Endpoints de reporte de hábitos y comparativa semanal consumidos desde el backend REST.
   async getHabitosReporte(userId: string): Promise<Result<HabitoReporte[]>> {
     return reportesRepository.get<HabitoReporte[]>(`/reports/user/${userId}/habits`);
   }

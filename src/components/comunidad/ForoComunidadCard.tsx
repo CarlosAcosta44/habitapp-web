@@ -24,7 +24,7 @@ interface ForoComunidadCardProps {
   isAdmin?: boolean;
 }
 
-export function ForoComunidadCard({ foro, isAdmin = false }: ForoComunidadCardProps) {
+export function ForoComunidadCard({ foro, isAdmin = false }: Readonly<ForoComunidadCardProps>) {
   const config = categoriaConfig[foro.categoria ?? ""] ?? categoriaConfig.default;
 
   return (

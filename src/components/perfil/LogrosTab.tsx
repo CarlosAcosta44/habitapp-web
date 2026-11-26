@@ -8,7 +8,7 @@ interface LogrosTabProps {
   porcentajeObj: number;
 }
 
-export function LogrosTab({ logros, logroDestacado, proximoObjetivo, porcentajeObj }: LogrosTabProps) {
+export function LogrosTab({ logros, logroDestacado, proximoObjetivo, porcentajeObj }: Readonly<LogrosTabProps>) {
   return (
     <div>
       {/* Logro destacado */}

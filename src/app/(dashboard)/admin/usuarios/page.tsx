@@ -11,11 +11,12 @@ export default async function AdminUsersPage() {
   const result = await getUsersAction(1, 10);
   const data = result.success ? result.data : null;
 
-  const initialUsers: any[] = data
-    ? Array.isArray(data)
-      ? data
-      : (data.data ?? [])
-    : [];
+  let initialUsers: any[] = [];
+  if (Array.isArray(data)) {
+    initialUsers = data;
+  } else if (data) {
+    initialUsers = data.data ?? [];
+  }
 
   const initialTotal = data && !Array.isArray(data) && data.meta?.total
     ? data.meta.total

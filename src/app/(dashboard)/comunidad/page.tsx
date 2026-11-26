@@ -19,6 +19,10 @@ export const metadata = {
 const comunidadService = new ComunidadService();
 const habitoService = new HabitoService();
 
+function unwrapArray<T>(res: { success: boolean; data?: T[] }): T[] {
+  return res.success && Array.isArray(res.data) ? res.data : [];
+}
+
 export default async function ComunidadPage() {
   const user = await requireUser();
 
@@ -43,12 +47,12 @@ export default async function ComunidadPage() {
     coachService.getMyTrainerAndRoutines(),
   ]);
 
-  const foros = forosRes.success && Array.isArray(forosRes.data) ? forosRes.data : [];
-  const habitosComunidad = habitosRes.success && Array.isArray(habitosRes.data) ? habitosRes.data : [];
-  const articulos = articulosRes.success && Array.isArray(articulosRes.data) ? articulosRes.data : [];
-  const especialistas = especialistasRes.success && Array.isArray(especialistasRes.data) ? especialistasRes.data : [];
-  const retos = retosRes.success && Array.isArray(retosRes.data) ? retosRes.data : [];
-  const userHabitos = userHabitosRes.success && Array.isArray(userHabitosRes.data) ? userHabitosRes.data : [];
+  const foros = unwrapArray(forosRes);
+  const habitosComunidad = unwrapArray(habitosRes);
+  const articulos = unwrapArray(articulosRes);
+  const especialistas = unwrapArray(especialistasRes);
+  const retos = unwrapArray(retosRes);
+  const userHabitos = unwrapArray(userHabitosRes);
   const linkedTrainerIds =
     trainerRes.success && trainerRes.data?.trainers
       ? trainerRes.data.trainers.flatMap((t) => [t.identrenador, t.idusuario].filter(Boolean))

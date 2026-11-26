@@ -27,7 +27,7 @@ export default async function PerfilPage() {
     reportesService.getEstadisticas(user.id, "month"),
   ]);
 
-  const reportesData = reportesRes && reportesRes.success ? reportesRes.data : null;
+  const reportesData = reportesRes?.success ? reportesRes.data : null;
   const activeHabitsCount =
     habitosRes.success && Array.isArray(habitosRes.data) ? habitosRes.data.length : 0;
 

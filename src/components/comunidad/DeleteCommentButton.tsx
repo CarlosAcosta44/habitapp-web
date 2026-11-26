@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 
-export function DeleteCommentButton({ commentId }: { commentId: string }) {
+export function DeleteCommentButton({ commentId }: Readonly<{ commentId: string }>) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 

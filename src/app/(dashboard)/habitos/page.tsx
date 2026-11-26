@@ -63,6 +63,21 @@ function calculateRealStreak(
   return streak;
 }
 
+function unwrapList<T>(res: { success: boolean; data?: T[] }): T[] {
+  return res.success && Array.isArray(res.data) ? res.data : [];
+}
+
+function buildRachasMap(habitos: any[]): Record<string, number> {
+  const rachasMap: Record<string, number> = {};
+  for (const h of habitos) {
+    const id = h.idHabito || h.idhabito;
+    if (id) {
+      rachasMap[id] = typeof h.rachaActual === "number" ? h.rachaActual : 0;
+    }
+  }
+  return rachasMap;
+}
+
 export default async function HabitosDashboardPage() {
   // ── 1. Verificar sesión ─────────────────────────────────────────────────────
   const user = await requireUser();
@@ -83,35 +98,30 @@ export default async function HabitosDashboardPage() {
     habitoService.getAll(),
   ]);
 
-  const habitos = habitosResult.success && Array.isArray(habitosResult.data) ? habitosResult.data : [];
+  const habitos = unwrapList(habitosResult);
   const quote = quoteResult.success && quoteResult.data
     ? quoteResult.data
     : { phrase: "Transforma tus metas en hábitos y tus hábitos en realidad.", author: "HabitApp" };
-  const allRetos = retosResult.success && Array.isArray(retosResult.data) ? retosResult.data : [];
+  const allRetos = unwrapList(retosResult);
   const retos = allRetos.filter((r: any) => {
     const list = r.usuarios_participando || [];
-    return Array.isArray(list) && currentUserId && list.includes(currentUserId);
+    return Array.isArray(list) && Boolean(currentUserId) && list.includes(currentUserId);
   });
-  const registrosReales = historialResult.success && Array.isArray(historialResult.data) ? historialResult.data : [];
-  const allHabitosFetched = allHabitosResult.success && Array.isArray(allHabitosResult.data) ? allHabitosResult.data : [];
+  const registrosReales = unwrapList(historialResult);
+  const allHabitosFetched = unwrapList(allHabitosResult);
   
   // Hábitos archivados/inactivos
-  const archivados = allHabitosFetched.filter(
-    (h: any) => (h.estado ?? '').toLowerCase() === 'inactivo' || (h.estado ?? '').toLowerCase() === 'archivado'
-  );
+  const archivados = allHabitosFetched.filter((h: any) => {
+    const estado = (h.estado ?? "").toLowerCase();
+    return estado === "inactivo" || estado === "archivado";
+  });
   const totalArchivados = archivados.length;
   
   // allHabitos contiene todos los hábitos (activos, inactivos y archivados)
   const allHabitos = allHabitosFetched.length > 0 ? allHabitosFetched : habitos;
 
   // ── 3. Calcular rachas reales para cada hábito individual ────────────────────
-  const rachasMap: Record<string, number> = {};
-  for (const h of habitos) {
-    const id = h.idHabito || h.idhabito;
-    if (id) {
-      rachasMap[id] = typeof h.rachaActual === 'number' ? h.rachaActual : 0;
-    }
-  }
+  const rachasMap = buildRachasMap(habitos);
 
   // ── 4. Calcular racha global real del usuario ───────────────────────────────
   const hoyStr = getLocalDateString(new Date());

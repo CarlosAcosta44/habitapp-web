@@ -14,8 +14,9 @@ interface ForoCardProps {
   foro: ForoConMetricas;
 }
 
-export function ForoCard({ foro }: ForoCardProps) {
+export function ForoCard({ foro }: Readonly<ForoCardProps>) {
   const [isPending, startTransition] = useTransition();
+  const subscriptionLabel = foro.estasSuscrito ? "✓ Suscrito" : "+ Suscribirse";
 
   function handleSuscripcion() {
     startTransition(async () => {
@@ -87,12 +88,7 @@ export function ForoCard({ foro }: ForoCardProps) {
             ${isPending ? "opacity-50 cursor-not-allowed" : ""}
           `}
         >
-          {isPending
-            ? "..."
-            : foro.estasSuscrito
-              ? "✓ Suscrito"
-              : "+ Suscribirse"
-          }
+          {isPending ? "..." : subscriptionLabel}
         </button>
       </div>
     </div>

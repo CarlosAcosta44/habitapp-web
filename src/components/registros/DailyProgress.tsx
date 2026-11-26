@@ -9,7 +9,7 @@ interface DailyProgressProps {
   total:       number;
 }
 
-export function DailyProgress({ completados, total }: DailyProgressProps) {
+export function DailyProgress({ completados, total }: Readonly<DailyProgressProps>) {
   const porcentaje = total === 0
     ? 0
     : Math.round((completados / total) * 100);

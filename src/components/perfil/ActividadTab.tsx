@@ -5,7 +5,7 @@ interface ActividadTabProps {
   actividad: ActividadItem[];
 }
 
-export function ActividadTab({ actividad }: ActividadTabProps) {
+export function ActividadTab({ actividad }: Readonly<ActividadTabProps>) {
   return (
     <div>
       <h2 className="text-lg font-bold text-white mb-4">Último Mes</h2>

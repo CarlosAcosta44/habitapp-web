@@ -11,7 +11,7 @@ interface HabitCreatorPremiumFormProps {
   categorias: CategoriaHabito[];
 }
 
-export function HabitCreatorPremiumForm({ categorias }: HabitCreatorPremiumFormProps) {
+export function HabitCreatorPremiumForm({ categorias }: Readonly<HabitCreatorPremiumFormProps>) {
   const [serverState, formAction, isPending] = useActionState(createHabitoAction, null);
   
   const { state, actions, computed } = useHabitForm(categorias);

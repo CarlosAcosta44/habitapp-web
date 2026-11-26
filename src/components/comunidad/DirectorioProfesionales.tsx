@@ -10,7 +10,7 @@ interface DirectorioProfesionalesProps {
   entrenadores: EntrenadorPublico[];
 }
 
-export function DirectorioProfesionales({ entrenadores }: DirectorioProfesionalesProps) {
+export function DirectorioProfesionales({ entrenadores }: Readonly<DirectorioProfesionalesProps>) {
   if (entrenadores.length === 0) return null;
 
   return (

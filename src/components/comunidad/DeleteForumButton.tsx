@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 
-export function DeleteForumButton({ forumId }: { forumId: string }) {
+export function DeleteForumButton({ forumId }: Readonly<{ forumId: string }>) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 

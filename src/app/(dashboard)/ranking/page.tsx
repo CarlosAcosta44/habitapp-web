@@ -72,8 +72,14 @@ export default async function RankingPage() {
 
           <div className="relative flex items-end justify-center gap-6 md:gap-12 px-4">
             {podio.map((user, i) => {
-              const realPos = i === 0 ? 2 : i === 1 ? 1 : 3;
+              const podiumPositions = [2, 1, 3];
+              const realPos = podiumPositions[i] ?? 3;
               const isFirst = realPos === 1;
+              const badgeColorMap: Record<number, string> = {
+                1: "bg-pink-500",
+                2: "bg-blue-500",
+              };
+              const badgeColor = badgeColorMap[realPos] ?? "bg-indigo-500";
 
               return (
                 <div key={user.posicion} className={`flex flex-col items-center ${isFirst ? "mb-4" : "mb-0"}`}>
@@ -94,9 +100,7 @@ export default async function RankingPage() {
                       )}
                     </div>
                     {/* Badge de posición */}
-                    <div className={`absolute -top-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg ${
-                      realPos === 1 ? "bg-pink-500" : realPos === 2 ? "bg-blue-500" : "bg-indigo-500"
-                    }`}>
+                    <div className={`absolute -top-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg ${badgeColor}`}>
                       {realPos}
                     </div>
                     {/* Estrella para 2do y 3ro */}

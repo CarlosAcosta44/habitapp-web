@@ -19,8 +19,9 @@ export function ComentarioForm({
   foroId,
   idComentarioPadre,
   placeholder = "Escribe tu comentario...",
-}: ComentarioFormProps) {
+}: Readonly<ComentarioFormProps>) {
   const [state, formAction, isPending] = useActionState(comentarAction, null);
+  const submitLabel = idComentarioPadre ? "Responder" : "Comentar";
 
   return (
     <form action={formAction} className="space-y-3">
@@ -53,12 +54,7 @@ export function ComentarioForm({
           disabled={isPending}
           className="ml-auto rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 transition-colors"
         >
-          {isPending
-            ? "Publicando..."
-            : idComentarioPadre
-              ? "Responder"
-              : "Comentar"
-          }
+          {isPending ? "Publicando..." : submitLabel}
         </button>
       </div>
     </form>

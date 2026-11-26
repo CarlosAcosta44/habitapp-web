@@ -16,7 +16,7 @@ export function PerfilSidebar({
   eficienciaMensual,
   proximoObjetivo,
   amigos,
-}: PerfilSidebarProps) {
+}: Readonly<PerfilSidebarProps>) {
   return (
     <div className="space-y-6">
       {/* Rendimiento Mensual */}
@@ -58,8 +58,8 @@ export function PerfilSidebar({
         <h3 className="text-base font-bold text-white mb-3">Círculo Social</h3>
         <div className="flex items-center gap-2 mb-3">
           <div className="flex -space-x-2">
-            {amigos.slice(0, 3).map((a, i) => (
-              <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 border-2 border-[#111827] flex items-center justify-center">
+            {amigos.slice(0, 3).map((a) => (
+              <div key={a.id} className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 border-2 border-[#111827] flex items-center justify-center">
                 <span className="text-[10px] text-slate-300 font-medium">{(a.nombre || '?').charAt(0)}</span>
               </div>
             ))}

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname()
   
   return (

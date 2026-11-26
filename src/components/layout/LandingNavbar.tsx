@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-export function LandingNavbar({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
+export function LandingNavbar({ isAuthenticated = false }: Readonly<{ isAuthenticated?: boolean }>) {
   const scrollTo = (id: string) => {
     const element = document.getElementById(id);
     if (element) {

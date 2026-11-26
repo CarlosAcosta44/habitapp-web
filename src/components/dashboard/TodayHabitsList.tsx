@@ -24,6 +24,43 @@ function getTodayBadgeText(total: number, pendientes: number): string {
   return `${pendientes} ${pendientes === 1 ? 'tarea pendiente' : 'tareas pendientes'}`;
 }
 
+function renderDayStatusBadge(
+  isToday: boolean,
+  isPast: boolean,
+  totalHabitos: number,
+  pendientesHoy: number,
+  completadosEnFecha: number
+) {
+  if (isToday) {
+    const isAllDone = pendientesHoy === 0 && totalHabitos > 0;
+    return (
+      <span
+        className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+          isAllDone
+            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
+            : 'bg-[#e6deff] text-[#1b065c] dark:bg-indigo-950/80 dark:text-indigo-200'
+        }`}
+      >
+        {getTodayBadgeText(totalHabitos, pendientesHoy)}
+      </span>
+    );
+  }
+  if (isPast) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        <Lock className="w-3 h-3 opacity-60" />
+        Histórico ({completadosEnFecha}/{totalHabitos} cumplidos)
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+      <Calendar className="w-3 h-3" />
+      Programado
+    </span>
+  );
+}
+
 export function TodayHabitsList({
   habitos,
   rachasMap,
@@ -75,30 +112,7 @@ export function TodayHabitsList({
             </h2>
 
             {/* Badge de Estado del Día */}
-            {isToday ? (
-              <span
-                className={`
-                  px-2.5 py-0.5 rounded-full text-xs font-bold
-                  ${
-                    pendientesHoy === 0 && habitos.length > 0
-                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
-                      : 'bg-[#e6deff] text-[#1b065c] dark:bg-indigo-950/80 dark:text-indigo-200'
-                  }
-                `}
-              >
-                {getTodayBadgeText(habitos.length, pendientesHoy)}
-              </span>
-            ) : isPast ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                <Lock className="w-3 h-3 opacity-60" />
-                Histórico ({completadosEnFecha}/{habitos.length} cumplidos)
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
-                <Calendar className="w-3 h-3" />
-                Programado
-              </span>
-            )}
+            {renderDayStatusBadge(isToday, isPast, habitos.length, pendientesHoy, completadosEnFecha)}
           </div>
 
           <button

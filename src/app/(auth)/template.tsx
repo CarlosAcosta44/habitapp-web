@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import React from 'react'
 
-export default function AuthTemplate({ children }: { children: React.ReactNode }) {
+export default function AuthTemplate({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <motion.div
       initial={{ opacity: 0 }}

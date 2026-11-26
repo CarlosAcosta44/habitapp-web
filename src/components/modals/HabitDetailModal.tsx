@@ -105,6 +105,97 @@ function formatRecordatoriosLabel(recordatorios: any): string {
   return `Recordatorios: ${formatted}`;
 }
 
+function renderModalCategoryIcon(catNombre: string, className: string) {
+  const catLower = catNombre.toLowerCase();
+  if (catLower.includes('ejercicio') || catLower.includes('deporte') || catLower.includes('gym')) {
+    return <Dumbbell className={className} />;
+  }
+  if (catLower.includes('productiv') || catLower.includes('estudio') || catLower.includes('trabajo')) {
+    return <Zap className={className} />;
+  }
+  if (catLower.includes('nutri') || catLower.includes('comida') || catLower.includes('aliment')) {
+    return <Utensils className={className} />;
+  }
+  if (catLower.includes('sueño') || catLower.includes('dormir') || catLower.includes('descanso')) {
+    return <Moon className={className} />;
+  }
+  if (catLower.includes('mental') || catLower.includes('mindful') || catLower.includes('paz')) {
+    return <Smile className={className} />;
+  }
+  if (catLower.includes('agua') || catLower.includes('hidrata')) {
+    return <Droplets className={className} />;
+  }
+  return <Sparkles className={className} />;
+}
+
+function buildUltimos7Dias(today: Date, todayStr: string, localCompletado: boolean, completedDates: string[]) {
+  const ultimos7Dias = [];
+  const dayNamesShort = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const completedSet = new Set(Array.isArray(completedDates) ? completedDates : []);
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const iso = getLocalDateString(d);
+    const isCurrent = iso === todayStr;
+
+    ultimos7Dias.push({
+      dateStr: iso,
+      dayNumber: d.getDate(),
+      dayName: isCurrent ? 'Hoy' : dayNamesShort[d.getDay()],
+      isToday: isCurrent,
+      completed: isCurrent ? localCompletado : completedSet.has(iso),
+    });
+  }
+  return ultimos7Dias;
+}
+
+function formatHabitDaysBadge(habito: any): string {
+  const d = habito.diasSemana ?? habito.dias_semana;
+  if (!Array.isArray(d) || d.length === 7 || d.length === 0) return 'Todos los días';
+  if (d.length === 5 && [1, 2, 3, 4, 5].every((x: number) => d.includes(x))) return 'Laborales (L - V)';
+  const labels = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  return d.map((n: number) => labels[n - 1] || n).join(', ');
+}
+
+function formatRemindersCountBadge(recordatorios: any): string {
+  if (!Array.isArray(recordatorios) || recordatorios.length === 0) {
+    return 'Sin recordatorios';
+  }
+  const sufijo = recordatorios.length === 1 ? 'activo' : 'activos';
+  return `${recordatorios.length} ${sufijo}`;
+}
+
+function computeSuccessRateLabel(completedDates: string[], localCompletado: boolean): string {
+  if (completedDates.length > 0) {
+    return `${Math.min(100, Math.round((completedDates.length / 30) * 100))}%`;
+  }
+  return localCompletado ? '100%' : '0%';
+}
+
+function getPresetDays(preset: FrequencyPreset, currentDays: number[]): number[] {
+  if (preset === 'todos') return [1, 2, 3, 4, 5, 6, 7];
+  if (preset === 'laborales') return [1, 2, 3, 4, 5];
+  return currentDays;
+}
+
+function toggleDaySelection(currentDays: number[], diaNum: number): number[] {
+  if (currentDays.includes(diaNum)) {
+    return currentDays.length === 1 ? currentDays : currentDays.filter((d) => d !== diaNum);
+  }
+  return [...currentDays, diaNum].sort((a, b) => a - b);
+}
+
+function shareHabitText(nombre: string, rachaActual: number) {
+  const text = `¡Llevo una racha de ${rachaActual} días en mi hábito "${nombre}" con HabitApp! 🚀`;
+  if (navigator.share) {
+    navigator.share({ title: 'Mi Hábito en HabitApp', text }).catch(() => {});
+  } else {
+    void navigator.clipboard.writeText(text);
+    alert('¡Copiado al portapapeles!');
+  }
+}
+
 export function HabitDetailModal({
   isOpen,
   onClose,
@@ -186,51 +277,16 @@ export function HabitDetailModal({
     habito.categorias_habitos?.nombre ||
     'General';
 
-  const catLower = catNombre.toLowerCase();
-  let CatIcon = Sparkles;
-  if (catLower.includes('ejercicio') || catLower.includes('deporte') || catLower.includes('gym')) {
-    CatIcon = Dumbbell;
-  } else if (catLower.includes('productiv') || catLower.includes('estudio') || catLower.includes('trabajo')) {
-    CatIcon = Zap;
-  } else if (catLower.includes('nutri') || catLower.includes('comida') || catLower.includes('aliment')) {
-    CatIcon = Utensils;
-  } else if (catLower.includes('sueño') || catLower.includes('dormir') || catLower.includes('descanso')) {
-    CatIcon = Moon;
-  } else if (catLower.includes('mental') || catLower.includes('mindful') || catLower.includes('paz')) {
-    CatIcon = Smile;
-  } else if (catLower.includes('agua') || catLower.includes('hidrata')) {
-    CatIcon = Droplets;
-  }
-
   // Días de la semana para el historial reciente de los últimos 7 días
   const today = new Date();
   const todayStr = getLocalDateString(today);
-  const ultimos7Dias = [];
-  const dayNamesShort = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const ultimos7Dias = buildUltimos7Dias(today, todayStr, localCompletado, completedDates);
 
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    const iso = getLocalDateString(d);
-    const dayName = dayNamesShort[d.getDay()];
-    const isCurrent = iso === todayStr;
-
-    // Verificar si completó en el registro real
-    let dayCompleted = false;
-    if (isCurrent) {
-      dayCompleted = localCompletado;
-    } else {
-      dayCompleted = Array.isArray(completedDates) ? completedDates.includes(iso) : false;
-    }
-
-    ultimos7Dias.push({
-      dateStr: iso,
-      dayNumber: d.getDate(),
-      dayName: isCurrent ? 'Hoy' : dayName,
-      isToday: isCurrent,
-      completed: dayCompleted,
-    });
-  }
+  const syncProgressState = (prog: number, comp: boolean) => {
+    setLocalProgreso(prog);
+    setLocalCompletado(comp);
+    onProgressUpdate?.(idHabito, prog, comp);
+  };
 
   // ── Registrar +1 unidad en la meta (Optimista) ──
   const handleIncrement = () => {
@@ -239,17 +295,9 @@ export function HabitDetailModal({
     const nextProgress = prevProg + 1;
     const isNowCompleted = nextProgress >= metaDiaria;
 
-    // 1. Actualización optimista inmediata en la UI
-    setLocalProgreso(nextProgress);
-    setLocalCompletado(isNowCompleted);
+    syncProgressState(nextProgress, isNowCompleted);
     setFeedbackError(null);
 
-    // 2. Notificar inmediatamente a las tarjetas del dashboard
-    if (onProgressUpdate) {
-      onProgressUpdate(idHabito, nextProgress, isNowCompleted);
-    }
-
-    // 3. Llamada al servidor
     startTransition(async () => {
       const fd = new FormData();
       fd.set('idHabito', idHabito);
@@ -259,12 +307,7 @@ export function HabitDetailModal({
 
       const res = await avanzarProgresoAction(null, fd);
       if (!res.success) {
-        // Rollback en caso de fallo
-        setLocalProgreso(prevProg);
-        setLocalCompletado(prevComp);
-        if (onProgressUpdate) {
-          onProgressUpdate(idHabito, prevProg, prevComp);
-        }
+        syncProgressState(prevProg, prevComp);
         setFeedbackError(res.message || 'Error al registrar progreso');
       } else {
         router.refresh();
@@ -281,47 +324,28 @@ export function HabitDetailModal({
     const nextProgress = Math.max(0, prevProg - 1);
     const isNowCompleted = nextProgress >= metaDiaria;
 
-    // 1. Actualización optimista
-    setLocalProgreso(nextProgress);
-    setLocalCompletado(isNowCompleted);
+    syncProgressState(nextProgress, isNowCompleted);
     setFeedbackError(null);
 
-    // 2. Notificar inmediatamente al dashboard
-    if (onProgressUpdate) {
-      onProgressUpdate(idHabito, nextProgress, isNowCompleted);
-    }
-
-    // 3. Llamada al servidor
     startTransition(async () => {
+      const fd = new FormData();
+      fd.set('idHabito', idHabito);
+      fd.set('fecha', todayStr);
+
+      let res;
       if (nextProgress === 0 && prevComp) {
-        const fd = new FormData();
-        fd.set('idHabito', idHabito);
-        fd.set('fecha', todayStr);
-        const res = await desmarcarCompletadoAction(null, fd);
-        if (!res.success) {
-          setLocalProgreso(prevProg);
-          setLocalCompletado(prevComp);
-          if (onProgressUpdate) onProgressUpdate(idHabito, prevProg, prevComp);
-          setFeedbackError(res.message || 'Error al desmarcar');
-        } else {
-          router.refresh();
-        }
+        res = await desmarcarCompletadoAction(null, fd);
       } else {
-        const fd = new FormData();
-        fd.set('idHabito', idHabito);
-        fd.set('fecha', todayStr);
         fd.set('cantidadAsumar', '-1');
         fd.set('metaDiaria', metaDiaria.toString());
+        res = await avanzarProgresoAction(null, fd);
+      }
 
-        const res = await avanzarProgresoAction(null, fd);
-        if (!res.success) {
-          setLocalProgreso(prevProg);
-          setLocalCompletado(prevComp);
-          if (onProgressUpdate) onProgressUpdate(idHabito, prevProg, prevComp);
-          setFeedbackError(res.message || 'Error al restar progreso');
-        } else {
-          router.refresh();
-        }
+      if (!res.success) {
+        syncProgressState(prevProg, prevComp);
+        setFeedbackError(res.message || 'Error al actualizar progreso');
+      } else {
+        router.refresh();
       }
     });
   };
@@ -329,33 +353,13 @@ export function HabitDetailModal({
   // Manejadores de selector rápido de frecuencia en edición
   const handleEditPresetChange = (preset: FrequencyPreset) => {
     setEditFrequencyPreset(preset);
-    if (preset === 'todos') {
-      setEditSelectedDays([1, 2, 3, 4, 5, 6, 7]);
-    } else if (preset === 'laborales') {
-      setEditSelectedDays([1, 2, 3, 4, 5]);
-    }
+    setEditSelectedDays((prev) => getPresetDays(preset, prev));
   };
 
   const handleEditToggleDay = (diaNum: number) => {
-    let newDays: number[];
-    if (editSelectedDays.includes(diaNum)) {
-      if (editSelectedDays.length === 1) return; // Mínimo un día seleccionado
-      newDays = editSelectedDays.filter((d) => d !== diaNum);
-    } else {
-      newDays = [...editSelectedDays, diaNum].sort((a, b) => a - b);
-    }
+    const newDays = toggleDaySelection(editSelectedDays, diaNum);
     setEditSelectedDays(newDays);
-
-    if (newDays.length === 7) {
-      setEditFrequencyPreset('todos');
-    } else if (
-      newDays.length === 5 &&
-      [1, 2, 3, 4, 5].every((d) => newDays.includes(d))
-    ) {
-      setEditFrequencyPreset('laborales');
-    } else {
-      setEditFrequencyPreset('personalizado');
-    }
+    setEditFrequencyPreset(determineFrequencyPreset(newDays));
   };
 
   // Manejadores de recordatorios en edición
@@ -399,8 +403,8 @@ export function HabitDetailModal({
       if (res.success) {
         setFeedbackSuccess('¡Hábito actualizado exitosamente!');
         setIsEditing(false);
-        if (editEstado === 'Inactivo' && onArchive) {
-          onArchive(idHabito);
+        if (editEstado === 'Inactivo') {
+          onArchive?.(idHabito);
         }
         router.refresh();
       } else {
@@ -419,7 +423,7 @@ export function HabitDetailModal({
       setFeedbackError(null);
       const res = await archivarHabitoAction(idHabito);
       if (res.success) {
-        if (onArchive) onArchive(idHabito);
+        onArchive?.(idHabito);
         onClose();
         router.refresh();
       } else {
@@ -430,11 +434,7 @@ export function HabitDetailModal({
 
   // ── Eliminar hábito ──
   const handleDelete = () => {
-    if (
-      !confirm(
-        `¿Estás seguro de que deseas eliminar permanentemente el hábito "${nombre}"? Esta acción no se puede deshacer.`
-      )
-    ) {
+    if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente el hábito "${nombre}"? Esta acción no se puede deshacer.`)) {
       return;
     }
 
@@ -445,7 +445,7 @@ export function HabitDetailModal({
 
       const res = await deleteHabitoAction(null, fd);
       if (res.success) {
-        if (onDelete) onDelete(idHabito);
+        onDelete?.(idHabito);
         onClose();
         router.refresh();
       } else {
@@ -455,15 +455,7 @@ export function HabitDetailModal({
   };
 
   // ── Compartir progreso ──
-  const handleShare = () => {
-    const text = `¡Llevo una racha de ${rachaActual} días en mi hábito "${nombre}" con HabitApp! 🚀`;
-    if (navigator.share) {
-      navigator.share({ title: 'Mi Hábito en HabitApp', text }).catch(() => {});
-    } else {
-      void navigator.clipboard.writeText(text);
-      alert('¡Copiado al portapapeles!');
-    }
-  };
+  const handleShare = () => shareHabitText(nombre, rachaActual);
 
   return createPortal(
     <div
@@ -524,24 +516,18 @@ export function HabitDetailModal({
           {/* Fila de resumen del hábito (Ícono + Título + Badges) */}
           <div className="flex items-start gap-3 sm:gap-4 pt-1">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#572de4]/10 dark:bg-indigo-950/80 text-[#572de4] dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-sm border border-slate-200/60 dark:border-slate-800">
-              <CatIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+              {renderModalCategoryIcon(catNombre, 'w-6 h-6 sm:w-7 sm:h-7')}
             </div>
 
             <div className="flex flex-col gap-1 min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-[11px] font-semibold">
-                  <CatIcon className="w-3 h-3 text-[#572de4] dark:text-indigo-400" />
+                  {renderModalCategoryIcon(catNombre, 'w-3 h-3 text-[#572de4] dark:text-indigo-400')}
                   {catNombre}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 text-[11px] font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#572de4]"></span>
-                  {(() => {
-                    const d = habito.diasSemana ?? habito.dias_semana;
-                    if (!Array.isArray(d) || d.length === 7 || d.length === 0) return 'Todos los días';
-                    if (d.length === 5 && [1, 2, 3, 4, 5].every((x: number) => d.includes(x))) return 'Laborales (L - V)';
-                    const labels = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-                    return d.map((n: number) => labels[n - 1] || n).join(', ');
-                  })()}
+                  {formatHabitDaysBadge(habito)}
                 </span>
                 <span className="text-[11px] text-slate-400 ml-auto hidden sm:inline-block">
                   ID: HAB-{idHabito?.slice(0, 4)}
@@ -827,7 +813,7 @@ export function HabitDetailModal({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-[#572de4] text-white flex items-center justify-center shadow-md">
-                      <CatIcon className="w-5 h-5" />
+                      {renderModalCategoryIcon(catNombre, 'w-5 h-5')}
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -944,7 +930,7 @@ export function HabitDetailModal({
                   </div>
                   <div className="flex flex-col">
                     <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                      {completedDates.length > 0 ? `${Math.min(100, Math.round((completedDates.length / Math.max(1, 30)) * 100))}%` : (localCompletado ? '100%' : '0%')}
+                      {computeSuccessRateLabel(completedDates, localCompletado)}
                     </span>
                     <span className="text-[11px] text-slate-500 dark:text-slate-400">
                       Cumplimiento
@@ -1066,13 +1052,7 @@ export function HabitDetailModal({
                         : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                     }`}
                   >
-                    {(() => {
-                      if (!Array.isArray(habito.recordatorios) || habito.recordatorios.length === 0) {
-                        return 'Sin recordatorios';
-                      }
-                      const sufijo = habito.recordatorios.length === 1 ? 'activo' : 'activos';
-                      return `${habito.recordatorios.length} ${sufijo}`;
-                    })()}
+                    {formatRemindersCountBadge(habito.recordatorios)}
                   </span>
                 </div>
                 {Array.isArray(habito.recordatorios) && habito.recordatorios.length > 0 ? (

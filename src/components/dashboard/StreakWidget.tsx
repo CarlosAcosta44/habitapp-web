@@ -20,7 +20,7 @@ function getDayCircleClass(activo: boolean, esHoy: boolean): string {
   return 'bg-slate-200/70 dark:bg-slate-700/60 text-slate-400';
 }
 
-export function StreakWidget({ rachaActual, diasSemana }: StreakWidgetProps) {
+export function StreakWidget({ rachaActual, diasSemana }: Readonly<StreakWidgetProps>) {
   return (
     <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#111827] shadow-[0_1px_3px_rgba(121,117,130,0.04),0_4px_12px_rgba(121,117,130,0.03)] border border-slate-200/80 dark:border-slate-800 flex flex-col gap-4">
       {/* Header */}

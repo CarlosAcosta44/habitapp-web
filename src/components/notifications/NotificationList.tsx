@@ -174,46 +174,43 @@ export function NotificationList() {
           return (
             <div
               key={n.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => {
-                if (!n.isRead) void handleMarkAsRead(n.id);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  if (!n.isRead) void handleMarkAsRead(n.id);
-                }
-              }}
-              className={`group flex items-start gap-4 p-5 rounded-3xl border transition-all cursor-pointer ${
+              className={`group flex items-start gap-4 p-5 rounded-3xl border transition-all ${
                 n.isRead
                   ? 'bg-white dark:bg-[#111827]/40 border-slate-200 dark:border-slate-800/40 text-slate-700 dark:text-slate-400 opacity-75 hover:opacity-100'
                   : 'bg-white dark:bg-[#111827] border-slate-300 dark:border-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm hover:shadow-md'
               }`}
             >
-              {/* Icono del tipo */}
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${style.bg} border ${style.border}`}>
-                <Icon className="w-5 h-5" />
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!n.isRead) void handleMarkAsRead(n.id);
+                }}
+                className="flex items-start gap-4 flex-1 min-w-0 text-left cursor-pointer"
+              >
+                {/* Icono del tipo */}
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${style.bg} border ${style.border}`}>
+                  <Icon className="w-5 h-5" />
+                </div>
 
-              {/* Contenido */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                    {n.type}
-                  </span>
-                  {!n.isRead && (
-                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                  )}
+                {/* Contenido */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                      {n.type}
+                    </span>
+                    {!n.isRead && (
+                      <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    )}
+                  </div>
+                  <p className={`text-sm leading-relaxed ${!n.isRead ? 'font-semibold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
+                    {n.message}
+                  </p>
+                  <div className="flex items-center gap-1 mt-2 text-[10px] text-slate-400 dark:text-slate-500">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{formatFriendlyDate(n.createdAt)}</span>
+                  </div>
                 </div>
-                <p className={`text-sm leading-relaxed ${!n.isRead ? 'font-semibold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
-                  {n.message}
-                </p>
-                <div className="flex items-center gap-1 mt-2 text-[10px] text-slate-400 dark:text-slate-500">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>{formatFriendlyDate(n.createdAt)}</span>
-                </div>
-              </div>
+              </button>
 
               {/* Botón de acción rápida si no está leída */}
               {!n.isRead && (

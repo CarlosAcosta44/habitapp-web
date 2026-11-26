@@ -16,7 +16,7 @@ interface MobileNavProps {
   user: any;
 }
 
-export function MobileNav({ user }: MobileNavProps) {
+export function MobileNav({ user }: Readonly<MobileNavProps>) {
   const pathname = usePathname();
   const [isNewHabitModalOpen, setIsNewHabitModalOpen] = useState(false);
 

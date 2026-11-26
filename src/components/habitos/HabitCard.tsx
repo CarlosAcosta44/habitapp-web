@@ -42,55 +42,49 @@ export function HabitCard({ habito, rachaActual }: Readonly<HabitCardProps>) {
   return (
     <>
       <div
-        role="button"
-        tabIndex={0}
-        onClick={() => setIsModalOpen(true)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setIsModalOpen(true);
-          }
-        }}
         className={`
-          cursor-pointer
           relative p-4 rounded-3xl border transition-all duration-200 hover:shadow-md
         ${completado
           ? "bg-indigo-50 border-indigo-200 dark:bg-indigo-950/40 dark:border-indigo-800"
           : "bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800"
         }
       `}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 dark:bg-indigo-900/70 text-indigo-600 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800">
-            {renderHabitCategoryIcon(nombreCategoria)}
-          </div>
-          <div className="min-w-0">
-            <p
-              className={`
-                font-bold truncate text-lg leading-tight
-                ${completado
-                  ? "text-slate-500 dark:text-slate-300 line-through"
-                  : "text-slate-900 dark:text-slate-100"
-                }
-              `}
-            >
-              {habito.nombre}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 capitalize mt-1">
-              {habito.categoria.nombre}
-            </p>
-          </div>
-        </div>
+      >
+        <div className="flex items-start justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 dark:bg-indigo-900/70 text-indigo-600 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800">
+              {renderHabitCategoryIcon(nombreCategoria)}
+            </div>
+            <div className="min-w-0">
+              <p
+                className={`
+                  font-bold truncate text-lg leading-tight
+                  ${completado
+                    ? "text-slate-500 dark:text-slate-300 line-through"
+                    : "text-slate-900 dark:text-slate-100"
+                  }
+                `}
+              >
+                {habito.nombre}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 capitalize mt-1">
+                {habito.categoria.nombre}
+              </p>
+            </div>
+          </button>
 
-        <MarcarCompletadoBtn
-          idHabito={habito.idHabito}
-          completado={completado}
-          progresoActual={progresoActual}
-          metaDiaria={metaDiaria}
-          fecha={hoy}
-        />
-      </div>
+          <MarcarCompletadoBtn
+            idHabito={habito.idHabito}
+            completado={completado}
+            progresoActual={progresoActual}
+            metaDiaria={metaDiaria}
+            fecha={hoy}
+          />
+        </div>
 
       <div className="mt-4 space-y-3">
         <div className="flex items-center justify-between text-xs">

@@ -16,7 +16,7 @@ interface HabitFormProps {
   categorias: CategoriaHabito[];
 }
 
-export function HabitForm({ categorias }: HabitFormProps) {
+export function HabitForm({ categorias }: Readonly<HabitFormProps>) {
   const [state, formAction, isPending] = useActionState(
     createHabitoAction,
     null
