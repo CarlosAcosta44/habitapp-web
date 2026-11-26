@@ -219,6 +219,12 @@ export function HabitItemCard({
   const isCompleted = isToday ? completadoHoy : isCompletedOnSelectedDate;
   const fallbackProgreso = isCompleted ? metaDiaria : 0;
   const progresoActual = isToday ? progresoHoy : fallbackProgreso;
+  const titleClass = isCompleted
+    ? 'line-through text-slate-400 dark:text-slate-500'
+    : 'text-slate-900 dark:text-white';
+  const progressLabel = isCompleted
+    ? `${metaDiaria}/${metaDiaria} hecho`
+    : `${progresoActual}/${metaDiaria} ${unidadMedida}`;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -246,9 +252,11 @@ export function HabitItemCard({
     });
   };
 
-  const progressLabel = isCompleted
-    ? `${metaDiaria}/${metaDiaria} hecho`
-    : `${progresoActual}/${metaDiaria} ${unidadMedida}`;
+  const handleModalProgressUpdate = (id: string, newProgress: number, isComp: boolean) => {
+    setProgresoHoy(newProgress);
+    setCompletadoHoy(isComp);
+    onProgressUpdate?.(id, newProgress, isComp);
+  };
 
   return (
     <>
@@ -271,9 +279,7 @@ export function HabitItemCard({
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <span
-                className={`text-base sm:text-lg font-bold truncate leading-tight ${
-                  isCompleted ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white'
-                }`}
+                className={`text-base sm:text-lg font-bold truncate leading-tight ${titleClass}`}
               >
                 {nombre}
               </span>
@@ -334,11 +340,7 @@ export function HabitItemCard({
         }}
         rachaActual={rachaActual}
         completedDates={completedDates}
-        onProgressUpdate={(id, newProgress, isComp) => {
-          setProgresoHoy(newProgress);
-          setCompletadoHoy(isComp);
-          if (onProgressUpdate) onProgressUpdate(id, newProgress, isComp);
-        }}
+        onProgressUpdate={handleModalProgressUpdate}
         onArchive={onArchive}
         onDelete={onDelete}
       />
