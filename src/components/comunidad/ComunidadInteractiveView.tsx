@@ -1387,6 +1387,250 @@ function CommunityForosSectionView({
   );
 }
 
+interface CommunityEspecialistasDirectoryViewProps {
+  readonly initialEspecialistasCount: number;
+  readonly showToast: (msg: string, type?: 'success' | 'error') => void;
+  readonly selectedEspCategory: string;
+  readonly setSelectedEspCategory: (cat: string) => void;
+  readonly especialistasFiltrados: any[];
+  readonly isTrainerLinked: (esp: any) => boolean;
+  readonly linkingTrainerId: string | null;
+  readonly getTrainerActionLabel: (esp: any) => string;
+  readonly setSelectedSpecialist: (esp: any) => void;
+  readonly handleToggleTrainerLink: (esp: any) => Promise<void>;
+}
+
+function CommunityEspecialistasDirectoryView({
+  initialEspecialistasCount,
+  showToast,
+  selectedEspCategory,
+  setSelectedEspCategory,
+  especialistasFiltrados,
+  isTrainerLinked,
+  linkingTrainerId,
+  getTrainerActionLabel,
+  setSelectedSpecialist,
+  handleToggleTrainerLink,
+}: CommunityEspecialistasDirectoryViewProps) {
+  return (
+    <div className="flex flex-col gap-7">
+      <section className="bg-white dark:bg-[#111827] rounded-3xl p-6 lg:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 relative overflow-hidden">
+        <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-8 relative z-10">
+          <div className="max-w-3xl flex flex-col gap-4">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-[#572de4] dark:text-indigo-300 w-fit border border-indigo-100 dark:border-indigo-900/50">
+              <ShieldCheck className="w-4 h-4 text-[#572de4] dark:text-indigo-400" />
+              <span className="text-xs font-bold uppercase tracking-wider">Entrenadores y especialistas verificados</span>
+            </div>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug">
+              Sesiones 1 a 1 y acompañamiento profesional para tus hábitos
+            </h2>
+            <p className="text-sm lg:text-base text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+              Conecta con especialistas en fuerza, nutrición y acondicionamiento físico para personalizar tu camino hacia una vida más saludable y consistente.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-[#572de4] dark:text-indigo-400 flex items-center justify-center shrink-0">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold text-slate-900 dark:text-white leading-none">{initialEspecialistasCount}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">Especialistas verificados</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-[#572de4] dark:text-indigo-400 flex items-center justify-center shrink-0">
+                  <Star className="w-5 h-5 fill-current" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold text-slate-900 dark:text-white leading-none">98%</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">Valoraciones positivas</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-[#572de4] dark:text-indigo-400 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold text-slate-900 dark:text-white leading-none">100%</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">Personalizado y guiado</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full xl:w-80 shrink-0 bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 rounded-3xl p-6 flex flex-col justify-between">
+            <div className="flex flex-col gap-2.5">
+              <div className="w-10 h-10 rounded-xl bg-[#572de4] text-white flex items-center justify-center shadow-sm">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-base pt-1">
+                ¿No sabes cuál especialista elegir?
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                Indícanos tu objetivo principal y te emparejamos con el profesional idóneo según tu nivel y metas.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => showToast('¡Pronto activaremos el recomendador inteligente de entrenadores!')}
+              className="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#572de4] hover:bg-[#461ebd] text-white rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm active:scale-95"
+            >
+              <span>Descubrir especialista</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-[#572de4]/10 blur-3xl pointer-events-none" />
+      </section>
+
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+          {['Todos', 'Nutrición', 'Fuerza', 'Crossfit'].map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setSelectedEspCategory(cat)}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                selectedEspCategory === cat
+                  ? 'bg-[#572de4] text-white shadow-sm'
+                  : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+        <span className="text-xs text-slate-500 dark:text-slate-400">
+          {especialistasFiltrados.length} profesionales disponibles
+        </span>
+      </div>
+
+      {especialistasFiltrados.length === 0 ? (
+        <div className="text-center py-12 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]">
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+            No se encontraron especialistas en esta categoría
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {especialistasFiltrados.map((esp) => {
+            const id = esp.idusuario || esp.idEntrenador;
+            const targetId = esp.identrenador || esp.idusuario || esp.id;
+            return (
+              <CommunitySpecialistDirectoryCard
+                key={id}
+                esp={esp}
+                isLinked={isTrainerLinked(esp)}
+                isLinking={linkingTrainerId === targetId}
+                actionLabel={getTrainerActionLabel(esp)}
+                onSelect={setSelectedSpecialist}
+                onToggleLink={(e) => {
+                  void handleToggleTrainerLink(e);
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface CommunityTopHeaderViewProps {
+  readonly totalMiembros: number;
+  readonly setIsCreateForoOpen: (open: boolean) => void;
+  readonly searchInputRef: React.RefObject<HTMLInputElement | null>;
+  readonly searchQuery: string;
+  readonly setSearchQuery: (q: string) => void;
+  readonly activeTab: TabType;
+  readonly setActiveTab: (tab: TabType) => void;
+}
+
+function CommunityTopHeaderView({
+  totalMiembros,
+  setIsCreateForoOpen,
+  searchInputRef,
+  searchQuery,
+  setSearchQuery,
+  activeTab,
+  setActiveTab,
+}: CommunityTopHeaderViewProps) {
+  const tabs: Array<{ id: TabType; label: string; icon: React.ReactNode }> = [
+    { id: 'todo', label: 'Todo', icon: <Sparkles className="w-3.5 h-3.5" /> },
+    { id: 'foros', label: 'Foros de Apoyo', icon: <MessageSquare className="w-3.5 h-3.5" /> },
+    { id: 'habitos', label: 'Hábitos Compartidos', icon: <Users className="w-3.5 h-3.5" /> },
+    { id: 'articulos', label: 'Artículos y Guías', icon: <BookOpen className="w-3.5 h-3.5" /> },
+    { id: 'especialistas', label: 'Especialistas', icon: <ShieldCheck className="w-3.5 h-3.5" /> },
+    { id: 'retos', label: 'Retos', icon: <Award className="w-3.5 h-3.5" /> },
+  ];
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Comunidad &amp; Bienestar
+          </h1>
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200/60 dark:border-emerald-800 shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs text-emerald-800 dark:text-emerald-300 font-bold">
+              {totalMiembros} miembros conectados
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsCreateForoOpen(true)}
+          className="sm:hidden self-start px-4 py-2 rounded-xl bg-[#572de4] hover:bg-[#461ebd] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Crear foro</span>
+        </button>
+      </div>
+
+      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl">
+        Espacio seguro y colaborativo para compartir rutinas, debatir en círculos de apoyo y conectar con especialistas verificados.
+      </p>
+
+      <div className="relative w-full">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+        <input
+          ref={searchInputRef}
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Buscar foros, hábitos comunitarios, artículos o especialistas..."
+          className="w-full h-12 pl-12 pr-20 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#572de4] transition-all"
+        />
+        <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+          <span>⌘</span>
+          <span>K</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm ${
+              activeTab === tab.id
+                ? 'bg-[#572de4] text-white'
+                : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+            }`}
+          >
+            {tab.icon}
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function ComunidadInteractiveView({
   initialForos = [],
   initialHabitosComunidad = [],
@@ -1679,132 +1923,15 @@ export function ComunidadInteractiveView({
       )}
 
       {/* ── Top Header & Stats ── */}
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Comunidad &amp; Bienestar
-            </h1>
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200/60 dark:border-emerald-800 shadow-sm">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs text-emerald-800 dark:text-emerald-300 font-bold">
-                {totalMiembros} miembros conectados
-              </span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsCreateForoOpen(true)}
-            className="sm:hidden self-start px-4 py-2 rounded-xl bg-[#572de4] hover:bg-[#461ebd] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Crear foro</span>
-          </button>
-        </div>
-
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl">
-          Espacio seguro y colaborativo para compartir rutinas, debatir en círculos de apoyo y conectar con especialistas verificados.
-        </p>
-
-        {/* ── Barra de Búsqueda con Atajo ⌘K ── */}
-        <div className="relative w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar foros, hábitos comunitarios, artículos o especialistas..."
-            className="w-full h-12 pl-12 pr-20 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#572de4] transition-all"
-          />
-          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-            <span>⌘</span>
-            <span>K</span>
-          </div>
-        </div>
-
-        {/* ── Pestañas Horizontales de Categorías ── */}
-        <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
-          <button
-            type="button"
-            onClick={() => setActiveTab('todo')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm ${
-              activeTab === 'todo'
-                ? 'bg-[#572de4] text-white'
-                : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Todo</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('foros')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm ${
-              activeTab === 'foros'
-                ? 'bg-[#572de4] text-white'
-                : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>Foros de Apoyo</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('habitos')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm ${
-              activeTab === 'habitos'
-                ? 'bg-[#572de4] text-white'
-                : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>Hábitos Compartidos</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('articulos')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm ${
-              activeTab === 'articulos'
-                ? 'bg-[#572de4] text-white'
-                : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Artículos y Guías</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('especialistas')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm ${
-              activeTab === 'especialistas'
-                ? 'bg-[#572de4] text-white'
-                : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Especialistas</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('retos')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm ${
-              activeTab === 'retos'
-                ? 'bg-[#572de4] text-white'
-                : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Award className="w-3.5 h-3.5" />
-            <span>Retos</span>
-          </button>
-        </div>
-      </div>
+      <CommunityTopHeaderView
+        totalMiembros={totalMiembros}
+        setIsCreateForoOpen={setIsCreateForoOpen}
+        searchInputRef={searchInputRef}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
       {/* ── Banner Destacado para Crear Foro (Solo en pestaña Foros) ── */}
       {activeTab === 'foros' && (
@@ -1918,132 +2045,18 @@ export function ComunidadInteractiveView({
 
           {/* ── BLOCK 4: DIRECTORIO COMPLETO DE ESPECIALISTAS ── */}
           {activeTab === 'especialistas' && (
-            <div className="flex flex-col gap-7">
-              {/* Hero Banner Especialistas */}
-              <section className="bg-white dark:bg-[#111827] rounded-3xl p-6 lg:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 relative overflow-hidden">
-                <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-8 relative z-10">
-                  <div className="max-w-3xl flex flex-col gap-4">
-                    <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-[#572de4] dark:text-indigo-300 w-fit border border-indigo-100 dark:border-indigo-900/50">
-                      <ShieldCheck className="w-4 h-4 text-[#572de4] dark:text-indigo-400" />
-                      <span className="text-xs font-bold uppercase tracking-wider">Entrenadores y especialistas verificados</span>
-                    </div>
-                    <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug">
-                      Sesiones 1 a 1 y acompañamiento profesional para tus hábitos
-                    </h2>
-                    <p className="text-sm lg:text-base text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-                      Conecta con especialistas en fuerza, nutrición y acondicionamiento físico para personalizar tu camino hacia una vida más saludable y consistente.
-                    </p>
-
-                    {/* Métricas destacadas */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                      <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-[#572de4] dark:text-indigo-400 flex items-center justify-center shrink-0">
-                          <Users className="w-5 h-5" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xl font-bold text-slate-900 dark:text-white leading-none">{initialEspecialistas.length}</span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">Especialistas verificados</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-[#572de4] dark:text-indigo-400 flex items-center justify-center shrink-0">
-                          <Star className="w-5 h-5 fill-current" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xl font-bold text-slate-900 dark:text-white leading-none">98%</span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">Valoraciones positivas</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-[#572de4] dark:text-indigo-400 flex items-center justify-center shrink-0">
-                          <ShieldCheck className="w-5 h-5" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xl font-bold text-slate-900 dark:text-white leading-none">100%</span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">Personalizado y guiado</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Tarjeta de asesoría */}
-                  <div className="w-full xl:w-80 shrink-0 bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 rounded-3xl p-6 flex flex-col justify-between">
-                    <div className="flex flex-col gap-2.5">
-                      <div className="w-10 h-10 rounded-xl bg-[#572de4] text-white flex items-center justify-center shadow-sm">
-                        <Sparkles className="w-5 h-5" />
-                      </div>
-                      <h3 className="font-bold text-slate-900 dark:text-white text-base pt-1">
-                        ¿No sabes cuál especialista elegir?
-                      </h3>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                        Indícanos tu objetivo principal y te emparejamos con el profesional idóneo según tu nivel y metas.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => showToast('¡Pronto activaremos el recomendador inteligente de entrenadores!')}
-                      className="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#572de4] hover:bg-[#461ebd] text-white rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm active:scale-95"
-                    >
-                      <span>Descubrir especialista</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-                <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-[#572de4]/10 blur-3xl pointer-events-none" />
-              </section>
-
-              {/* Filtros de Especialidad */}
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-                  {['Todos', 'Nutrición', 'Fuerza', 'Crossfit'].map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setSelectedEspCategory(cat)}
-                      className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        selectedEspCategory === cat
-                          ? 'bg-[#572de4] text-white shadow-sm'
-                          : 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  {especialistasFiltrados.length} profesionales disponibles
-                </span>
-              </div>
-
-              {/* Cuadrícula de Especialistas */}
-              {especialistasFiltrados.length === 0 ? (
-                <div className="text-center py-12 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827]">
-                  <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                    No se encontraron especialistas en esta categoría
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {especialistasFiltrados.map((esp) => {
-                    const id = esp.idusuario || esp.idEntrenador;
-                    const targetId = esp.identrenador || esp.idusuario || esp.id;
-                    return (
-                      <CommunitySpecialistDirectoryCard
-                        key={id}
-                        esp={esp}
-                        isLinked={isTrainerLinked(esp)}
-                        isLinking={linkingTrainerId === targetId}
-                        actionLabel={getTrainerActionLabel(esp)}
-                        onSelect={setSelectedSpecialist}
-                        onToggleLink={(e) => {
-                          void handleToggleTrainerLink(e);
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <CommunityEspecialistasDirectoryView
+              initialEspecialistasCount={initialEspecialistas.length}
+              showToast={showToast}
+              selectedEspCategory={selectedEspCategory}
+              setSelectedEspCategory={setSelectedEspCategory}
+              especialistasFiltrados={especialistasFiltrados}
+              isTrainerLinked={isTrainerLinked}
+              linkingTrainerId={linkingTrainerId}
+              getTrainerActionLabel={getTrainerActionLabel}
+              setSelectedSpecialist={setSelectedSpecialist}
+              handleToggleTrainerLink={handleToggleTrainerLink}
+            />
           )}
 
           {/* ── BLOCK 5: DIRECTORIO COMPLETO DE RETOS Y DESAFÍOS ── */}
