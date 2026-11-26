@@ -119,10 +119,13 @@ function filterHabitosComunidad(list: any[], searchQuery: string): any[] {
   );
 }
 
+type ForoSortBy = 'recientes' | 'populares' | 'sin_responder';
+type RetoFilterTab = 'todos' | 'participando';
+
 function filterAndSortForos(
   initialForos: any[],
   selectedTag: string,
-  sortBy: 'recientes' | 'populares' | 'sin_responder',
+  sortBy: ForoSortBy,
   searchQuery: string
 ): any[] {
   let list = [...initialForos];
@@ -740,8 +743,8 @@ function CommunitySidebarView({
 interface CommunityRetosDirectoryViewProps {
   readonly retosVigentesCount: number;
   readonly setIsCreateRetoOpen: (open: boolean) => void;
-  readonly retoFilterTab: 'todos' | 'participando';
-  readonly setRetoFilterTab: (tab: 'todos' | 'participando') => void;
+  readonly retoFilterTab: RetoFilterTab;
+  readonly setRetoFilterTab: (tab: RetoFilterTab) => void;
   readonly initialRetosCount: number;
   readonly misRetos: Reto[];
   readonly retosFiltrados: Reto[];
@@ -1244,8 +1247,8 @@ interface CommunityForosSectionViewProps {
   readonly setActiveTab: (tab: TabType) => void;
   readonly selectedTag: string;
   readonly setSelectedTag: (tag: string) => void;
-  readonly sortBy: 'recientes' | 'populares' | 'sin_responder';
-  readonly setSortBy: (sort: 'recientes' | 'populares' | 'sin_responder') => void;
+  readonly sortBy: ForoSortBy;
+  readonly setSortBy: (sort: ForoSortBy) => void;
   readonly forosFiltrados: any[];
   readonly setIsCreateForoOpen: (open: boolean) => void;
   readonly userId?: string;
@@ -1413,7 +1416,7 @@ export function ComunidadInteractiveView({
 
   // Filtro de categoría en Foros
   const [selectedTag, setSelectedTag] = useState<string>('Todos');
-  const [sortBy, setSortBy] = useState<'recientes' | 'populares' | 'sin_responder'>('recientes');
+  const [sortBy, setSortBy] = useState<ForoSortBy>('recientes');
 
   // Filtros de categoría para Especialistas
   const [selectedEspCategory, setSelectedEspCategory] = useState<string>('Todos');
@@ -1425,7 +1428,7 @@ export function ComunidadInteractiveView({
   const [editingForo, setEditingForo] = useState<Record<string, any> | null>(null);
 
   // Filtro de retos: 'todos' | 'participando'
-  const [retoFilterTab, setRetoFilterTab] = useState<'todos' | 'participando'>('todos');
+  const [retoFilterTab, setRetoFilterTab] = useState<RetoFilterTab>('todos');
 
   // Menú de opciones de foro y eliminación
   const [openForoMenuId, setOpenForoMenuId] = useState<string | null>(null);
