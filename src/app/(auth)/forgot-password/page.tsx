@@ -48,7 +48,10 @@ export default function ForgotPasswordPage() {
              <p className="text-slate-300 text-sm font-medium">
                {success}
              </p>
-             <Link href="/login" className="block w-full py-3 mt-4 bg-[#818cf8] hover:bg-[#6366f1] text-[#111827] rounded-[1rem] font-bold text-[14px] transition-all">
+             <Link href="/update-password" className="block w-full py-3 mt-4 bg-[#818cf8] hover:bg-[#6366f1] text-[#111827] rounded-[1rem] font-bold text-[14px] transition-all">
+               Ya tengo mi código de recuperación
+             </Link>
+             <Link href="/login" className="block w-full py-2.5 text-slate-300 hover:text-white text-[13px] font-semibold transition-all">
                Volver al inicio de sesión
              </Link>
           </div>
