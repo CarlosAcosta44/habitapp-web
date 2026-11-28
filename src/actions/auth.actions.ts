@@ -212,5 +212,5 @@ export async function updatePasswordAction(formData: FormData): Promise<{ error?
     return { error: result.error || 'No fue posible actualizar la contraseña.' }
   }
 
-  redirect('/login')
+  redirect('/login?message=Contrase%C3%B1a+actualizada+exitosamente.+Inicia+sesi%C3%B3n+con+tu+nueva+clave.')
 }
