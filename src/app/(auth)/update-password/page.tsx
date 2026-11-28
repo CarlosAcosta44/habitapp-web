@@ -9,15 +9,28 @@ import { Eye, EyeOff } from 'lucide-react'
 
 function UpdatePasswordForm() {
   const searchParams = useSearchParams()
-  const urlToken = searchParams.get('token') || ''
+  const token = searchParams.get('token') || ''
 
-  const [manualToken, setManualToken] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const effectiveToken = urlToken || manualToken.trim()
+  if (!token) {
+    return (
+      <div className="bg-[#1e2536] border border-red-500/20 p-6 rounded-[1.125rem] text-center space-y-4">
+        <p className="text-slate-300 text-sm font-medium">
+          El enlace de recuperación no es válido o está incompleto. Por favor solicita un nuevo enlace desde tu correo.
+        </p>
+        <Link
+          href="/forgot-password"
+          className="block w-full py-3 mt-4 bg-[#818cf8] hover:bg-[#6366f1] text-[#111827] rounded-[1rem] font-bold text-[14px] transition-all"
+        >
+          Solicitar nuevo enlace
+        </Link>
+      </div>
+    )
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -27,12 +40,6 @@ function UpdatePasswordForm() {
     const formData = new FormData(event.currentTarget)
     const password = (formData.get('password') as string) || ''
     const confirmPassword = (formData.get('confirm_password') as string) || ''
-
-    if (!effectiveToken) {
-      setError('Ingresa el código/token de recuperación enviado a tu correo.')
-      setLoading(false)
-      return
-    }
 
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.')
@@ -46,7 +53,7 @@ function UpdatePasswordForm() {
       return
     }
 
-    formData.set('token', effectiveToken)
+    formData.set('token', token)
     const result = await updatePasswordAction(formData)
 
     if (result?.error) {
@@ -63,24 +70,7 @@ function UpdatePasswordForm() {
         </div>
       )}
 
-      <input type="hidden" name="token" value={effectiveToken} />
-
-      {!urlToken && (
-        <div className="space-y-1.5 flex flex-col">
-          <label htmlFor="reset-token" className="text-[13px] italic text-slate-400">
-            Código / Token de recuperación (enviado a tu correo)
-          </label>
-          <input
-            id="reset-token"
-            type="text"
-            value={manualToken}
-            onChange={(e) => setManualToken(e.target.value)}
-            required
-            className="w-full px-4 py-3.5 rounded-[1.125rem] bg-[#1e2536] border-none text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono text-xs placeholder:text-slate-500"
-            placeholder="Pega aquí el token recibido por correo"
-          />
-        </div>
-      )}
+      <input type="hidden" name="token" value={token} />
 
       <div className="space-y-1.5 flex flex-col">
         <label htmlFor="update-password" className="text-[13px] italic text-slate-400">
